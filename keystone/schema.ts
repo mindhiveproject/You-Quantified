@@ -70,7 +70,7 @@ export const lists: Lists = {
       parameters: json({
         defaultValue: [
           {
-            name: "Sample",
+            name: "Untitled",
             suggested: ["Alpha"],
           },
         ],
