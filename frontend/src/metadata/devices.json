@@ -1,0 +1,216 @@
+[
+  {
+    "heading": "EMOTIV",
+    "short_description": "The EMOTIV is a consumer-grade EEG headset used for research and brain-computer interfaces, capable of reading brain signals, providing derived metrics, and tracking head movement.",
+    "description": "The EMOTIV is an electroencephalography (EEG) headset that reads brain signals and sends them into a computer. This is a consumer-grade device generally used for research outside of laboratories and brain-computer interfaces (BCIs). EMOTIV not only acquires the raw signals, but it also provides meaningful metrics derived from the signal. It also has motion data to track head movement.",
+    "type": "EEG device",
+    "sampling_rate": 128,
+    "data": [
+      {
+        "name": "Theta",
+        "description": "Band power from (4-8Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Alpha",
+        "description": "Band power from (8-12Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Low beta",
+        "description": "Band power from (12-16Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "High beta",
+        "description": "Band power from (16-25Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Gamma",
+        "description": "Band power from (25-45Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "X",
+        "description": "X-axis gyroscope data for the EMOTIV headset",
+        "type": "Movement"
+      },
+      {
+        "name": "Y",
+        "description": "Y-axis gyroscope data for the EMOTIV headset",
+        "type": "Movement"
+      },
+      {
+        "name": "Z",
+        "description": "Z-axis gyroscope data for the EMOTIV headset",
+        "type": "Movement"
+      },
+      {
+        "name": "AF3",
+        "description": "AF3 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "F7",
+        "description": "F7 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "F3",
+        "description": "F3 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "FC5",
+        "description": "FC5 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "T7",
+        "description": "T7 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "P7",
+        "description": "P7 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "O1",
+        "description": "O1 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "O2",
+        "description": "O2 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "P8",
+        "description": "P8 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "T8",
+        "description": "T8 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "FC6",
+        "description": "FC6 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "F4",
+        "description": "F4 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "F8",
+        "description": "F8 channel of raw EEG",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "AF4",
+        "description": "AF4 channel of raw EEG",
+        "type": "Raw EEG channels"
+      }
+    ]
+  },
+  {
+    "heading": "Muse",
+    "description": "The Muse is another consumer EEG grade-headset. This one is generally intended for sleep studies, and meditation. It mainly acquires signals from the frontal lobe.",
+    "type": "EEG device",
+    "sampling_rate": 256,
+    "data": [
+      {
+        "name": "Theta",
+        "description": "Band power from (4-8Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Alpha",
+        "description": "Band power from (8-12Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Low beta",
+        "description": "Band power from (12-16Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "High beta",
+        "description": "Band power from (16-25Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "Gamma",
+        "description": "Band power from (25-45Hz)",
+        "type": "EEG Metrics"
+      },
+      {
+        "name": "TP9",
+        "description": "EEG activity from the left temporal lobe.",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "TP10",
+        "description": "EEG activity from the right temporal lobe.",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "AF7",
+        "description": "EEG activity from the left frontal lobe.",
+        "type": "Raw EEG channels"
+      },
+      {
+        "name": "AF8",
+        "description": "EEG activity from the right temporal lobe",
+        "type": "Raw EEG channels"
+      }
+    ]
+  },
+  {
+    "heading": "Face",
+    "short_description": "This sensor allows you to capture video of your face and detect specific movements and getures",
+    "description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
+    "type": "Video",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Facial Movements",
+        "description": "Different Facial Movements",
+        "type": "Face Landmark"
+      }
+    ]
+  },
+  {
+    "heading": "VideoHeartRate",
+    "short_description": "This sensor allows you to measure yout heart rate from a video input",
+    "description": "This sensor allows you to measure yout heart rate from a video input",
+    "type": "Video",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Heart rate",
+        "description": "Heart rate estimated from changes in the color of your face",
+        "type": "Heart"
+      }
+    ]
+  },
+  {
+    "heading": "AudioVolume",
+    "short_description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
+    "description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
+    "type": "Audio",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Volume",
+        "description": "The Root Mean Square of the values of the signal",
+        "type": "Audio Feature"
+      }
+    ]
+  }
+]
