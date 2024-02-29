@@ -1,0 +1,39 @@
+.DS_Store
+# ---- Frontend -----
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.env
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+
+
+# ---- Backend -----
+keystone/.env.local
+keystone/.env
+keystone/.keystone
+keystone/node_modules
+keystone/.pnp
+keystone/.pnp.js
+keystone/*.db
+keystone/*.vscode
+keystone/dist
+keystone/__generated__
