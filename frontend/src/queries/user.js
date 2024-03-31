@@ -7,6 +7,7 @@ export const AUTH_USER = gql`
         id
         name
         email
+        isAdmin
       }
     }
   }

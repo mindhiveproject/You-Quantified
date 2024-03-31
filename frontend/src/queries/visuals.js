@@ -45,3 +45,11 @@ export const NEW_VISUAL = gql`
     }
   }
 `;
+
+export const DELETE_VISUAL = gql`
+  mutation DeleteVisual($id: ID!) {
+    deleteVisual(where: { id: $id }) {
+      id
+    }
+  }
+`;

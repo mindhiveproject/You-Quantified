@@ -1,11 +1,11 @@
 import React from "react";
 import { TextEditor } from "./editor/text_editor";
-// import { QueryLesson } from "./editor/main";
+import { MainViewLesson, QueryLesson } from "./editor/main";
 
 export default function LessonBuilder() {
     return (
-        <div className="scrollable">
-            <TextEditor />
+        <div className="h-100">
+            <MainViewLesson />
         </div>
     )
 }

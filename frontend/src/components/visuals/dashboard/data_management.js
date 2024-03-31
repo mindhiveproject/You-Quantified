@@ -30,10 +30,37 @@ function DataCard({
   dataMappings,
   custom,
   deleteParameter,
+  setVisInfo,
+  visInfo,
   claves,
 }) {
   // Represents an individual parameter
   const [expanded, setExpanded] = useState(false); // Used for styling, checks to see if accordion is collapsed or not
+
+  const dispatch = useDispatch();
+
+  function changeSource(sourceName, paramName, noMap) {
+    dispatch({
+      type: "params/updateMappings",
+      payload: {
+        name: paramName,
+        mapping: sourceName,
+      },
+    });
+
+    if (custom && !noMap) {
+      const newMeta = JSON.parse(JSON.stringify(visInfo));
+      const paramIndx = newMeta.parameters.findIndex(
+        ({ name }) => name == paramName
+      );
+
+      newMeta.parameters[paramIndx] = {
+        name: paramName,
+        suggested: [sourceName],
+      };
+      setVisInfo[newMeta.parameters];
+    }
+  }
 
   return (
     <div className="list-group-item" key={visParameter.name}>
@@ -41,7 +68,7 @@ function DataCard({
         className="d-flex align-items-center pt-1 pb-1"
         key={visParameter.name}
       >
-        {custom ? (
+        {custom && (
           <button
             className="btn btn-link text-center p-0 me-2 ms-n1 delete-btn"
             onClick={() => {
@@ -50,13 +77,14 @@ function DataCard({
           >
             <i className="h5 p-0 bi bi-dash text-danger"></i>
           </button>
-        ) : null}
+        )}
         <div>{visParameter.name}</div>
         <div className="btn-map-transition closed col align-items-right">
           <div className="d-flex justify-content-end align-items-center text-center flex-wrap">
             <div className="mt-1 mb-1">
               <ParameterDropDown
                 claves={claves}
+                changeSource={changeSource}
                 parameter={visParameter}
                 dataMappings={dataMappings}
               />
@@ -94,12 +122,7 @@ function DataCard({
   );
 }
 
-export default function DataManagement({
-  setVisInfo,
-  visInfo,
-  custom,
-  parameters,
-}) {
+export default function DataManagement({ setVisInfo, visInfo, custom }) {
   // Contains the entire accordion with all vis properties based on the current visInfo
 
   const [newParamName, setNewParamName] = useState("");
@@ -109,12 +132,11 @@ export default function DataManagement({
   const overlayRef = useRef(null);
 
   const dataMappings = useSelector(selectDataMappings);
-
-  // Change - Modify data mappings selector
-
+  console.log("Data Mappings");
+  console.log(dataMappings);
   const claves = useSelector(getDataStreamKeys);
-
-  console.log(visInfo);
+  console.log("Claves");
+  console.log(claves);
 
   const dataCards = visInfo?.parameters?.map((parameter) => (
     <DataCard
@@ -122,6 +144,8 @@ export default function DataManagement({
       key={parameter.name}
       dataMappings={dataMappings}
       deleteParameter={deleteParameter}
+      setVisInfo={setVisInfo}
+      visInfo={visInfo}
       custom={custom}
       claves={claves}
     />
@@ -167,8 +191,9 @@ export default function DataManagement({
     setShow(false);
   }
 
-
   useOutsideAlerter(overlayRef, setShow);
+
+  if (Object.keys(dataMappings).length === 0) return <div>Loading...</div>;
 
   const newParamToolTip = (
     <Popover id="popover-basic">
@@ -230,4 +255,3 @@ export default function DataManagement({
     </div>
   );
 }
-

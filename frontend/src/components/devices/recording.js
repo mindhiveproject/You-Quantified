@@ -6,9 +6,9 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
   // Save object might be changed to a hook?
 
   const buttonClassName =
-    recording != false
-      ? "btn-link text-danger rounded-0"
-      : "btn-link rounded-0";
+    recording == false
+      ? "btn btn-outline-dark fw-medium mb-2"
+      : "btn btn-danger btn-outline-dark fw-medium mb-2";
   const iconClassName =
     recording != false ? "bi bi-stop-circle" : "bi bi-record-circle";
   const recordingText = recording != false ? "Stop recording" : "Record data";
@@ -24,7 +24,7 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
 
   return (
     <button className={buttonClassName} onClick={handleClick}>
-      <i className={iconClassName}>{recordingText}</i>
+      <i className={iconClassName}> {recordingText}</i>
     </button>
   );
 }

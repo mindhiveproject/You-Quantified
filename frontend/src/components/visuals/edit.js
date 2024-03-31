@@ -2,7 +2,7 @@ import { useContext, useLayoutEffect, useState, useRef } from "react";
 import { UserContext } from "../../App";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { NEW_VISUAL } from "../../queries/visuals";
+import { DELETE_VISUAL, NEW_VISUAL } from "../../queries/visuals";
 import { useMutation } from "@apollo/client";
 import { profanity } from "@2toad/profanity";
 
@@ -83,7 +83,7 @@ function CopyEditPopup({ visMetadata }) {
   if (data) {
     setTimeout(() => {
       navigate(`/visuals/${data?.createVisual?.id}`);
-    }, 1000);
+    }, 30);
   }
 
   return (
@@ -110,6 +110,18 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
   );
 
   let isFormValid = visName && visDescription && !errorMessage;
+
+  const [deleteVisual, { data: visualDeleted, loading, error }] = useMutation(
+    DELETE_VISUAL,
+    { variables: { id: visMetadata?.id } }
+  );
+
+  function deleteButtonCallback() {
+    const checkConfirmation = confirm(
+      "Are you sure you want to delete the current visual?"
+    );
+    if (checkConfirmation) deleteVisual;
+  }
 
   function validateName(input) {
     setVisName(input);
@@ -161,8 +173,23 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     textbox.current.style.height = `${textbox.current.scrollHeight}px`;
   });
 
+  const navigate = useNavigate();
+
+  if (visualDeleted) {
+    navigate("/visuals");
+  }
+
   return (
     <div>
+      <div className="d-flex justify-content-between">
+        <button
+          className="devices-close-btn h4 text-end"
+          onClick={() => setShowEdit(false)}
+        >
+          <i className="bi bi-x"></i>
+        </button>
+        <h3 className="mb-3">Edit</h3>
+      </div>
       <form onSubmit={handleFormSubmit}>
         <div className="mb-3">
           <label htmlFor="visualName" id="basic-addon2">
@@ -204,10 +231,10 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
         {errorMessage && <p className="text-warning">{errorMessage}</p>}
         <div className="d-flex justify-content-between">
           <button
-            className="btn btn-outline-dark"
-            onClick={() => setShowEdit(false)}
+            className="btn btn-outline-danger"
+            onClick={deleteButtonCallback}
           >
-            Close
+            Delete visual
           </button>
           <button
             type="submit"
@@ -215,7 +242,7 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
               !isFormValid && "disabled"
             }`}
           >
-            Submit
+            <i className="bi bi-floppy2-fill"></i> Save changes
           </button>
         </div>
       </form>

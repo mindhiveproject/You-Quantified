@@ -4,8 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import React, { useRef, useEffect, useState } from "react";
 import DataManagement from "../../visuals/dashboard/data_management";
 import { useQuery } from "@apollo/client";
-import { MY_VISUALS } from "../../../queries/visuals";
 import { selectParamValues } from "../../visuals/selectors";
+import { GET_LESSON } from "../../../queries/lessons";
+import { useParams } from "react-router-dom";
 
 const ParameterExtension = Node.create({
   name: "Parameters",
@@ -14,9 +15,8 @@ const ParameterExtension = Node.create({
   atom: true,
   addAttributes() {
     return {
-      visID: {
-        default: "clrpzl7jr00020wfku5szbyg8",
-        parseHTML: (element) => element.getAttribute("visID"),
+      visMeta: {
+        parseHTML: (element) => element.getAttribute("visMeta"),
       },
     };
   },
@@ -57,17 +57,27 @@ function StateManagerParameters({ visMeta }) {
   );
 }
 
-function ParametersTipTap(props) {
-  const { loading, error, data } = useQuery(MY_VISUALS, {
-    variables: { where: { id: { equals: props.node.attrs.visID } } },
+function ParametersTipTap() {
+  const { lessonID } = useParams();
+
+  const { loading, error, data } = useQuery(GET_LESSON, {
+    variables: { id: lessonID },
   });
 
-  if (loading) return <NodeViewWrapper>Loading...</NodeViewWrapper>;
-  if (error) return <NodeViewWrapper>{error}</NodeViewWrapper>;
+  if (loading) return "Loading...";
+  if (error) return `Error!`;
+
+  const lessonData = data.lesson;
+
+  const visData = {
+    code: lessonData?.code,
+    parameters: lessonData?.parameters,
+    editable: true,
+  };
 
   return (
     <NodeViewWrapper>
-      <StateManagerParameters visMeta={data?.visuals[0]} />
+      <StateManagerParameters visMeta={visData} />
     </NodeViewWrapper>
   );
 }

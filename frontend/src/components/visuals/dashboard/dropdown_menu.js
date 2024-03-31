@@ -1,6 +1,4 @@
-import React, { useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import React, { useState, useMemo, useEffect} from "react";
 
 function NestedDropDown({
   option,
@@ -9,8 +7,6 @@ function NestedDropDown({
   display,
   selectNewSource,
 }) {
-  let { visID } = useParams();
-
   function checkDefault(data) {
     return parameter?.suggested?.includes(data) || false;
   }
@@ -23,6 +19,13 @@ function NestedDropDown({
     },
     { hasDefault: [], notHasDefault: [] }
   );
+
+  useEffect(() => {
+    if (hasDefault.length > 0) {
+      console.log(hasDefault);
+      selectNewSource([option.device, hasDefault[0]], true);
+    }
+  }, []);
 
   return (
     <ul className="submenu dropdown-menu" id="nested-dropdown">
@@ -56,8 +59,12 @@ function NestedDropDown({
   );
 }
 
-export function ParameterDropDown({ claves, parameter, dataMappings }) {
-
+export function ParameterDropDown({
+  claves,
+  parameter,
+  dataMappings,
+  changeSource,
+}) {
   const [show, setShow] = useState(true);
 
   // Display text on the card. Upon creation, it checks the status
@@ -68,26 +75,6 @@ export function ParameterDropDown({ claves, parameter, dataMappings }) {
     return disp;
   });
 
-  const dispatch = useDispatch();
-
-  // Changes the data source
-  function selectNewSource(sourceName) {
-    dispatch({
-      type: "params/updateMappings",
-      payload: {
-        name: parameter.name,
-        mapping: sourceName,
-      },
-    });
-
-    // Changes the display text when the data source/dataMappings change
-    let disp = sourceName;
-
-    if (sourceName === "Manual") setDisplay("Manual");
-    else setDisplay(disp[1]);
-    setShow(false);
-  }
-
   // Changes the color of the button as dataMappings changes
   const dispColor = useMemo(
     () =>
@@ -96,6 +83,16 @@ export function ParameterDropDown({ claves, parameter, dataMappings }) {
         : "btn btn-mapping ms-2 rounded-0",
     [dataMappings]
   );
+
+  function selectNewSource(sourceName, noMap) {
+    changeSource(sourceName, parameter.name, noMap);
+
+    let disp = sourceName;
+
+    if (sourceName === "Manual") setDisplay("Manual");
+    else setDisplay(disp[1]);
+    setShow(false);
+  }
 
   return (
     <div>

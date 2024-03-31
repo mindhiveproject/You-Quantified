@@ -10,6 +10,8 @@ type User {
   visualsCount(where: VisualWhereInput! = {}): Int
   lessons(where: LessonWhereInput! = {}, orderBy: [LessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LessonWhereUniqueInput): [Lesson!]
   lessonsCount(where: LessonWhereInput! = {}): Int
+  userLessons(where: UserLessonWhereInput! = {}, orderBy: [UserLessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserLessonWhereUniqueInput): [UserLesson!]
+  userLessonsCount(where: UserLessonWhereInput! = {}): Int
   isAdmin: Boolean
   createdAt: DateTime
 }
@@ -34,6 +36,7 @@ input UserWhereInput {
   email: StringFilter
   visuals: VisualManyRelationFilter
   lessons: LessonManyRelationFilter
+  userLessons: UserLessonManyRelationFilter
   isAdmin: BooleanFilter
   createdAt: DateTimeNullableFilter
 }
@@ -89,6 +92,12 @@ input LessonManyRelationFilter {
   none: LessonWhereInput
 }
 
+input UserLessonManyRelationFilter {
+  every: UserLessonWhereInput
+  some: UserLessonWhereInput
+  none: UserLessonWhereInput
+}
+
 input BooleanFilter {
   equals: Boolean
   not: BooleanFilter
@@ -124,6 +133,7 @@ input UserUpdateInput {
   password: String
   visuals: VisualRelateToManyForUpdateInput
   lessons: LessonRelateToManyForUpdateInput
+  userLessons: UserLessonRelateToManyForUpdateInput
   isAdmin: Boolean
   createdAt: DateTime
 }
@@ -142,6 +152,13 @@ input LessonRelateToManyForUpdateInput {
   connect: [LessonWhereUniqueInput!]
 }
 
+input UserLessonRelateToManyForUpdateInput {
+  disconnect: [UserLessonWhereUniqueInput!]
+  set: [UserLessonWhereUniqueInput!]
+  create: [UserLessonCreateInput!]
+  connect: [UserLessonWhereUniqueInput!]
+}
+
 input UserUpdateArgs {
   where: UserWhereUniqueInput!
   data: UserUpdateInput!
@@ -153,6 +170,7 @@ input UserCreateInput {
   password: String
   visuals: VisualRelateToManyForCreateInput
   lessons: LessonRelateToManyForCreateInput
+  userLessons: UserLessonRelateToManyForCreateInput
   isAdmin: Boolean
   createdAt: DateTime
 }
@@ -167,13 +185,29 @@ input LessonRelateToManyForCreateInput {
   connect: [LessonWhereUniqueInput!]
 }
 
+input UserLessonRelateToManyForCreateInput {
+  create: [UserLessonCreateInput!]
+  connect: [UserLessonWhereUniqueInput!]
+}
+
 type Lesson {
   id: ID!
   title: String
   content: JSON
-  visual: Visual
   author: User
   createdAt: DateTime
+  code: FileFieldOutput
+  parameters: JSON
+  visual: Visual
+  unit: Unit
+  userLessons(where: UserLessonWhereInput! = {}, orderBy: [UserLessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserLessonWhereUniqueInput): [UserLesson!]
+  userLessonsCount(where: UserLessonWhereInput! = {}): Int
+}
+
+type FileFieldOutput {
+  filename: String!
+  filesize: Int!
+  url: String!
 }
 
 input LessonWhereUniqueInput {
@@ -186,9 +220,11 @@ input LessonWhereInput {
   NOT: [LessonWhereInput!]
   id: IDFilter
   title: StringFilter
-  visual: VisualWhereInput
   author: UserWhereInput
   createdAt: DateTimeNullableFilter
+  visual: VisualWhereInput
+  unit: UnitWhereInput
+  userLessons: UserLessonManyRelationFilter
 }
 
 input LessonOrderByInput {
@@ -200,10 +236,27 @@ input LessonOrderByInput {
 input LessonUpdateInput {
   title: String
   content: JSON
-  visual: VisualRelateToOneForUpdateInput
   author: UserRelateToOneForUpdateInput
   createdAt: DateTime
+  code: FileFieldInput
+  parameters: JSON
+  visual: VisualRelateToOneForUpdateInput
+  unit: UnitRelateToOneForUpdateInput
+  userLessons: UserLessonRelateToManyForUpdateInput
 }
+
+input UserRelateToOneForUpdateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+}
+
+input FileFieldInput {
+  upload: Upload!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 input VisualRelateToOneForUpdateInput {
   create: VisualCreateInput
@@ -211,9 +264,9 @@ input VisualRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input UserRelateToOneForUpdateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
+input UnitRelateToOneForUpdateInput {
+  create: UnitCreateInput
+  connect: UnitWhereUniqueInput
   disconnect: Boolean
 }
 
@@ -225,9 +278,18 @@ input LessonUpdateArgs {
 input LessonCreateInput {
   title: String
   content: JSON
-  visual: VisualRelateToOneForCreateInput
   author: UserRelateToOneForCreateInput
   createdAt: DateTime
+  code: FileFieldInput
+  parameters: JSON
+  visual: VisualRelateToOneForCreateInput
+  unit: UnitRelateToOneForCreateInput
+  userLessons: UserLessonRelateToManyForCreateInput
+}
+
+input UserRelateToOneForCreateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
 }
 
 input VisualRelateToOneForCreateInput {
@@ -235,9 +297,143 @@ input VisualRelateToOneForCreateInput {
   connect: VisualWhereUniqueInput
 }
 
-input UserRelateToOneForCreateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
+input UnitRelateToOneForCreateInput {
+  create: UnitCreateInput
+  connect: UnitWhereUniqueInput
+}
+
+type UserLesson {
+  id: ID!
+  title: String
+  content: JSON
+  author: User
+  startedAt: DateTime
+  completedAt: DateTime
+  code: FileFieldOutput
+  parameters: JSON
+  lesson: Lesson
+}
+
+input UserLessonWhereUniqueInput {
+  id: ID
+}
+
+input UserLessonWhereInput {
+  AND: [UserLessonWhereInput!]
+  OR: [UserLessonWhereInput!]
+  NOT: [UserLessonWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  author: UserWhereInput
+  startedAt: DateTimeNullableFilter
+  completedAt: DateTimeNullableFilter
+  lesson: LessonWhereInput
+}
+
+input UserLessonOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  startedAt: OrderDirection
+  completedAt: OrderDirection
+}
+
+input UserLessonUpdateInput {
+  title: String
+  content: JSON
+  author: UserRelateToOneForUpdateInput
+  startedAt: DateTime
+  completedAt: DateTime
+  code: FileFieldInput
+  parameters: JSON
+  lesson: LessonRelateToOneForUpdateInput
+}
+
+input LessonRelateToOneForUpdateInput {
+  create: LessonCreateInput
+  connect: LessonWhereUniqueInput
+  disconnect: Boolean
+}
+
+input UserLessonUpdateArgs {
+  where: UserLessonWhereUniqueInput!
+  data: UserLessonUpdateInput!
+}
+
+input UserLessonCreateInput {
+  title: String
+  content: JSON
+  author: UserRelateToOneForCreateInput
+  startedAt: DateTime
+  completedAt: DateTime
+  code: FileFieldInput
+  parameters: JSON
+  lesson: LessonRelateToOneForCreateInput
+}
+
+input LessonRelateToOneForCreateInput {
+  create: LessonCreateInput
+  connect: LessonWhereUniqueInput
+}
+
+type Unit {
+  id: ID!
+  title: String
+  duration: Int
+  description: String
+  lessons(where: LessonWhereInput! = {}, orderBy: [LessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LessonWhereUniqueInput): [Lesson!]
+  lessonsCount(where: LessonWhereInput! = {}): Int
+}
+
+input UnitWhereUniqueInput {
+  id: ID
+}
+
+input UnitWhereInput {
+  AND: [UnitWhereInput!]
+  OR: [UnitWhereInput!]
+  NOT: [UnitWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  duration: IntNullableFilter
+  description: StringFilter
+  lessons: LessonManyRelationFilter
+}
+
+input IntNullableFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntNullableFilter
+}
+
+input UnitOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  duration: OrderDirection
+  description: OrderDirection
+}
+
+input UnitUpdateInput {
+  title: String
+  duration: Int
+  description: String
+  lessons: LessonRelateToManyForUpdateInput
+}
+
+input UnitUpdateArgs {
+  where: UnitWhereUniqueInput!
+  data: UnitUpdateInput!
+}
+
+input UnitCreateInput {
+  title: String
+  duration: Int
+  description: String
+  lessons: LessonRelateToManyForCreateInput
 }
 
 type Tag {
@@ -311,12 +507,6 @@ enum ImageExtension {
   gif
 }
 
-type FileFieldOutput {
-  filename: String!
-  filesize: Int!
-  url: String!
-}
-
 input VisualWhereUniqueInput {
   id: ID
 }
@@ -364,13 +554,6 @@ input VisualUpdateInput {
 }
 
 input ImageFieldInput {
-  upload: Upload!
-}
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
-
-input FileFieldInput {
   upload: Upload!
 }
 
@@ -422,6 +605,18 @@ type Mutation {
   updateLessons(data: [LessonUpdateArgs!]!): [Lesson]
   deleteLesson(where: LessonWhereUniqueInput!): Lesson
   deleteLessons(where: [LessonWhereUniqueInput!]!): [Lesson]
+  createUserLesson(data: UserLessonCreateInput!): UserLesson
+  createUserLessons(data: [UserLessonCreateInput!]!): [UserLesson]
+  updateUserLesson(where: UserLessonWhereUniqueInput!, data: UserLessonUpdateInput!): UserLesson
+  updateUserLessons(data: [UserLessonUpdateArgs!]!): [UserLesson]
+  deleteUserLesson(where: UserLessonWhereUniqueInput!): UserLesson
+  deleteUserLessons(where: [UserLessonWhereUniqueInput!]!): [UserLesson]
+  createUnit(data: UnitCreateInput!): Unit
+  createUnits(data: [UnitCreateInput!]!): [Unit]
+  updateUnit(where: UnitWhereUniqueInput!, data: UnitUpdateInput!): Unit
+  updateUnits(data: [UnitUpdateArgs!]!): [Unit]
+  deleteUnit(where: UnitWhereUniqueInput!): Unit
+  deleteUnits(where: [UnitWhereUniqueInput!]!): [Unit]
   createTag(data: TagCreateInput!): Tag
   createTags(data: [TagCreateInput!]!): [Tag]
   updateTag(where: TagWhereUniqueInput!, data: TagUpdateInput!): Tag
@@ -463,6 +658,12 @@ type Query {
   lessons(where: LessonWhereInput! = {}, orderBy: [LessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: LessonWhereUniqueInput): [Lesson!]
   lesson(where: LessonWhereUniqueInput!): Lesson
   lessonsCount(where: LessonWhereInput! = {}): Int
+  userLessons(where: UserLessonWhereInput! = {}, orderBy: [UserLessonOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserLessonWhereUniqueInput): [UserLesson!]
+  userLesson(where: UserLessonWhereUniqueInput!): UserLesson
+  userLessonsCount(where: UserLessonWhereInput! = {}): Int
+  units(where: UnitWhereInput! = {}, orderBy: [UnitOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UnitWhereUniqueInput): [Unit!]
+  unit(where: UnitWhereUniqueInput!): Unit
+  unitsCount(where: UnitWhereInput! = {}): Int
   tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
   tag(where: TagWhereUniqueInput!): Tag
   tagsCount(where: TagWhereInput! = {}): Int

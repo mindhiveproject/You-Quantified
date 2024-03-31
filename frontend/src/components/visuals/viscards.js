@@ -99,11 +99,12 @@ export function VisualizationCards({
       description={visual.description}
       title={visual.title}
       visId={visual.id}
+      key = {visual.id}
     />
   ));
 
   return (
-    <div key="visCards">
+    <div>
       <div className="custom-grid h-100 mt-3">{customSources}</div>
     </div>
   );

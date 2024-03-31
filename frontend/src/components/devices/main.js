@@ -82,21 +82,24 @@ function MainWindow({ setCurrentScreen, saveObject, recording, setRecording }) {
   const areDevices = useSelector(areThereDevices);
 
   return (
-    <div>
-      {areDevices && (
-        <RecordComponent
-          saveObject={saveObject}
-          recording={recording}
-          setRecording={setRecording}
-        />
-      )}
+    <div className="w-50">
       <h2 className="mt-5 mb-2 fw-bold ms-5">Data sources</h2>
-      <button
-        className="btn btn-secondary btn-outline-dark fw-medium mb-2"
-        onClick={() => setCurrentScreen("new")}
-      >
-        <i className="bi bi-plus m-0 p-0 me-1"></i>New source
-      </button>
+      <div className="d-flex p-0 m-0 justify-content-end">
+        {true && (
+          <RecordComponent
+            saveObject={saveObject}
+            recording={recording}
+            setRecording={setRecording}
+          />
+        )}
+
+        <button
+          className="btn btn-secondary btn-outline-dark fw-medium mb-2 ms-2"
+          onClick={() => setCurrentScreen("new")}
+        >
+          <i className="bi bi-plus m-0 p-0 me-1"></i>New source
+        </button>
+      </div>
       <div>
         <RenderDevices />
       </div>
@@ -124,7 +127,7 @@ function NewDevicesWindow({ setCurrentScreen, setCurrentDevice }) {
       <div className="button-list mt-3">
         <div
           className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
-          onClick={() => setCurrentDevice("Upload")}
+          onClick={() => changeDevice("Upload")}
         >
           <div className="card-body">
             <p className="m-0 text-body-tertiary">Any</p>

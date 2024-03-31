@@ -45,7 +45,7 @@ export function NewVisual() {
 
   function validateDescription(input) {
     const regex = /^[^%$-/]+$/;
-    if (regex.test(input) || profanity.exists(input)) {
+    if (!regex.test(input) || profanity.exists(input)) {
       setVisDescription("");
       setErrorMessage("Invalid description");
       return;
@@ -56,7 +56,7 @@ export function NewVisual() {
 
   function validateName(input) {
     const regex = /^(?!.*[%$\-\/])[^\n\r]{1,50}$/;
-    if (regex.test(input) || profanity.exists(input)) {
+    if (!regex.test(input) || profanity.exists(input)) {
       setVisName("");
       setErrorMessage("Invalid name");
       return;

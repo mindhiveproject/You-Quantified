@@ -4,9 +4,16 @@ import { useSelector, useDispatch } from "react-redux";
 
 export default function DataManagementWindow({ setVisInfo, visInfo, custom }) {
   // The window with the data mappings
+  console.log("Parameters");
 
   const parameters = useSelector((state) => state.params);
-  if (Object.keys(parameters).length === 0) return <div>Loading...</div>;
+  const selectorKeys = Object.keys(parameters);
+  const visInfoKeys = visInfo?.parameters.map(({ name }) => name);
+  console.log(selectorKeys);
+  console.log(visInfoKeys);
+
+  if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
+    return <div>Loading...</div>;
 
   return (
     <div className="h-100 ms-5 me-5 overflow-auto disable-scrollbar">
@@ -16,7 +23,6 @@ export default function DataManagementWindow({ setVisInfo, visInfo, custom }) {
         visInfo={visInfo}
         custom={custom}
         setVisInfo={setVisInfo}
-        parameters={parameters}
       />
     </div>
   );

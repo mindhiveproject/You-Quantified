@@ -3,30 +3,39 @@ import { useContext, useState } from "react";
 import { MY_VISUALS, NEW_VISUAL } from "../../../queries/visuals";
 import { NEW_LESSON } from "../../../queries/lessons";
 import { UserContext } from "../../../App";
+import { useNavigate } from "react-router-dom";
 
 export function NewLesson({ setShowNew }) {
   const [visLink, setVisLink] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { currentUser } = useContext(UserContext);
-  const isFormValid = errorMessage && !visLink;
+  const isFormValid = !errorMessage && visLink;
+  console.log(!errorMessage);
+
   const [checkValidVis, { data: visData }] = useLazyQuery(MY_VISUALS, {
     onCompleted: (data) => {
-      setErrorMessage(data?.visuals.length == 0 ? "Visual not found" : "");
+      setErrorMessage(
+        data && data?.visuals.length == 0 ? "Visual not found" : ""
+      );
     },
   });
-  const [createNewLesson] = useMutation(NEW_LESSON);
+
+  console.log(visData);
+
+  const [createNewLesson, { data, error }] = useMutation(NEW_LESSON);
 
   function validateLink(input) {
     const visID = extractVisID(input);
-    checkValidVis({ variables: { where: { id: visID } } });
+    checkValidVis({ variables: { where: { id: { equals: visID } } } });
     setVisLink(input);
   }
 
   async function handleFormSubmit(e) {
     e.preventDefault();
-    if (isFormValid) {
+    if (!isFormValid) {
       return;
     }
+
     const visMetadata = visData.visuals[0];
 
     const response = await fetch(visMetadata?.code?.url);
@@ -65,29 +74,34 @@ export function NewLesson({ setShowNew }) {
     });
   }
 
+  if (data?.id) {
+    const navigate = useNavigate();
+    navigate(`/lessons/${data?.id}`);
+  }
+
   return (
     <div>
       <form onSubmit={handleFormSubmit}>
         <div className="mb-3">
-          <label htmlFor="lessonVisual">Visual link or id</label>
-          <div className="row">
-            <input
-              type="text"
-              className="form-control col-8"
-              placeholder="Paste link or id"
-              aria-label="paste-vis-link"
-              onChange={(e) => validateLink(e.target.value)}
-              value={visLink}
-            ></input>
-            <button
-              type="submit"
-              className={`col-4 btn btn-primary btn-outline-dark text-white ${
-                !isFormValid && "disabled"
-              }`}
-            >
-              Create
-            </button>
-          </div>
+          <label htmlFor="lessonVisual">Visual</label>
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Paste link or id"
+            aria-label="paste-vis-link"
+            onChange={(e) => validateLink(e.target.value)}
+            value={visLink}
+          ></input>
+          <button
+            type="submit"
+            className={`btn btn-primary btn-outline-dark mt-2 ${
+              !isFormValid && "disabled"
+            }`}
+          >
+            Create
+          </button>
+
           {errorMessage && <p className="text-warning">{errorMessage}</p>}
         </div>
       </form>

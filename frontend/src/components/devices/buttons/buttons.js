@@ -73,40 +73,38 @@ export function FileDeviceButton({ data, name, handleShow }) {
   }
 
   return (
-    <div>
-      <div className="row card-margin">
-        <div className="card rounded-0 mb-2 mt-1 col-8">
-          <button
-            className="card-body btn btn-link text-decoration-none text-start"
-            onClick={() => handleShow(name)}
-          >
+    <div className="row m-0 justify-content-end">
+      <div className="card rounded-0 mb-2 mt-1 col-7 col-md-6 p-0">
+        <button
+          className="card-body btn btn-link text-decoration-none text-start"
+          onClick={() => handleShow(name)}
+        >
+          <div>
             <h5 className="card-title g-0 m-0">{name}</h5>
             <small className="g-0 m-0">{data.heading}</small>
-          </button>
-        </div>
-        <div className="card rounded-0 mb-2 mt-1 col-4">
-          <div className="card-body d-flex align-items-center justify-content-center">
-            <button className="btn btn-link" onClick={restartStreaming}>
-              <i className="bi bi-rewind" />
-            </button>
-            {playing ? (
-              <button className="btn btn-link">
-                <i className="bi bi-pause" onClick={pauseStreaming} />
-              </button>
-            ) : (
-              <button className="btn btn-link">
-                <i className="bi bi-play" onClick={startStreaming} />
-              </button>
-            )}
-            <button className="btn btn-link">
-              <i
-                className={`bi bi-arrow-repeat ${
-                  looping ? "text-primary" : ""
-                }`}
-                onClick={loopStreaming}
-              />
-            </button>
           </div>
+        </button>
+      </div>
+      <div className="card rounded-0 mb-2 mt-1 col-5 col-md-6">
+        <div className="card-body d-flex align-items-center justify-content-center">
+          <button className="btn btn-link" onClick={restartStreaming}>
+            <i className="bi bi-rewind" />
+          </button>
+          {playing ? (
+            <button className="btn btn-link">
+              <i className="bi bi-pause" onClick={pauseStreaming} />
+            </button>
+          ) : (
+            <button className="btn btn-link">
+              <i className="bi bi-play" onClick={startStreaming} />
+            </button>
+          )}
+          <button className="btn btn-link">
+            <i
+              className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
+              onClick={loopStreaming}
+            />
+          </button>
         </div>
       </div>
     </div>

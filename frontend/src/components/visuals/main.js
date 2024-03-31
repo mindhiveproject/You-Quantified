@@ -105,12 +105,14 @@ function VisTopBar({
           )}
         </div>
         {showEdit && (
-          <div className="edit-popup" ref={editPopupRef}>
-            <EditModalManager
-              visMetadata={visMetadata}
-              setShowEdit={setShowEdit}
-              changeVisMetadata={changeVisMetadata}
-            />
+          <div className="edit-background">
+            <div className="edit-popup" ref={editPopupRef}>
+              <EditModalManager
+                visMetadata={visMetadata}
+                setShowEdit={setShowEdit}
+                changeVisMetadata={changeVisMetadata}
+              />
+            </div>
           </div>
         )}
         <h5 className="align-self-center m-0 text-center">

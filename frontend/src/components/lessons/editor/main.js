@@ -4,19 +4,26 @@ import Placeholder from "@tiptap/extension-placeholder";
 import StarterKit from "@tiptap/starter-kit";
 import ParameterExtension from "./parameters";
 import { BubbleMenu, EditorContent, useEditor } from "@tiptap/react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@apollo/client";
-import { CHANGE_LESSON, GET_LESSON } from "../../../queries/lessons";
-import { MY_VISUALS } from "../../../queries/visuals";
+import {
+  CHANGE_LESSON,
+  GET_LESSON,
+  GET_USER_LESSON,
+  CHANGE_USER_LESSON,
+} from "../../../queries/lessons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchCode } from "../../visuals/fetch_code";
 import { VisualsWindow } from "../../visuals/window/visuals_window";
 import { useFullScreenHandle } from "react-full-screen";
+import { FloatingMenu } from "@tiptap/react";
 
 const CustomDocument = Document.extend({
-  content: "emphasis heading block*",
+  content: "heading block*",
 });
+
+// https://tiptap.dev/docs/editor/api/nodes/code-block-lowlight
 
 const extensions = [
   StarterKit,
@@ -36,23 +43,35 @@ const extensions = [
   }),
 ];
 
-export function QueryLesson() {
+export function MainViewLesson() {
   const { lessonID } = useParams();
+
+  let params = new URLSearchParams(document.location.search);
+  let isUserLesson = params.get("user") == "true"; // is the string "Jonathan"
 
   const {
     loading,
     error,
-    data: lessonData,
-  } = useQuery(GET_LESSON, {
+    data,
+  } = useQuery(isUserLesson ? GET_USER_LESSON : GET_LESSON, {
     variables: { id: lessonID },
   });
 
   if (loading) return "Loading...";
   if (error) return `Error!`;
 
-  return <MainView lessonData={lessonData} visData={lessonData?.visual}/>;
-}
+  const lessonData = data?.userLesson || data.lesson;
+  
+  console.log(lessonData);
+  
+  const visData = {
+    code: lessonData?.code,
+    parameters: lessonData?.parameters,
+    editable: true,
+  };
 
+  return <MainView lessonData={lessonData} visData={visData} />;
+}
 
 function MainView({ visData, lessonData }) {
   const [visMetadata, _setVisMetadata] = useState(visData);
@@ -61,11 +80,18 @@ function MainView({ visData, lessonData }) {
   const fullScreenHandle = useFullScreenHandle();
   const dispatch = useDispatch();
 
+  const [updateLesson] = useMutation(
+    lessonData.isUserLesson ? CHANGE_USER_LESSON : CHANGE_LESSON,
+    {
+      variables: { id: lessonData?.id },
+    }
+  );
+
   useEffect(() => {
     if (visMetadata?.parameters) {
       dispatch({ type: "params/load", payload: visMetadata?.parameters });
     }
-  }, [visMetadata]);
+  }, [visMetadata?.parameters]);
 
   useEffect(() => {
     fetchCode(visMetadata?.code?.url)
@@ -75,8 +101,12 @@ function MainView({ visData, lessonData }) {
 
   return (
     <div className="h-100 d-flex">
-      <div className="w-50">
-        <TipTap lessonData={lessonData} />
+      <div className="w-50 scrollable">
+        <TipTap
+          lessonData={lessonData}
+          updateLesson={updateLesson}
+          visMetadata={visMetadata}
+        />
       </div>
       <div className="w-50">
         <VisualsWindow
@@ -91,23 +121,19 @@ function MainView({ visData, lessonData }) {
   );
 }
 
-function TipTap({ lessonData }) {
-  const [updateLesson] = useMutation(CHANGE_LESSON, {
-    variables: { id: lessonData?.id },
-  });
-
+function TipTap({ lessonData, updateLesson, visMetadata }) {
   const editor = useEditor({
     extensions,
-    content: lessonData?.content,
-    onUpdate: (editor) => {
-      const content = editor.getJSON();
-      updateLesson({ variables: { data: content } });
+    content: lessonData.content,
+    onUpdate: ({ editor }) => {
+      if (editor) {
+        const content = editor.getJSON();
+        const title = content?.[0]?.[0]?.content?.[0]?.text;
+        console.log(content);
+        updateLesson({ variables: { data: { content: content } } });
+      }
     },
   });
-
-  if (editor) {
-    editor.setEditable(true);
-  }
 
   return (
     <>
@@ -116,7 +142,7 @@ function TipTap({ lessonData }) {
         <InlineMenuWithLink editor={editor} />
       </BubbleMenu>
       <FloatingMenu editor={editor}>
-        <NewLineMenu editor={editor} />
+        <NewLineMenu editor={editor} visMetadata={visMetadata} />
       </FloatingMenu>
     </>
   );
@@ -199,10 +225,12 @@ function InlineMenuWithLink({ editor }) {
   );
 }
 
-function NewLineMenu({ editor }) {
+function NewLineMenu({ editor, visMetadata }) {
   if (!editor) {
     return null;
   }
+
+  console.log(visMetadata);
 
   return (
     <>
@@ -239,7 +267,9 @@ function NewLineMenu({ editor }) {
           <li>
             <button
               onClick={() => {
-                editor.commands.insertContent(`<parameters visID=${visID} />`);
+                editor.commands.insertContent(
+                  `<parameters visMeta=${JSON.stringify(visMetadata)} />`
+                );
               }}
               className="dropdown-item"
             >

@@ -6,6 +6,7 @@
 
 $primary: #7749F8;
 $secondary: #46eb9c;
+$danger: #FF4E64;
 
 $accent: #2bedc7;
 $headings-font-weight: 600;
@@ -83,6 +84,9 @@ div.code-editor {
     border-color: #FF4E64;
 }
 
+div.foreground {
+    z-index: 100;
+}
 
 
 div.w-100 {
@@ -93,16 +97,80 @@ div.w-100 {
 .vertical-spacing {
     margin-top: 25vh;
 }
+/*
 
 .edit-popup {
     position: absolute;
     top: 119px;
-    left: 59px;
+    left: 57px;
     border: solid 1px black;
     background: white;
     padding: 2rem;
     text-align: left;
     z-index: 102;
+}*/
+
+
+.edit-popup {
+    position: absolute;
+    min-width: 50% !important;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border: solid 1px black;
+    background: white;
+    padding: 2rem;
+    text-align: left;
+    z-index: 102;
+}
+
+.edit-background {
+    background-color: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    height: calc(100vh - 60px);
+    width: 100vw;
+    position: absolute;
+    top: 60px;
+    z-index: 102;
+    right: 0;
+} 
+
+.git-btn {
+    position: fixed;
+    right: 3rem;
+    bottom: 3rem;
+    z-index: 102;
+    display: inline-block;
+    width: -moz-fit-content;
+    width: fit-content;
+}
+
+.btn-square {
+    height: 50px;
+    width: 50px;
+    padding: 0 !important;
+    line-height: 50px !important;
+    text-align: center !important;
+}
+
+.new-lesson-background {
+    position: fixed;
+    height: 100vh;
+    widtH: 100vw;
+    top: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 102;
+}
+
+.new-lesson-popup {
+    position: static;
+    margin-top: 40vh;
+    margin-left: 30vw;
+    margin-right: 30vw;
+    text-align: left;
 }
 
 .card-column {
@@ -116,10 +184,10 @@ div.w-100 {
 }
 
 .tiptap {
-    margin-left: 20%;
-    margin-right: 20%;
-    padding-left: 5rem;
-    padding-right: 5rem;
+    margin-left: 10%;
+    margin-right: 10%;
+    padding-left: 2rem;
+    padding-right: 2rem;
     padding-top: 2rem;
     margin-top: 2rem;
     margin-bottom: 2rem;
@@ -137,6 +205,13 @@ div.w-100 {
     height: calc(100vh - 60px);
 }
 
+.w-btn {
+    width: 13rem;
+}
+
+.h-95 {
+    height: calc(100vh - 60px);
+}
 
 .tiptap:focus {
     outline: none;
@@ -200,6 +275,69 @@ div.w-100 {
 
 div.big-right-margin {
     margin-right: 15%;
+}
+
+.ps-15 {
+    padding-left: 15% !important;
+}
+
+.pe-20 {
+    padding-right: 20rem !important;
+}
+
+.main-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0px !important;
+    margin-top: 60px !important;
+    height: calc(100% - 60px);
+    z-index: 0;
+}
+
+.icon-image {
+    height: 1rem;
+    width: 1rem;
+}
+
+
+
+.lesson-card {
+    .accordion-item {
+        background-color: none;
+        border-radius: 0 !important;
+        border: #CED4DA solid 1px;
+        .accordion-button {
+            background: none;
+            font-weight: bold;
+            border-radius: 0;
+
+            h6 {
+                font-weight: bold;
+            }
+
+            p {
+                font-weight: normal;
+            }
+
+            small {
+                font-weight: normal;
+                font-style: italic;
+            }
+        }
+        .accordion-button:focus,
+        .accordion-button:active,
+        .accordion-button:not(.collapsed) {
+            outline: none;
+            box-shadow: none;
+            color: #1A1A1A;
+        }
+        .card {
+            border-radius: 0 !important;
+            border-color: #1A1A1A;
+        }
+    }
 }
 
 div.big-left-margin {
@@ -788,6 +926,8 @@ input.vis-name-input::placeholder {
     overflow: hidden;
 
 }
+
+
 
 .split-pane-right {
     background-color: #fff;

@@ -8,25 +8,69 @@ export const GET_LESSON = gql`
       content
       id
       title
-      visual {
-        author {
-          id
-          name
-        }
+      code {
+        url
+      }
+      parameters
+    }
+  }
+`;
+
+export const GET_UNITS = gql`
+  query GetAllUnits($userID: ID) {
+    units {
+      description
+      title
+      lessons {
+        title
+        id
+        content
         code {
           url
         }
-        cover {
-          url
+        visual {
+          title
         }
-        title
-        createdAt
-        description
-        parameters
+        userLessons(where: { author: { id: { equals: $userID } } }) {
+          author {
+            id
+          }
+          id
+          completedAt
+          startedAt
+          title
+        }
+        author {
+          id
+          isAdmin
+        }
+      }
+    }
+  }
+`;
+
+export const GET_USER_LESSON = gql`
+  query GetUserLesson($id: ID) {
+    userLesson(where: { id: $id }) {
+      author {
         id
-        editable
       }
+      code {
+        url
       }
+      content
+      parameters
+      title
+    }
+  }
+`;
+
+export const CHANGE_USER_LESSON = gql`
+  mutation ChangeUserLesson($id: ID!, $data: UserLessonUpdateInput!) {
+    updateUserLesson(where: { id: $id }, data: $data) {
+      content
+      id
+      title
     }
   }
 `;
@@ -44,6 +88,14 @@ export const CHANGE_LESSON = gql`
 export const NEW_LESSON = gql`
   mutation NewLesson($data: LessonCreateInput!) {
     createLesson(data: $data) {
+      id
+    }
+  }
+`;
+
+export const NEW_USER_LESSON = gql`
+  mutation NewUserLesson($data: UserLessonCreateInput!) {
+    createUserLesson(data: $data) {
       id
     }
   }
