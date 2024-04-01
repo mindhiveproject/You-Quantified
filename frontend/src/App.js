@@ -43,8 +43,6 @@ function DesktopApp() {
   const [showDevices, setShowDevices] = useState(false);
   const [recording, setRecording] = useState(false);
 
-  console.log(process.env);
-
   return (
     <>
       <NavBar setShowDevices={setShowDevices} />

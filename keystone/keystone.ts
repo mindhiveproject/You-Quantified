@@ -31,8 +31,12 @@ export default withAuth(
       // we're using sqlite for the fastest startup experience
       //   for more information on what database might be appropriate for you
       //   see https://keystonejs.com/docs/guides/choosing-a-database#title
-      provider: "sqlite",
-      url: "file:./keystone.db",
+      provider:
+        process.env.NODE_ENV === "development" ? "sqlite" : "postgresql",
+      url:
+        process.env.NODE_ENV === "development"
+          ? "file:./keystone.db"
+          : process.env.POSTGRES_URL || 'file:./keystone.db',
     },
     ui: {
       isAccessAllowed: (context) => context.session?.data.isAdmin,
