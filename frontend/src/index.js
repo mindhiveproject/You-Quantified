@@ -11,7 +11,7 @@ import {
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 const link = createUploadLink({
-  uri: "http://localhost:3001/api/graphql",
+  uri: "http://localhost:3001/api/graphql", // Add a fix in the production using env variables
   credentials: "include",
   headers: {
     "Apollo-Require-Preflight": "true",
