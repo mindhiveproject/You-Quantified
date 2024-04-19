@@ -1,5 +1,5 @@
 # Creative Representation of the Quantified Self
-This project aims to promote data literacy through the creative representation of the Quantified Self. It's meant to serve as a learning resource for students seeking to understand, play around, collect and visualize their physiological signals. This repository is the second version of the web app, which includes back-end integration.
+This project aims to promote data literacy through the creative representation of the Quantified Self. It's meant to serve as a learning resource for students seeking to understand, play around, collect and visualize their physiological signals. This repository is the second version of the web app, which includes back-end integration. This app is currently being hosted at [youquantified.com](https://youquantified.com).
 
 ## Installing and running the App
 To install and run this app, you must run the front end and back end (keystone) separately. Navigate into each folder on different command lines and run

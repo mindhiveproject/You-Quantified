@@ -3,15 +3,16 @@ import ReactDOM from "react-dom/client";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import App from "./App";
 import "./index.scss";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-} from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
+const uriEndpoint =
+  process.env.REACT_APP_CORTEX_LICENSE === "development"
+    ? process.env.REACT_APP_UPLOAD_URI_ENDPOINT_DEV
+    : process.env.REACT_APP_UPLOAD_URI_ENDPOINT;
+
 const link = createUploadLink({
-  uri: "http://localhost:3001/api/graphql", // Add a fix in the production using env variables
+  uri: uriEndpoint, // Add a fix in the production using env variables
   credentials: "include",
   headers: {
     "Apollo-Require-Preflight": "true",
