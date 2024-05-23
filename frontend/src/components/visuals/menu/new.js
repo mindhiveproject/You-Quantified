@@ -44,7 +44,7 @@ export function NewVisual() {
   }
 
   function validateDescription(input) {
-    const regex = /^[!@#$%^&*()\-+={}[\]"'<>?\/|\\]/;
+    const regex = /^(?!.*[%$\-\/])[^\n\r]{1,1000}$/;
     if (!regex.test(input) || profanity.exists(input)) {
       setVisDescription("");
       setErrorMessage("Invalid description");
