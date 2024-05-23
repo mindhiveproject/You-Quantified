@@ -12,8 +12,6 @@ export function CodeEditor({ code, setCode, isEditable }) {
     },
   };
 
-  console.log(isEditable);
-
   if (!isEditable) {
     settings["readOnly"] = true;
   } else {

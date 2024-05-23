@@ -62,7 +62,7 @@ export function MainViewLesson() {
 
   const lessonData = data?.userLesson || data.lesson;
   
-  console.log(lessonData);
+  // console.log(lessonData);
   
   const visData = {
     code: lessonData?.code,
@@ -129,7 +129,7 @@ function TipTap({ lessonData, updateLesson, visMetadata }) {
       if (editor) {
         const content = editor.getJSON();
         const title = content?.[0]?.[0]?.content?.[0]?.text;
-        console.log(content);
+        // console.log(content);
         updateLesson({ variables: { data: { content: content } } });
       }
     },
@@ -230,7 +230,7 @@ function NewLineMenu({ editor, visMetadata }) {
     return null;
   }
 
-  console.log(visMetadata);
+  // console.log(visMetadata);
 
   return (
     <>

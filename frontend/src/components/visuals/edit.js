@@ -125,7 +125,7 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
 
   function validateName(input) {
     setVisName(input);
-    const regex = /[!@#$%^&*()\-+={}[\]:;"'<>,.?\/|\\]/;
+    const regex = /^[!@#$%^&*()\-+={}[\]:;"'<>,.?\/|\\]/;
     if (!regex.test(input) | profanity.exists(input)) {
       setErrorMessage("Invalid name");
       return;

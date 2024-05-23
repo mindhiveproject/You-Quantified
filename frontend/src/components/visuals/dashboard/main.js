@@ -4,13 +4,10 @@ import { useSelector, useDispatch } from "react-redux";
 
 export default function DataManagementWindow({ setVisInfo, visInfo, custom }) {
   // The window with the data mappings
-  console.log("Parameters");
 
   const parameters = useSelector((state) => state.params);
   const selectorKeys = Object.keys(parameters);
   const visInfoKeys = visInfo?.parameters.map(({ name }) => name);
-  console.log(selectorKeys);
-  console.log(visInfoKeys);
 
   if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
     return <div>Loading...</div>;

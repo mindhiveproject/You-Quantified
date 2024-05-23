@@ -63,7 +63,6 @@ class LSLReceiver {
             typeof data.info?.source_id == "undefined"
               ? data.info.type
               : data.info.source_id;
-          console.log(this.metadata.id);
           store.dispatch({
             type: "devices/create",
             payload: {

@@ -15,8 +15,6 @@ function LessonCard({ lessonData }) {
   const [createNewUserLesson, { data }] = useMutation(NEW_USER_LESSON);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(userLessons);
-  console.log(lessonData);
 
   async function goToLessonCallback() {
     setIsLoading(true);
@@ -61,7 +59,6 @@ function LessonCard({ lessonData }) {
 
   // If the lesson has been copied by the mutation, navigate there
   if (data) {
-    console.log(data?.createUserLesson?.id);
     navigate(`/lessons/${data?.createUserLesson?.id}`);
   }
 
@@ -89,8 +86,6 @@ export function UnitCard({ unitData }) {
   const lessonCards = unitData?.lessons.map((lesson) => (
     <LessonCard lessonData={lesson} />
   ));
-
-  console.log(unitData?.description);
 
   return (
     <div className="lesson-card">

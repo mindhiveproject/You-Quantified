@@ -10,8 +10,6 @@ import { UnitCard } from "./card";
 export function LessonMenu() {
   const { currentUser } = useContext(UserContext);
 
-  console.log(currentUser);
-
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start">

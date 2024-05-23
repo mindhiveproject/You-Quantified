@@ -44,7 +44,7 @@ export function NewVisual() {
   }
 
   function validateDescription(input) {
-    const regex = /[!@#$%^&*()\-+={}[\]"'<>?\/|\\]/;
+    const regex = /^[!@#$%^&*()\-+={}[\]"'<>?\/|\\]/;
     if (!regex.test(input) || profanity.exists(input)) {
       setVisDescription("");
       setErrorMessage("Invalid description");
@@ -85,7 +85,6 @@ export function NewVisual() {
       codeFile = blob;
     }
 
-    console.log(params);
     const visMetadata = {
       title: visName,
       description: visDescription,
@@ -107,8 +106,6 @@ export function NewVisual() {
       },
     });
   }
-
-  console.log(data);
 
   if (data?.createVisual?.id) {
     console.log("Navigating...");
@@ -222,7 +219,6 @@ async function handleFileUpload(e, setInitCode) {
       const jsContent = event.target.result;
 
       const txtContent = jsContent.replace(/(?:\r\n|\r|\n)/g, "\n"); // Normalize line endings
-      console.log(txtContent);
 
       const txtBlob = new Blob([txtContent], { type: "text/plain" });
       setInitCode(txtBlob);

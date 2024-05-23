@@ -10,8 +10,6 @@ export function NewLesson({ setShowNew }) {
   const [errorMessage, setErrorMessage] = useState("");
   const { currentUser } = useContext(UserContext);
   const isFormValid = !errorMessage && visLink;
-  console.log(!errorMessage);
-
   const [checkValidVis, { data: visData }] = useLazyQuery(MY_VISUALS, {
     onCompleted: (data) => {
       setErrorMessage(
@@ -19,8 +17,6 @@ export function NewLesson({ setShowNew }) {
       );
     },
   });
-
-  console.log(visData);
 
   const [createNewLesson, { data, error }] = useMutation(NEW_LESSON);
 

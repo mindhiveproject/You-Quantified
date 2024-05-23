@@ -68,7 +68,6 @@ export default function SignUp() {
 function SignedUpScreen({ email, password, user, setCurrentUser }) {
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
     update(cache, { data }) {
-      console.log(data);
       if (data?.authenticateUserWithPassword?.item) {
         setCurrentUser(data?.authenticateUserWithPassword?.item);
       }

@@ -67,9 +67,9 @@ export default withAuth(
       p5_visuals: {
         kind: "local",
         type: "file",
-        generateUrl: (path) => `${baseUrl}/visuals${path}`,
+        generateUrl: (path) => `${baseUrl}/code${path}`,
         serverRoute: {
-          path: "/visuals",
+          path: "/code",
         },
         storagePath: `public/visuals`,
       },

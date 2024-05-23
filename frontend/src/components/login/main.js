@@ -60,7 +60,6 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
 function LoginScreen() {
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
     update(cache, { data }) {
-      console.log(data);
       if (data?.authenticateUserWithPassword?.item) {
         setAuthSuccess(true);
         setCurrentUser(data?.authenticateUserWithPassword?.item);
@@ -74,7 +73,6 @@ function LoginScreen() {
 
   const { setCurrentUser } = useContext(UserContext);
 
-  console.log(data);
 
   let userInput;
   let passwordInput;

@@ -132,11 +132,7 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
   const overlayRef = useRef(null);
 
   const dataMappings = useSelector(selectDataMappings);
-  console.log("Data Mappings");
-  console.log(dataMappings);
   const claves = useSelector(getDataStreamKeys);
-  console.log("Claves");
-  console.log(claves);
 
   const dataCards = visInfo?.parameters?.map((parameter) => (
     <DataCard

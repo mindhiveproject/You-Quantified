@@ -22,7 +22,6 @@ function NestedDropDown({
 
   useEffect(() => {
     if (hasDefault.length > 0) {
-      console.log(hasDefault);
       selectNewSource([option.device, hasDefault[0]], true);
     }
   }, []);

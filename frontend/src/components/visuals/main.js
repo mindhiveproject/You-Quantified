@@ -202,7 +202,6 @@ export function MainView({ visID, queryData }) {
   function setCode(str) {
     localStorage.setItem(`visuals/${visID}`, str);
     const file = createTextFileFromString(str, "code.txt");
-    console.log(file);
     changeVisMetadata({
       variables: {
         data: {
