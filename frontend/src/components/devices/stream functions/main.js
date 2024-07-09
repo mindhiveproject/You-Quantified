@@ -36,12 +36,19 @@ const deviceConnectionFunctions = {
   AudioVolume: connectAudioRMS,
 };
 
-export function DeviceConnection({ deviceName, deviceID, setCurrentScreen }) {
+export function DeviceConnection({
+  deviceName,
+  deviceID
+}) {
+  console.log("Device name");
+  console.log(deviceName);
   if (deviceName === "" || deviceName === undefined) return;
 
   const onButtonConnect = deviceConnectionFunctions[deviceName];
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const device = devicesRaw.find(({ heading }) => heading === deviceName);
+  console.log(deviceName);
+  console.log(device);
 
   const [connText, setConnInfo] = useState({ text: "", type: "" });
   const [disabled, setDisabled] = useState(false);
@@ -65,18 +72,13 @@ export function DeviceConnection({ deviceName, deviceID, setCurrentScreen }) {
   const source = [deviceName];
 
   return (
-    <div className="mt-5 w-50">
-      <button
-        className="btn btn-link text-decoration-none fw-medium mb-0"
-        onClick={() => setCurrentScreen("new")}
-      >
-        <i className="bi bi-arrow-left-short"></i>New device
-      </button>
+    <div className="w-50">
       {deviceName === "LSL" ? (
         <LSLModalHeader />
       ) : (
         <>
-          <h2 className="mb-2 fw-bold ms-5">{device.heading}</h2>
+          {deviceID && <h5 className="mb-2 ms-5 text-muted">{device.heading}</h5>}
+          <h2 className="mb-2 fw-bold ms-5">{deviceID?deviceID:device.heading}</h2>
           <div>
             {device.description}
             <div className="mt-3">

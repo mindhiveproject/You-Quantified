@@ -34,6 +34,7 @@
     "graphql": "^16.8.1",
     "graphql-upload": "^16.0.2",
     "install": "^0.13.0",
+    "jszip": "^3.10.1",
     "mathjs": "^11.11.1",
     "monaco-jsx-highlighter": "^2.0.4",
     "muse-js": "^3.3.0",

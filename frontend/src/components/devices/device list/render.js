@@ -3,21 +3,20 @@ import React, { useState } from "react";
 import devicesRaw from "../../../metadata/devices";
 import { useSelector } from "react-redux";
 
-import { DeviceConnection } from "../stream functions/connection_modal";
+// import { DeviceConnection } from "../stream functions/connection_modal";
+
+import { DeviceConnection } from "../stream functions/main";
+
 import DeviceList from "./list";
 
-export default function RenderDevices() {
-  const [show, setShow] = useState(false);
-  const [currId, setCurrId] = useState("");
+export default function RenderDevices({ setCurrentScreen, setCurrentDevice }) {
+  
+  const deviceMeta = useSelector((state) => state.deviceMeta);
 
   function handleShow(data) {
-    setShow(true);
-    setCurrId(data);
+    setCurrentScreen("device");
+    setCurrentDevice({name: deviceMeta?.[data]?.device, id: data})
   }
-
-  const handleClose = () => setShow(false);
-
-  const deviceMeta = useSelector((state) => state.deviceMeta);
 
   const deviceButtonList = Object.keys(deviceMeta)?.map((id) => {
     const currDev = deviceMeta[id];
@@ -57,17 +56,9 @@ export default function RenderDevices() {
     );
   });
 
-  const deviceName = deviceMeta?.[currId]?.device;
-
   return (
     <div>
       {deviceButtonList}
-      <DeviceConnection
-        show={show}
-        handleClose={handleClose}
-        deviceID={currId}
-        deviceName={deviceName}
-      />
     </div>
   );
 }

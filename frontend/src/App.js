@@ -36,7 +36,7 @@ function NavBar({ setShowDevices }) {
   );
 }
 
-// Object where recording is temporarily stored
+// Object where recording is temporarily stored - Save Object Origin
 const saveObject = [];
 
 function DesktopApp() {

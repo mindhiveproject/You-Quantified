@@ -124,8 +124,9 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
   }
 
   function validateName(input) {
-    const regex = /^[!@#$%^&*()\-+={}[\]:;"'<>,.?\/|\\]/;
-    if (!regex.test(input) | profanity.exists(input)) {
+    const regex = /^(?!.*[%$\-\/])[^\n\r]{1,50}$/;
+    if (!regex.test(input) || profanity.exists(input)) {
+      setVisName("");
       setErrorMessage("Invalid name");
       return;
     }
@@ -133,10 +134,11 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     setErrorMessage();
   }
 
+
   function validateDescription(input) {
-    
     const regex = /^(?!.*[%$\-\/])[^\n\r]{1,1000}$/;
     if (!regex.test(input) || profanity.exists(input)) {
+      setVisDescription("");
       setErrorMessage("Invalid description");
       return;
     }

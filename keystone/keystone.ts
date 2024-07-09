@@ -71,7 +71,7 @@ export default withAuth(
         serverRoute: {
           path: "/code",
         },
-        storagePath: `public/visuals`,
+        storagePath: `public/code`,
       },
     },
   })

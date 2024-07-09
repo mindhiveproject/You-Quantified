@@ -10,8 +10,6 @@ export function MainMenu() {
   const [currentFilter, setCurrentFilter] = useState("all");
   const [currentSearch, setCurrentSearch] = useState("");
 
-  console.log(currentUser);
-
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start">

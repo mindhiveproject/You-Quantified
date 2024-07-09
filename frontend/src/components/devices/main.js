@@ -33,21 +33,50 @@ export function DevicesManager({
   recording,
   setRecording,
 }) {
-  const [currentScreen, setCurrentScreen] = useState("main");
+  const [previousScreen, setPreviousScreen] = useState();
+  const [currentScreen, _setCurrentScreen] = useState("main");
   const [currentDevice, setCurrentDevice] = useState();
+
+  function setCurrentScreen(val) {
+    if (val === "new") {
+      setPreviousScreen("main");
+    } else if (val === "main") {
+      setPreviousScreen();
+    } else {
+      setPreviousScreen(currentScreen);
+    }
+    _setCurrentScreen(val);
+  }
+
+  const previousScreenName = {
+    main: "Data sources",
+    new: "New devices",
+  };
 
   return (
     <div className="h-100 overflow-scroll disable-scrollbar devices-overlay">
-      <button
-        className="devices-close-btn h4"
-        onClick={() => setShowDevices(false)}
-      >
-        <i className="bi bi-x"></i>
-      </button>
+      <div className="d-flex justify-content-end">
+        {previousScreen && (
+          <button
+            className="btn btn-link text-decoration-none fw-medium"
+            onClick={() => setCurrentScreen(previousScreen)}
+          >
+            <i className="bi bi-arrow-left me-1"></i>
+            {previousScreenName[previousScreen]}
+          </button>
+        )}
+        <button
+          className="btn btn-link text-decoration-none"
+          onClick={() => setShowDevices(false)}
+        >
+          <i className="bi bi-x h4"></i>
+        </button>
+      </div>
       <div className="d-flex justify-content-end align-items-end text-end me-3">
         {currentScreen === "main" && (
           <MainWindow
             setCurrentScreen={setCurrentScreen}
+            setCurrentDevice={setCurrentDevice}
             saveObject={saveObject}
             recording={recording}
             setRecording={setRecording}
@@ -78,12 +107,18 @@ const areThereDevices = createSelector(
   }
 );
 
-function MainWindow({ setCurrentScreen, saveObject, recording, setRecording }) {
+function MainWindow({
+  setCurrentScreen,
+  setCurrentDevice,
+  saveObject,
+  recording,
+  setRecording,
+}) {
   const areDevices = useSelector(areThereDevices);
 
   return (
     <div className="w-50">
-      <h2 className="mt-5 mb-2 fw-bold ms-5">Data sources</h2>
+      <h2 className="mb-2 fw-bold ms-5">Data sources</h2>
       <div className="d-flex p-0 m-0 justify-content-end">
         {true && (
           <RecordComponent
@@ -101,7 +136,10 @@ function MainWindow({ setCurrentScreen, saveObject, recording, setRecording }) {
         </button>
       </div>
       <div>
-        <RenderDevices />
+        <RenderDevices
+          setCurrentScreen={setCurrentScreen}
+          setCurrentDevice={setCurrentDevice}
+        />
       </div>
     </div>
   );
@@ -109,21 +147,14 @@ function MainWindow({ setCurrentScreen, saveObject, recording, setRecording }) {
 
 function NewDevicesWindow({ setCurrentScreen, setCurrentDevice }) {
   function changeDevice(input) {
-    setCurrentDevice(input);
+    setCurrentDevice({ name: input });
     setCurrentScreen("device");
   }
 
   return (
     <div>
-      <div className="ms-5 mt-5">
-        <button
-          className="btn btn-link text-decoration-none fw-medium mb-0"
-          onClick={() => setCurrentScreen("main")}
-        >
-          <i className="bi bi-arrow-left-short"></i>Data sources
-        </button>
         <h2 className="mb-2 fw-bold">Add a new source</h2>
-      </div>
+
       <div className="button-list mt-3">
         <div
           className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
@@ -145,15 +176,16 @@ function NewDevicesWindow({ setCurrentScreen, setCurrentDevice }) {
   );
 }
 
-function DeviceScreen({ setCurrentDevice, currentDevice, setCurrentScreen }) {
-  if (currentDevice === "Upload") {
+function DeviceScreen({ currentDevice, setCurrentScreen }) {
+  if (currentDevice?.name === "Upload") {
     return <FileUploader setCurrentScreen={setCurrentScreen} />;
   }
-
+  console.log("Current device");
+  console.log(currentDevice);
   return (
     <DeviceConnection
-      deviceName={currentDevice}
-      setCurrentScreen={setCurrentScreen}
+      deviceName={currentDevice?.name}
+      deviceID={currentDevice?.id}
     />
   );
 }

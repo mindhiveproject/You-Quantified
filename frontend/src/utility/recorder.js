@@ -1,7 +1,8 @@
 
 import store from '../store/store';
 import Papa from 'papaparse';
-
+import JSZip from 'jszip';
+import devicesRaw from '../metadata/devices.json'
 
 function saveToObject(saveObject) {
     saveObject.push(store.getState().dataStream);
@@ -29,14 +30,7 @@ export function subToStore(saveObject) {
     return unsub
 }
 
-/*
-export function saveAtInterval(saveObject, interval) {
-    const intervalID = setInterval(()=>saveToObject(saveObject), interval)
-    return intervalID
-}
-*/
-
-function autoCSVDownload(saveObject) {
+function autoCSVDownload(saveObject, deviceMeta) {
     // CallBackFunction to download a CSV
     const a = document.createElement("a");
     document.body.appendChild(a);
@@ -45,36 +39,84 @@ function autoCSVDownload(saveObject) {
     const finalObject = {}
     const currentDate = new Date();
     const dateString = currentDate.fileName();
-    // const saveObject = JSON.parse(sessionStorage.getItem("data"));
 
+    var zip = new JSZip();
+
+    var fileText = txtContent;
+
+    fileText += "This folder contains the following files: ";
+    const metadataJSON = []
+    console.log("device metadata")
+    console.log(deviceMeta);
+
+    // Load each file into the zip
     for (const key in saveObject[0]) {
         finalObject[key] = saveObject.map((data)=>data[key]);
-        // finalObject[key][0]["Device"] = key;
-        // finalObject[key] = finalObject[key].map((data)=>data[key]=)
-        // finalObject[key][0]["Device"] = key;
         const json = JSON.stringify(finalObject[key]);
+        console.log(json)
         const blob = new Blob([Papa.unparse(json)], {type: "text/csv"});
-        const url = window.URL.createObjectURL(blob);
+        const thisFileName = key.toLowerCase().replace(/ /g, "_")+".csv";
+
+        const currentDeviceMeta = {"device name": deviceMeta[key]?.device, "recording id": key}
+        const deviceFromList = devicesRaw.find(({ heading }) => heading === deviceMeta[key]?.device);
+
+        if (deviceFromList) {
+            currentDeviceMeta["type"] = deviceFromList["type"]
+            currentDeviceMeta["sampling rate"] = deviceFromList["sampling_rate"]
+        }
+
+        if (deviceMeta[key]?.samplingRate) {
+            currentDeviceMeta["sampling rate"] = deviceMeta?.sampling_rate
+        }
+
+        metadataJSON.push(currentDeviceMeta)
+        zip.file(thisFileName, blob);
+        fileText += thisFileName+", "
+    }
+
+    const blob = new Blob([Papa.unparse(metadataJSON)], {type: "text/csv"});
+    zip.file("metadata.csv", blob);
+
+    fileText += "metadata.csv";
+    zip.file("README.txt", fileText);
+
+    // Download the zip
+    zip.generateAsync({type:"blob"}).then(function(content) {
+        const url = window.URL.createObjectURL(content);
         a.href = url;
-        a.download = key.toLowerCase().replace(/ /g, "_")+"_"+dateString+".csv";
+        a.download = "yq_rec_"+dateString+".zip";
     
         // Creates a hidden <a> object and clicks it
         a.click();
         window.URL.revokeObjectURL(url);
-    }
+    });
+    
 }
 
-export function stopRecording(unsub, saveObject) {
-    //clearInterval(intervalID);
-    unsub.dispose();
+export function stopRecording(unsub, saveObject, deviceMeta) {
 
-    autoCSVDownload(saveObject);
+    unsub.dispose();
+    autoCSVDownload(saveObject, deviceMeta);
+
     while(saveObject.length > 0) {
         saveObject.pop();
     }
 
     // sessionStorage.removeItem("data");
 }
+
+
+const txtContent = `
+Hi! I'm a small file meant to describe the contents of your folder. 
+
+You: Quantified saves the data recorded from each of your devices as separate "csv" files. There is an additional file with the metadata for each device.
+
+The data gathered from the web browser can have unreliable time synchrony or sampling rates, so be aware of its usage for research purposes. 
+
+If you have questions or suggestions, please visit the repository at https://github.com/esromerog/You-Quantified.
+
+`;
+
 
 Date.prototype.fileName = function() {
     // YYYYMMDDThhmm - standard format for dates and times

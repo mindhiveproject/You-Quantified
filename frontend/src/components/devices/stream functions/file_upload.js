@@ -93,13 +93,7 @@ export function FileUploader({ setCurrentScreen }) {
   }
 
   return (
-    <div className="mt-5 w-50">
-      <button
-        className="btn btn-link text-decoration-none fw-medium mb-0"
-        onClick={() => setCurrentScreen("new")}
-      >
-        <i className="bi bi-arrow-left-short"></i>New device
-      </button>
+    <div className="w-50">
       <h2>
         <input
           type="text"
