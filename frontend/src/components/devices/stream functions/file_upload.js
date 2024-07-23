@@ -142,6 +142,7 @@ class UploadedFile {
 
   constructor(file, device, id) {
     this.file = file;
+    console.log(this.file);
     this.device = device;
     this.id = id;
     this.sampling_rate = devicesRaw.find(

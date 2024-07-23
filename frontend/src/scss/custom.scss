@@ -97,6 +97,7 @@ div.w-100 {
 .vertical-spacing {
     margin-top: 25vh;
 }
+
 /*
 
 .edit-popup {
@@ -135,7 +136,7 @@ div.w-100 {
     top: 60px;
     z-index: 102;
     right: 0;
-} 
+}
 
 .git-btn {
     position: fixed;
@@ -308,6 +309,7 @@ div.big-right-margin {
         background-color: none;
         border-radius: 0 !important;
         border: #CED4DA solid 1px;
+
         .accordion-button {
             background: none;
             font-weight: bold;
@@ -326,6 +328,7 @@ div.big-right-margin {
                 font-style: italic;
             }
         }
+
         .accordion-button:focus,
         .accordion-button:active,
         .accordion-button:not(.collapsed) {
@@ -333,6 +336,7 @@ div.big-right-margin {
             box-shadow: none;
             color: #1A1A1A;
         }
+
         .card {
             border-radius: 0 !important;
             border-color: #1A1A1A;
@@ -510,6 +514,24 @@ canvas {
     }
 }
 
+// Devices loading animation
+/* HTML: <div class="loader"></div> */
+.connection-loading {
+    background: linear-gradient(-45deg, rgb(226, 226, 226) 49%, rgb(255, 255, 255) 50%);
+    background-size: 210% 210%;
+    animation: 1.25s ease-in-out 0.8s infinite alternate moveBackground;
+    transition: all 2s ease-in;
+}
+
+
+@keyframes moveBackground {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 100%;
+    }
+}
 /* ============ desktop view .end// ============ */
 
 /* ============ small devices ============ */
@@ -798,6 +820,7 @@ canvas {
     padding: 0;
     text-align: center;
 }
+
 
 .devices-overlay {
     background-color: rgba(255, 255, 255, 0.9);

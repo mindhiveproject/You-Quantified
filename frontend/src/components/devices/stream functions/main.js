@@ -13,7 +13,7 @@ import { connectLSL } from "./lsl";
 
 const connectionText = {
   disconnected: { text: "", type: "" },
-  awaiting: { text: "Attempting connection ...", type: "text-warning" },
+  awaiting: { text: "", type: "text-warning" },
   connected: { text: " ", type: "text-success" },
   failed: { text: "Unable to connect", type: "text-danger" },
   lost: { text: "Connection lost", type: "text-danger" },
@@ -36,10 +36,7 @@ const deviceConnectionFunctions = {
   AudioVolume: connectAudioRMS,
 };
 
-export function DeviceConnection({
-  deviceName,
-  deviceID
-}) {
+export function DeviceConnection({ deviceName, deviceID }) {
   console.log("Device name");
   console.log(deviceName);
   if (deviceName === "" || deviceName === undefined) return;
@@ -77,8 +74,12 @@ export function DeviceConnection({
         <LSLModalHeader />
       ) : (
         <>
-          {deviceID && <h5 className="mb-2 ms-5 text-muted">{device.heading}</h5>}
-          <h2 className="mb-2 fw-bold ms-5">{deviceID?deviceID:device.heading}</h2>
+          {deviceID && (
+            <h5 className="mb-2 ms-5 text-muted">{device.heading}</h5>
+          )}
+          <h2 className="mb-2 fw-bold ms-5">
+            {deviceID ? deviceID : device.heading}
+          </h2>
           <div>
             {device.description}
             <div className="mt-3">
@@ -104,11 +105,17 @@ export function DeviceConnection({
             {!(connText.text === " ") ? (
               <button
                 type="button"
-                className="btn btn-secondary btn-outline-dark fw-medium"
+                className={`btn btn-secondary btn-outline-dark fw-medium btn-connect ${
+                  connText == connectionText.awaiting && "connection-loading"
+                }`}
                 onClick={() => onButtonConnect(changeConnectionStatus)}
                 disabled={disabled}
               >
-                Connect
+                {connText == connectionText.awaiting ? (
+                  <div className="d-flex">Connecting</div>
+                ) : (
+                  <span>Connect</span>
+                )}
               </button>
             ) : (
               <div className="text-success mt-1 mb-1">Connected</div>

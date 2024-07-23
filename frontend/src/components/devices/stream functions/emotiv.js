@@ -15,8 +15,14 @@ export function connectEmotiv(changeConnectionStatus) {
   c.sub(["pow", "eeg", "mot"]);
 
   changeConnectionStatus("awaiting");
-  setTimeout(() => {
+
+  let intervalRuns = 0;
+  const intervalDuration = 1000; // 1 second
+  const maxIntervalRuns = 5; // 5 seconds
+  
+  const connectionTimer = setInterval(() => {
     const id = c.headsetId;
+    
     if (c.sessionId !== undefined) {
       changeConnectionStatus("connected");
       store.dispatch({
@@ -31,8 +37,14 @@ export function connectEmotiv(changeConnectionStatus) {
           },
         },
       });
-    } else {
+      clearInterval(connectionTimer);
+    } else if (intervalRuns >= maxIntervalRuns) {
       changeConnectionStatus("failed");
+      console.log("Failed EMOTIV Connection")
+      console.log(c);
+      clearInterval(connectionTimer);
+    } else {
+      intervalRuns++;
     }
-  }, 2000);
+  }, intervalDuration);
 }
