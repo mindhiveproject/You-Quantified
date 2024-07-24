@@ -36,4 +36,6 @@ keystone/.pnp.js
 keystone/*.db
 keystone/*.vscode
 keystone/dist
+keystone/migrations
 keystone/__generated__
+keystone/public

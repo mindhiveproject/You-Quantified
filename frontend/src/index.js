@@ -32,20 +32,6 @@ import { Provider } from "react-redux";
 import store from "./store/store";
 import { BrowserRouter } from "react-router-dom";
 
-/*
-const router = createBrowserRouter([
-  {
-    path: ":visID/*",
-    element: <App />,
-    errorElement: <ErrorPage />,
-  },
-
-]);
-{
-  path: "*",
-  element: <Navigate to="/home/devices" />,
-}*/
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ApolloProvider client={client}>
@@ -56,7 +42,3 @@ root.render(
     </BrowserRouter>
   </ApolloProvider>
 );
-
-// <RouterProvider router={router}>
-// <Provider>
-// </React.StrictMode>
