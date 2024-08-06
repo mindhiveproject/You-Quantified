@@ -5,7 +5,7 @@ import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
 import { useSelector, useDispatch } from "react-redux";
 import { DataManualSlider, DataAutoSlider } from "./sliders";
 import { ParameterDropDown } from "./dropdown_menu";
-import { selectDataMappings, getDataStreamKeys } from "../selectors";
+import { selectDataMappings, getDataStreamKeys } from "../utility/selectors";
 
 function ParameterManager({ parameter, dataMappings }) {
   // Manages if parameters are managed manually or automatically
@@ -62,13 +62,15 @@ function DataCard({
     }
   }
 
+  // Rewrite the delte parameter logic to avoid deletion when only one is left
+
   return (
     <div className="list-group-item" key={visParameter.name}>
       <div
         className="d-flex align-items-center pt-1 pb-1"
         key={visParameter.name}
       >
-        {custom && (
+        {custom && (visInfo?.parameters?.length > 1) && (
           <button
             className="btn btn-link text-center p-0 me-2 ms-n1 delete-btn"
             onClick={() => {

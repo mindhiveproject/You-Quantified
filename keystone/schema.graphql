@@ -485,6 +485,7 @@ type Visual {
   author: User
   createdAt: DateTime
   parameters: JSON
+  docs: JSON
   published: Boolean
   editable: Boolean
   tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
@@ -548,6 +549,7 @@ input VisualUpdateInput {
   author: UserRelateToOneForUpdateInput
   createdAt: DateTime
   parameters: JSON
+  docs: JSON
   published: Boolean
   editable: Boolean
   tags: TagRelateToManyForUpdateInput
@@ -577,6 +579,7 @@ input VisualCreateInput {
   author: UserRelateToOneForCreateInput
   createdAt: DateTime
   parameters: JSON
+  docs: JSON
   published: Boolean
   editable: Boolean
   tags: TagRelateToManyForCreateInput

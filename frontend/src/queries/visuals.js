@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const MY_VISUALS = gql`
-  query Query($where: VisualWhereInput!) {
+  query VisualsQuery($where: VisualWhereInput!) {
     visuals(where: $where) {
       author {
         id
@@ -18,6 +18,7 @@ export const MY_VISUALS = gql`
       description
       parameters
       id
+      docs
       editable
     }
   }

@@ -14,7 +14,7 @@ import {
 } from "../../../queries/lessons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { fetchCode } from "../../visuals/fetch_code";
+import { fetchCode } from "../../visuals/utility/fetch_code";
 import { VisualsWindow } from "../../visuals/window/visuals_window";
 import { useFullScreenHandle } from "react-full-screen";
 import { FloatingMenu } from "@tiptap/react";

@@ -4,7 +4,7 @@ import { P5iFrame } from "../P5Plugin/p5iframe";
 import { FullScreen } from "react-full-screen";
 import { useSelector } from "react-redux";
 import React, { useEffect, useRef, useState } from "react";
-import { selectParamValues } from "../selectors";
+import { selectParamValues } from "../utility/selectors";
 
 export function VisualsWindow({
   visMetadata,

@@ -61,7 +61,7 @@ const SplitPane = ({ children, ...props }) => {
 export const Divider = (props) => {
     const { onMouseHoldDown } = useContext(SplitPaneContext);
 
-    return <div {...props} className="separator-col d-flex align-items-center" onMouseDown={onMouseHoldDown} ><h5><i className="bi bi-grip-vertical"></i></h5></div>;
+    return <div {...props} className="separator-col d-flex align-items-center" onMouseDown={onMouseHoldDown} ><div className="vl"></div></div>;
 };
 
 export const SplitPaneLeft = (props) => {

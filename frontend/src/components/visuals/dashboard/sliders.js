@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import { selectParamValues } from "../selectors";
+import { selectParamValues } from "../utility/selectors";
 import { normalizeValue } from "../../../store/utility_functions";
 
 export function DataManualSlider({ parameter }) {

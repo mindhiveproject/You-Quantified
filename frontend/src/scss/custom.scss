@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;600;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;200;300;400;700;800&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300");
+@import url('highlight.js/styles/github-dark.css');
+
 
 // Purple - 7749F8; Green - 4AB69B; Yellow - F6C651
 
@@ -12,6 +14,21 @@ $accent: #2bedc7;
 $headings-font-weight: 600;
 $enable-negative-margins: true;
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+
+// Gray colors
+$white:    #fff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black:    #000;
+
 
 // Input customization
 $input-border-radius: 0px;
@@ -130,10 +147,10 @@ div.w-100 {
     background-color: rgba(255, 255, 255, 0.95);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    height: calc(100vh - 60px);
+    height: calc(100vh - 120px);
     width: 100vw;
     position: absolute;
-    top: 60px;
+    top: 120px;
     z-index: 102;
     right: 0;
 }
@@ -194,6 +211,14 @@ div.w-100 {
     margin-bottom: 2rem;
     // box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.07);
     min-height: 90vh;
+
+    pre {
+        background: #1A1A1A;
+        color: white;
+        border-radius: 0.5rem;
+        margin: 1.5rem 0;
+        padding: 0.75rem 1rem;
+    }
 }
 
 .p5-container-lessons {
@@ -635,7 +660,7 @@ canvas {
     font-weight: 600;
 }
 
-
+// Visualization menu bar
 .vis-bar {
     display: flex;
     justify-content: space-between;
@@ -658,8 +683,23 @@ canvas {
     margin: -1px;
 }
 
+.vis-bar .btn-custom.docs {
+    background-color: white;
+    margin-left: -1px;
+}
+
+.vis-bar .btn-custom.docs:hover {
+    background-color: $accent;
+}
+
 .vis-bar .btn-custom.secondary {
+    background-color: white;
+    margin-left: 0px;
+}
+
+.vis-bar .btn-custom.secondary:hover {
     background-color: $secondary;
+    color: #1A1A1A;
 }
 
 .vis-bar .btn-custom.code {
@@ -668,18 +708,16 @@ canvas {
     font-weight: bold;
 }
 
+.vis-bar .btn-custom.code:hover {
+    background-color: #1A1A1A;
+    color: white;
+}
+
 .vis-bar .btn-custom.code.active {
     background-color: #1A1A1A;
     color: white;
 }
-
-.vis-bar .btn-custom.secondary:hover {
-    background-color: #1A1A1A;
-    color: white;
-}
-
-.vis-bar .btn-custom.code:hover {
-    background-color: #1A1A1A;
+.vis-bar .btn-custom.code.active:hover {
     color: $primary;
 }
 
@@ -967,14 +1005,23 @@ input.vis-name-input::placeholder {
 .separator-col {
     cursor: col-resize;
     z-index: 101;
+    .vl {
+        border-right: 1px solid #1A1A1A;
+        height: 100%;
+        margin-left: -8px;
+        padding-left: 8px;
+    }
 }
 
 .separator-col:hover {
-    background-color: #00000018;
+    .vl {
+        border-right: 2px solid #7849f8;
+        height: 100%;
+    }
 }
 
 .separator-col:active {
-    background-color: #00000000;
+    background-color: #ffffff00;
     color: $primary;
     padding-left: 50vw;
     padding-right: 50vw;
@@ -982,6 +1029,8 @@ input.vis-name-input::placeholder {
     margin-right: -50vw;
 }
 
+
+// Lessons SCSS Code
 .inline-menu {
     background-color: #FFFFFF;
     box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.07);
@@ -993,6 +1042,13 @@ input.vis-name-input::placeholder {
     background: none;
     border: none;
 }
+
+// Menu bar
+.menu-bar {
+    background-color: #f2f2f2;
+    outline: solid 1px #1A1A1A;
+}
+
 
 .vertical-line {
     width: 1px;

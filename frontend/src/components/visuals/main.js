@@ -6,9 +6,10 @@ import DataManagementWindow from "./dashboard/main";
 import { VisualsWindow } from "./window/visuals_window";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import { useDispatch } from "react-redux";
-import { fetchCode } from "./fetch_code";
+import { fetchCode } from "./utility/fetch_code";
 import { useOutsideAlerter } from "../../utility/outsideClickDetection";
 import { EditModalManager } from "./edit";
+import DocsWindow from "./docs/main";
 
 import SplitPane, {
   SplitPaneLeft,
@@ -25,7 +26,9 @@ export function VisualScreen({
   setVisMetadata,
   popupVisuals,
   setPopupVisuals,
-  showCode,
+  currentScreen,
+  updateDocsData,
+  docsContent,
 }) {
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
@@ -37,18 +40,26 @@ export function VisualScreen({
   return (
     <SplitPane className="split-pane-row">
       <SplitPaneLeft>
-        {showCode ? (
+        {currentScreen.left == "code" && (
           <CodePane
             visName={visName}
             setCode={setCode}
             code={code}
             isEditable={isEditable}
           />
-        ) : (
+        )}
+        {currentScreen.left == "data" && (
           <DataManagementWindow
             visInfo={visMetadata}
             custom={isEditable}
             setVisInfo={setVisMetadata}
+          />
+        )}
+        {currentScreen.left == "docs" && (
+          <DocsWindow
+            updateDocsData={updateDocsData}
+            docsContent={docsContent}
+            isEditable={isEditable}
           />
         )}
       </SplitPaneLeft>
@@ -68,8 +79,8 @@ export function VisualScreen({
 
 function VisTopBar({
   visMetadata,
-  showCode,
-  setShowCode,
+  currentScreen,
+  setCurrentScreen,
   popupVisuals,
   setPopupVisuals,
   fullScreenHandle,
@@ -84,26 +95,44 @@ function VisTopBar({
   return (
     <div className="vis-bar">
       <div className="d-flex align-items-center">
-        <div className="align-self-center me-3">
+        <div>
           {visMetadata?.editable && (
             <div>
-              <button
-                className={`btn-custom code ${showCode ? "active" : ""}`}
-                onClick={() => setShowCode(!showCode)}
-              >
-                <b>
-                  <i className="bi bi-code-slash" alt="code"></i>
-                </b>
-              </button>
               <button
                 className="btn-custom secondary"
                 onClick={() => setShowEdit(!showEdit)}
               >
                 <i className="bi bi-pencil-fill"></i>
               </button>
+              <button
+                className={`btn-custom code ${
+                  currentScreen.left == "code" ? "active" : ""
+                }`}
+                onClick={() =>
+                  setCurrentScreen({
+                    ...currentScreen,
+                    left: currentScreen.left == "code" ? "data" : "code",
+                  })
+                }
+              >
+                <b>
+                  <i className="bi bi-code-slash" alt="code"></i>
+                </b>
+              </button>
             </div>
           )}
         </div>
+        <button
+          className="btn-custom secondary"
+          onClick={() =>
+            setCurrentScreen({
+              ...currentScreen,
+              left: currentScreen.left == "docs" ? "data" : "docs",
+            })
+          }
+        >
+          <i class="bi bi-file-earmark-text"></i>
+        </button>
         {showEdit && (
           <div className="edit-background">
             <div className="edit-popup" ref={editPopupRef}>
@@ -115,7 +144,7 @@ function VisTopBar({
             </div>
           </div>
         )}
-        <h5 className="align-self-center m-0 text-center">
+        <h5 className="align-self-center m-0 text-center ms-3">
           {visMetadata?.title}
         </h5>
       </div>
@@ -167,6 +196,7 @@ export function QueryMainView() {
 
   const { loading, error, data } = useQuery(MY_VISUALS, {
     variables: { where: { id: { equals: visID } } },
+    fetchPolicy: 'network-only'
   });
 
   if (loading) return "Loading...";
@@ -193,11 +223,12 @@ export function MainView({ visID, queryData }) {
     }
   }, [visMetadata]);
 
-  //const [custom, setCustom] = useState("custom" in visMetadata);
+  const [currentScreen, setCurrentScreen] = useState({
+    left: "data",
+  });
 
-  // Load the visualizations from the local storage
-  const [showCode, setShowCode] = useState(false);
   const [code, _setCode] = useState("");
+  const [docsContent, _setDocsContent] = useState();
 
   function setCode(str) {
     localStorage.setItem(`visuals/${visID}`, str);
@@ -214,6 +245,16 @@ export function MainView({ visID, queryData }) {
     _setCode(str);
   }
 
+  function updateDocsData(content) {
+    changeVisMetadata({
+      variables: {
+        data: {
+          docs: content,
+        },
+      },
+    });
+    _setDocsContent(content);
+  }
   function changeVisParameters(input) {
     _setVisMetadata({
       ...visMetadata,
@@ -228,11 +269,14 @@ export function MainView({ visID, queryData }) {
     });
   }
 
-  // Get the code when the program starts
+  // Get the code and docs when the program starts
   useEffect(() => {
     fetchCode(visMetadata?.code?.url)
       .then((response) => _setCode(response))
       .catch((error) => _setCode(null));
+    if (visMetadata?.docs) {
+      _setDocsContent(visMetadata?.docs);
+    }
   }, []);
 
   const fullScreenHandle = useFullScreenHandle();
@@ -242,8 +286,8 @@ export function MainView({ visID, queryData }) {
     <div className="h-100">
       <VisTopBar
         visMetadata={visMetadata}
-        showCode={showCode}
-        setShowCode={setShowCode}
+        currentScreen={currentScreen}
+        setCurrentScreen={setCurrentScreen}
         popupVisuals={popupVisuals}
         setPopupVisuals={setPopupVisuals}
         fullScreenHandle={fullScreenHandle}
@@ -257,8 +301,10 @@ export function MainView({ visID, queryData }) {
         setVisMetadata={changeVisParameters}
         setPopupVisuals={setPopupVisuals}
         popupVisuals={popupVisuals}
-        showCode={showCode}
+        currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}
+        updateDocsData={updateDocsData}
+        docsContent = {docsContent}
       />
     </div>
   );

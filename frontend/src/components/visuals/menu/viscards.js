@@ -1,7 +1,7 @@
 import { React } from "react";
 import { Link } from "react-router-dom";
-import p5logo from "../../assets/p5logo.png";
-import { MY_VISUALS } from "../../queries/visuals";
+import p5logo from "../../../assets/p5logo.png";
+import { MY_VISUALS } from "../../../queries/visuals";
 import { useQuery, gql } from "@apollo/client";
 
 export function ImageCard({ parameters, cover, description, title, visId }) {

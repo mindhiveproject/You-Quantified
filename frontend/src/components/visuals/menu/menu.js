@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { VisualizationCards } from "../viscards";
+import { VisualizationCards } from "./viscards";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../../../App";

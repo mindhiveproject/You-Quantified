@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import React, { useRef, useEffect, useState } from "react";
 import DataManagement from "../../visuals/dashboard/data_management";
 import { useQuery } from "@apollo/client";
-import { selectParamValues } from "../../visuals/selectors";
+import { selectParamValues } from "../../visuals/utility/selectors";
 import { GET_LESSON } from "../../../queries/lessons";
 import { useParams } from "react-router-dom";
 

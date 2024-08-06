@@ -178,6 +178,7 @@ export const lists: Lists = {
           },
         ],
       }),
+      docs: json(),
       published: checkbox(),
       editable: checkbox(),
       tags: relationship({ ref: "Tag", many: true }),
