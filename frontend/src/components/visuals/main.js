@@ -133,7 +133,7 @@ function VisTopBar({
             })
           }
         >
-          <i class="bi bi-file-earmark-text"></i>
+          <i className="bi bi-file-earmark-text"></i>
         </button>
         {showEdit && (
           <div className="edit-background">

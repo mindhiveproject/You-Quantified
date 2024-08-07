@@ -19,7 +19,7 @@ lowlight.register("js", javascript);
 // In case I want to add support for more languages:
 // https://tiptap.dev/docs/examples/advanced/syntax-highlighting
 
-const MenuBar = ({ editor, setIsAddingLink}) => {
+const MenuBar = ({ editor, setIsAddingLink }) => {
   if (!editor) {
     return null;
   }
@@ -236,7 +236,9 @@ export default function DocsWindow({
 
   return (
     <div>
-      <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
+      {isEditable && (
+        <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
+      )}
       <div className="scrollable">
         <EditorContent editor={editor}></EditorContent>
       </div>

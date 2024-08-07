@@ -37,7 +37,7 @@ export function MainMenu() {
           >
             Log In
           </Link>
-          <Link to="signup" className="btn btn-outline-dark">
+          <Link to="/signup" className="btn btn-outline-dark">
             Sign Up
           </Link>
         </div>

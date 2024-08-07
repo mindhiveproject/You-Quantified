@@ -1,5 +1,5 @@
 import { MyUserName } from "./username";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../../App";
 import { profanity } from "@2toad/profanity";
 import { useMutation } from "@apollo/client";
@@ -121,7 +121,9 @@ export function NewVisual() {
           <Link
             className="btn btn-link text-decoration-none fw-medium mb-0 p-0 mt-5"
             to="/visuals"
-          ><i className="bi bi-arrow-left-short"></i>Visuals</Link>
+          >
+            <i className="bi bi-arrow-left-short"></i>Visuals
+          </Link>
           <h2 className="mt-0 mb-1 fw-bold">New visual</h2>
           <p>
             Create a new P5.js visual from scratch or upload your code<br></br>
@@ -169,6 +171,7 @@ export function NewVisual() {
               idx={idx}
               setAllParams={setAllParams}
               setIsParamsValid={setIsParamsValid}
+              allParamsLength={allParams.length}
               key={idx}
             />
           ))}
@@ -231,13 +234,23 @@ async function handleFileUpload(e, setInitCode) {
   }
 }
 
-function ParamItem({ myParam, setAllParams, idx, setIsParamsValid }) {
+function ParamItem({
+  myParam,
+  setAllParams,
+  idx,
+  setIsParamsValid,
+  allParamsLength,
+}) {
   const [myParamValid, _setMyParamValid] = useState(true);
 
   function setMyParamValid(val) {
     _setMyParamValid(val);
     setIsParamsValid(val);
   }
+
+  useEffect(() => {
+    setIsParamsValid(false);
+  }, []);
 
   function updateParams(value) {
     setAllParams((prevParams) => {
@@ -256,6 +269,11 @@ function ParamItem({ myParam, setAllParams, idx, setIsParamsValid }) {
   }
 
   function updateName(e) {
+    if (!e.target.value) {
+      setIsParamsValid(false);
+      return;
+    }
+    setIsParamsValid(true);
     updateParams({ name: e.target.value, suggested: myParam?.suggested });
   }
 
@@ -284,9 +302,11 @@ function ParamItem({ myParam, setAllParams, idx, setIsParamsValid }) {
           placeholder="Suggested (i.e. Alpha, Beta, Gamma)"
           onChange={updateSuggested}
         ></input>
+
         <button
           className="btn btn-outline-danger fw-medium"
           onClick={deleteParameter}
+          disabled={allParamsLength <= 1}
         >
           Delete
         </button>
