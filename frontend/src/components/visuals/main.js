@@ -123,7 +123,9 @@ function VisTopBar({
           )}
         </div>
         <button
-          className="btn-custom secondary"
+          className={`btn-custom code ${
+            currentScreen.left == "docs" ? "active" : ""
+          }`}
           onClick={() =>
             setCurrentScreen({
               ...currentScreen,
@@ -196,7 +198,7 @@ export function QueryMainView() {
 
   const { loading, error, data } = useQuery(MY_VISUALS, {
     variables: { where: { id: { equals: visID } } },
-    fetchPolicy: 'network-only'
+    fetchPolicy: "network-only",
   });
 
   if (loading) return "Loading...";
@@ -304,7 +306,7 @@ export function MainView({ visID, queryData }) {
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}
         updateDocsData={updateDocsData}
-        docsContent = {docsContent}
+        docsContent={docsContent}
       />
     </div>
   );
