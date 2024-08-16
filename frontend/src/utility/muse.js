@@ -31,6 +31,13 @@ export class MuseDevice {
     this.WINDOW_SIZE = 2;
     this.sfreq = 256;
     this.muse = new MuseClient();
+    
+    // PPG Heart rate
+    this.muse.enablePpg = true; // Enable the PPG (please)
+    this.ppgBuffer = [];
+    this.bufferSize = 512; // 8 sec buffer
+    this.ppgDataArray = []; // store PPG readings
+
     this.id = this.muse.deviceName;
     this.connected = false;
 
@@ -87,6 +94,8 @@ export class MuseDevice {
 
   async stream() {
     this.muse.start();
+
+    // EEG readings
     this.muse.eegReadings.subscribe((reading) => {
       if (this.connected) {
         this.dataArray.push(reading);
@@ -134,8 +143,45 @@ export class MuseDevice {
         }
       }
     });
-    this.startMetricStream();
+
+    // Subscribe to PPG readings
+    this.muse.ppgReadings.subscribe((ppgReading) => {
+      if (this.connected) {
+        this.ppgBuffer.push(...ppgReading.samples);
+
+        if (this.ppgBuffer.length > this.bufferSize) {
+          this.ppgBuffer = this.ppgBuffer.slice(-this.bufferSize);
+        }
+
+        if (this.ppgBuffer.length >= this.bufferSize) {
+          const heartRate = this._calculateHeartRate(this.ppgBuffer);
+
+          store.dispatch({
+            type: "devices/streamUpdate",
+            payload: {
+              id: this.id,
+              data: { heartRate },
+            },
+          });
+
+          // Use a sliding window approach instead of clearing the buffer
+          this.ppgBuffer = this.ppgBuffer.slice(-this.bufferSize / 2);
+        }
+      }
+    });
+
+    this.startMetricStream();  // Existing EEG metrics stream
   }
+  
+  _calculateHeartRate(ppgBuffer) {
+    // console.log("ppgBuffer", ppgBuffer);
+    // const ppgSamples = ppgBuffer.flatMap((data) => data.samples);
+    // console.log("ppgSamples", ppgSamples);
+    const heartRate = getHeartRateFromPPG(ppgBuffer);
+    console.log("heartRate", heartRate);
+    return heartRate;
+  }
+
 
   async _calculate_eeg_metrics() {
     const res = Object.keys(this.bandPowers).reduce((acc, key) => {
@@ -198,4 +244,61 @@ function applyHanningWindow(signal) {
     array.push(signal[i] * hann(i, signal.length));
   }
   return array;
+}
+
+function getHeartRateFromPPG(ppgSamples) {
+  const smoothedSignal = smoothSignal(ppgSamples);
+  const peaks = detectPeaks(smoothedSignal);
+  const rrIntervals = calculateRRIntervals(peaks);
+  const heartRate = calculateBPM(rrIntervals);
+  console.log("rrIntervals", rrIntervals)
+  return heartRate;
+}
+
+function smoothSignal(signal, smoothingFactor = 3) {
+  const smoothedSignal = [];
+  for (let i = 0; i < signal.length; i++) {
+    const start = Math.max(0, i - smoothingFactor);
+    const end = Math.min(signal.length, i + smoothingFactor);
+    const window = signal.slice(start, end);
+    const average = window.reduce((sum, val) => sum + val, 0) / window.length;
+    smoothedSignal.push(average);
+  }
+  // console.log(smoothedSignal)
+  return smoothedSignal;
+}
+
+function detectPeaks(signal, thresholdRatio = 0.6, windowSize = 10) {
+  const maxSignalValue = Math.max(...signal);
+  const threshold = maxSignalValue * thresholdRatio;
+
+  const peaks = [];
+  for (let i = windowSize; i < signal.length - windowSize; i++) {
+    const window = signal.slice(i - windowSize, i + windowSize + 1);
+    const isPeak = signal[i] > threshold && signal[i] === Math.max(...window);
+
+    if (isPeak) {
+      peaks.push(i);
+      // Move i forward to avoid detecting the same peak in overlapping windows
+      i += windowSize; 
+    }
+  }
+
+  console.log('Signal:', signal);
+  console.log('Peaks:', peaks);
+  return peaks;
+}
+
+
+function calculateRRIntervals(peaks) {
+  const rrIntervals = [];
+  for (let i = 1; i < peaks.length; i++) {
+    rrIntervals.push(peaks[i] - peaks[i - 1]);
+  }
+  return rrIntervals;
+}
+
+function calculateBPM(rrIntervals, samplingRate = 64) {
+  const averageRRInterval = rrIntervals.reduce((sum, val) => sum + val, 0) / rrIntervals.length;
+  return Math.round((60 * samplingRate) / averageRRInterval);
 }
