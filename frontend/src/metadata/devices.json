@@ -3,6 +3,7 @@
     "heading": "EMOTIV",
     "short_description": "The EMOTIV is a consumer-grade EEG headset used for research and brain-computer interfaces, capable of reading brain signals, providing derived metrics, and tracking head movement.",
     "description": "The EMOTIV is an electroencephalography (EEG) headset that reads brain signals and sends them into a computer. This is a consumer-grade device generally used for research outside of laboratories and brain-computer interfaces (BCIs). EMOTIV not only acquires the raw signals, but it also provides meaningful metrics derived from the signal. It also has motion data to track head movement.",
+    "image": "/EMOTIV_EPOC.webp",
     "type": "EEG device",
     "sampling_rate": 128,
     "data": [
@@ -121,6 +122,8 @@
   {
     "heading": "Muse",
     "description": "The Muse is another consumer EEG grade-headset. This one is generally intended for sleep studies, and meditation. It mainly acquires signals from the frontal lobe.",
+    "short_description": "The Muse is another consumer EEG grade-headset. This one is generally intended for sleep studies, and meditation. It mainly acquires signals from the frontal lobe.",
+    "image": "/Muse2.webp",
     "type": "EEG device",
     "sampling_rate": 256,
     "data": [
@@ -173,8 +176,9 @@
   },
   {
     "heading": "Face",
-    "short_description": "This sensor allows you to capture video of your face and detect specific movements and getures",
+    "short_description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
     "description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
+    "image":"/face_landmark.png",
     "type": "Video",
     "sampling_rate": 15,
     "data": [
@@ -189,6 +193,7 @@
     "heading": "VideoHeartRate",
     "short_description": "This sensor allows you to measure yout heart rate from a video input",
     "description": "This sensor allows you to measure yout heart rate from a video input",
+    "image":"/HeartRateLine.png",
     "type": "Video",
     "sampling_rate": 15,
     "data": [
@@ -203,6 +208,7 @@
     "heading": "AudioVolume",
     "short_description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
     "description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
+    "image":"/speaker-high-volume.png",
     "type": "Audio",
     "sampling_rate": 15,
     "data": [
