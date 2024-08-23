@@ -196,12 +196,27 @@ function NewDeviceButton({ setCurrentDevice, device }) {
       className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
       onClick={() => setCurrentDevice(device.heading)}
     >
-      <div className="card-body">
-        <p className="mb-1 text-body-tertiary">{device?.type}</p>
-        <h5 className="card-title">{device?.heading}</h5>
-        {device?.short_description && (
-          <p className="card-text">{device.short_description}</p>
-        )}
+      <div className="row g-0 align-items-center">
+        {/* Left Column - Image */}
+        <div className="col-md-4 d-flex justify-content-center">
+          <img
+            src={device?.image || '/placeholder.jpg'}
+            alt={device?.heading}
+            className="img-fluid rounded-start"
+            style={{ maxHeight: '100px', objectFit: 'contain' }} // Ensures the image fits nicely
+          />
+        </div>
+
+        {/* Right Column - Content */}
+        <div className="col-md-8">
+          <div className="card-body">
+            <p className="mb-1 text-body-tertiary">{device?.type}</p>
+            <h5 className="card-title">{device?.heading}</h5>
+            {device?.short_description && (
+              <p className="card-text">{device.short_description}</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
