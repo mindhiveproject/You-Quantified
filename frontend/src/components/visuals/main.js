@@ -28,14 +28,15 @@ export function VisualScreen({
   setPopupVisuals,
   currentScreen,
   updateDocsData,
+  setDocsVisibility,
   docsContent,
 }) {
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
 
   const { currentUser } = useContext(UserContext);
-
   const isEditable = visMetadata?.author?.id === currentUser?.id;
+  const isDocsVisible = visMetadata?.docsVisible || isEditable;
 
   return (
     <SplitPane className="split-pane-row">
@@ -58,8 +59,10 @@ export function VisualScreen({
         {currentScreen.left == "docs" && (
           <DocsWindow
             updateDocsData={updateDocsData}
+            setDocsVisibility={setDocsVisibility}
             docsContent={docsContent}
             isEditable={isEditable}
+            isDocsVisible={isDocsVisible}
           />
         )}
       </SplitPaneLeft>
@@ -91,6 +94,9 @@ function VisTopBar({
   const editPopupRef = useRef(null);
 
   useOutsideAlerter(editPopupRef, setShowEdit);
+  const { currentUser } = useContext(UserContext);
+  const isEditable = visMetadata?.author?.id === currentUser?.id;
+  const isDocsVisible = visMetadata?.docsVisible || isEditable;
 
   return (
     <div className="vis-bar">
@@ -122,19 +128,21 @@ function VisTopBar({
             </div>
           )}
         </div>
-        <button
-          className={`btn-custom code ${
-            currentScreen.left == "docs" ? "active" : ""
-          }`}
-          onClick={() =>
-            setCurrentScreen({
-              ...currentScreen,
-              left: currentScreen.left == "docs" ? "data" : "docs",
-            })
-          }
-        >
-          <i className="bi bi-file-earmark-text"></i>
-        </button>
+        {isDocsVisible && (
+          <button
+            className={`btn-custom code ${
+              currentScreen.left == "docs" ? "active" : ""
+            }`}
+            onClick={() =>
+              setCurrentScreen({
+                ...currentScreen,
+                left: currentScreen.left == "docs" ? "data" : "docs",
+              })
+            }
+          >
+            <i className="bi bi-file-earmark-text"></i>
+          </button>
+        )}
         {showEdit && (
           <div className="edit-background">
             <div className="edit-popup" ref={editPopupRef}>
@@ -257,6 +265,17 @@ export function MainView({ visID, queryData }) {
     });
     _setDocsContent(content);
   }
+
+  function setDocsVisibility(input) {
+    changeVisMetadata({
+      variables: {
+        data: {
+          docsVisible: input,
+        },
+      },
+    });
+  }
+
   function changeVisParameters(input) {
     _setVisMetadata({
       ...visMetadata,
@@ -306,6 +325,7 @@ export function MainView({ visID, queryData }) {
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}
         updateDocsData={updateDocsData}
+        setDocsVisibility={setDocsVisibility}
         docsContent={docsContent}
       />
     </div>

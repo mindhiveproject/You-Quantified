@@ -93,6 +93,7 @@ model Visual {
   createdAt          DateTime? @default(now())
   parameters         String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
   docs               String?
+  docsVisible        Boolean   @default(false)
   published          Boolean   @default(false)
   editable           Boolean   @default(false)
   tags               Tag[]     @relation("Visual_tags")

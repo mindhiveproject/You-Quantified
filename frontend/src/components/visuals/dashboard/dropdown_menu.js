@@ -22,7 +22,7 @@ function NestedDropDown({
 
   useEffect(() => {
     if (hasDefault.length > 0) {
-      selectNewSource([option.device, hasDefault[0]], true);
+      selectNewSource([option.device, hasDefault[0]]);
     }
   }, []);
 
@@ -83,8 +83,8 @@ export function ParameterDropDown({
     [dataMappings]
   );
 
-  function selectNewSource(sourceName, noMap) {
-    changeSource(sourceName, parameter.name, noMap);
+  function selectNewSource(sourceName) {
+    changeSource(sourceName, parameter.name);
 
     let disp = sourceName;
 

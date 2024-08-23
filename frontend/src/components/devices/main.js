@@ -153,7 +153,7 @@ function NewDevicesWindow({ setCurrentScreen, setCurrentDevice }) {
 
   return (
     <div>
-        <h2 className="mb-2 fw-bold">Add a new source</h2>
+      <h2 className="mb-2 fw-bold">Add a new source</h2>
 
       <div className="button-list mt-3">
         <div
@@ -196,8 +196,21 @@ function NewDeviceButton({ setCurrentDevice, device }) {
       className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
       onClick={() => setCurrentDevice(device.heading)}
     >
+      <div className="card-body">
+        <p className="mb-1 text-body-tertiary">{device?.type}</p>
+        <h5 className="card-title">{device?.heading}</h5>
+        {device?.short_description && (
+          <p className="card-text">{device.short_description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* Device Rendering With Images 
+
       <div className="row g-0 align-items-center">
-        {/* Left Column - Image */}
+        // Left column
         <div className="col-md-4 d-flex justify-content-center">
           <img
             src={device?.image || '/placeholder.jpg'}
@@ -206,8 +219,7 @@ function NewDeviceButton({ setCurrentDevice, device }) {
             style={{ maxHeight: '100px', objectFit: 'contain' }} // Ensures the image fits nicely
           />
         </div>
-
-        {/* Right Column - Content */}
+        // Right column
         <div className="col-md-8">
           <div className="card-body">
             <p className="mb-1 text-body-tertiary">{device?.type}</p>
@@ -218,6 +230,5 @@ function NewDeviceButton({ setCurrentDevice, device }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+
+*/

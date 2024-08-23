@@ -39,7 +39,7 @@ function DataCard({
 
   const dispatch = useDispatch();
 
-  function changeSource(sourceName, paramName, noMap) {
+  function changeSource(sourceName, paramName) {
     dispatch({
       type: "params/updateMappings",
       payload: {
@@ -47,19 +47,6 @@ function DataCard({
         mapping: sourceName,
       },
     });
-
-    if (custom && !noMap) {
-      const newMeta = JSON.parse(JSON.stringify(visInfo));
-      const paramIndx = newMeta.parameters.findIndex(
-        ({ name }) => name == paramName
-      );
-
-      newMeta.parameters[paramIndx] = {
-        name: paramName,
-        suggested: [sourceName],
-      };
-      setVisInfo[newMeta.parameters];
-    }
   }
 
   // Rewrite the delte parameter logic to avoid deletion when only one is left

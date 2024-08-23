@@ -215,8 +215,10 @@ function LinkMenu({ editor, setIsAddingLink }) {
 
 export default function DocsWindow({
   updateDocsData,
+  setDocsVisibility,
   docsContent,
   isEditable,
+  isDocsVisible,
 }) {
   const editor = useEditor({
     extensions: extensions,
@@ -225,10 +227,18 @@ export default function DocsWindow({
     onUpdate: ({ editor }) => {
       if (editor) {
         const content = editor.getJSON();
+        console.log(content);
         updateDocsData(content);
       }
     },
   });
+
+  const [_isDocsVisible, _setIsDocsVisible] = useState(isDocsVisible);
+
+  function setIsDocsVisible(input) {
+    setDocsVisibility(input);
+    _setIsDocsVisible(input);
+  }
 
   const [isAddingLink, setIsAddingLink] = useState(false);
   const linkPopupRef = React.useRef(null);
@@ -236,8 +246,35 @@ export default function DocsWindow({
 
   return (
     <div>
+      {/*
+      <div
+        className="d-flex justify-content-between align-items-center"
+        style={{ color: "white", backgroundColor: "#1A1A1A" }}
+      >
+        <h5 className="ms-2 p-2 pt-3 align-self-center">Documentation</h5>
+        <button className="btn btn-link" onClick={() => console.log("Hi!")}>
+          <i className="bi bi-download code-download"></i>
+        </button>
+      </div>*/}
       {isEditable && (
-        <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
+        <div className="d-flex flex-column">
+          <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
+          <button
+            className={`btn ${
+              _isDocsVisible
+                ? "btn-light btn-outline-primary"
+                : "btn-light btn-outline-dark"
+            }  btn-docs-vis`}
+            onClick={() => setIsDocsVisible(!_isDocsVisible)}
+          >
+            <div className="d-flex align-items-center">
+              <span className="material-symbols-outlined inline-icon ms-n1 me-1">
+                {_isDocsVisible ? "public" : "public_off"}
+              </span>
+              {_isDocsVisible ? "Published" : "Hidden"}
+            </div>
+          </button>
+        </div>
       )}
       <div className="scrollable">
         <EditorContent editor={editor}></EditorContent>
@@ -252,82 +289,3 @@ export default function DocsWindow({
     </div>
   );
 }
-
-/*
-function InlineMenuWithLink({ editor }) {
-  const [isAddingLink, setIsAddingLink] = useState(false);
-
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div>
-      {editor.isActive("paragraph") &&
-        (!isAddingLink ? (
-          <InlineMenu editor={editor} setIsAddingLink={setIsAddingLink} />
-        ) : (
-          <LinkMenu editor={editor} setIsAddingLink={setIsAddingLink} />
-        ))}
-    </div>
-  );
-}
-
-
-function InlineMenu({ editor, setIsAddingLink }) {
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div className="inline-menu">
-      <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={editor.isActive("bold") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_bold
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={editor.isActive("italic") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_italic
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={editor.isActive("underline") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_underlined
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        disabled={!editor.can().chain().focus().toggleCode().run()}
-        className={editor.isActive("code") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">code</span>
-      </button>
-      {!editor.isActive("link") ? (
-        <button
-          onClick={() => setIsAddingLink(true)}
-          className={editor.isActive("link") ? "is-active" : ""}
-        >
-          <span className="material-symbols-outlined inline-icon">link</span>
-        </button>
-      ) : (
-        <button onClick={() => editor.chain().focus().unsetLink().run()}>
-          <span className="material-symbols-outlined inline-icon">
-            link_off
-          </span>
-        </button>
-      )}
-    </div>
-  );
-}*/

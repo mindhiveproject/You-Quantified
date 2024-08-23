@@ -486,6 +486,7 @@ type Visual {
   createdAt: DateTime
   parameters: JSON
   docs: JSON
+  docsVisible: Boolean
   published: Boolean
   editable: Boolean
   tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
@@ -521,6 +522,7 @@ input VisualWhereInput {
   description: StringFilter
   author: UserWhereInput
   createdAt: DateTimeNullableFilter
+  docsVisible: BooleanFilter
   published: BooleanFilter
   editable: BooleanFilter
   tags: TagManyRelationFilter
@@ -537,6 +539,7 @@ input VisualOrderByInput {
   title: OrderDirection
   description: OrderDirection
   createdAt: OrderDirection
+  docsVisible: OrderDirection
   published: OrderDirection
   editable: OrderDirection
 }
@@ -550,6 +553,7 @@ input VisualUpdateInput {
   createdAt: DateTime
   parameters: JSON
   docs: JSON
+  docsVisible: Boolean
   published: Boolean
   editable: Boolean
   tags: TagRelateToManyForUpdateInput
@@ -580,6 +584,7 @@ input VisualCreateInput {
   createdAt: DateTime
   parameters: JSON
   docs: JSON
+  docsVisible: Boolean
   published: Boolean
   editable: Boolean
   tags: TagRelateToManyForCreateInput
