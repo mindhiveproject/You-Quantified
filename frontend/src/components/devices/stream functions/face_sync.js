@@ -1,23 +1,23 @@
-import VHeartRate from '../../../utility/vheartrate';
+import FaceSync from '../../../utility/faceSync';
 import store from '../../../store/store';
 
-export function connectVHeartRate(changeConnectionStatus) {
-  window.open("/audiovideo/heartrate/index.html", "_blank", "popup");
-  const bc = new BroadcastChannel('video-heart-rate');
-  const vhr = new VHeartRate(bc);
-  vhr.initialize();
+export function connectFaceSync(changeConnectionStatus) {
+    window.open("/audiovideo/facesync/index.html", "_blank");
+    const bc = new BroadcastChannel('face-sync');
+    const face = new FaceSync(bc);
+    face.initialize();
 
     changeConnectionStatus("awaiting");
     setTimeout(() => {
-      const id = "Video Heart Rate";
-        if (vhr.isOpen()) {
+        const id = "Face Synchronicity";
+        if (face.isOpen()) {
             changeConnectionStatus("connected");
             store.dispatch({
                 type: "devices/create",
                 payload: {
                 id: id,
           metadata: {
-            device: "Video Heart Rate",
+            device: "FaceSync",
             type: "default",
             id: id,
             connected: true,

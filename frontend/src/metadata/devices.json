@@ -178,7 +178,7 @@
     "heading": "Face",
     "short_description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
     "description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
-    "image":"/face_landmark.png",
+    "image": "/face_landmark.png",
     "type": "Video",
     "sampling_rate": 15,
     "data": [
@@ -190,10 +190,25 @@
     ]
   },
   {
-    "heading": "VideoHeartRate",
+    "heading": "Face Synchronicity",
+    "short_description": "This sensor allows you to measure the synchronicity of facial expressions",
+    "description": "This sensor allows you to measure the synchronicity of facial expressions",
+    "image": "/face_landmark.png",
+    "type": "Video",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Facial Synchronicity",
+        "description": "Syncrhonicity between facial expressions",
+        "type": "Syncrhonicity"
+      }
+    ]
+  },
+  {
+    "heading": "Video Heart Rate",
     "short_description": "This sensor allows you to measure yout heart rate from a video input",
     "description": "This sensor allows you to measure yout heart rate from a video input",
-    "image":"/HeartRateLine.png",
+    "image": "/HeartRateLine.png",
     "type": "Video",
     "sampling_rate": 15,
     "data": [
@@ -208,7 +223,7 @@
     "heading": "AudioVolume",
     "short_description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
     "description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
-    "image":"/speaker-high-volume.png",
+    "image": "/speaker-high-volume.png",
     "type": "Audio",
     "sampling_rate": 15,
     "data": [

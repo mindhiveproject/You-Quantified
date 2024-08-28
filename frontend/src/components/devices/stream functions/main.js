@@ -10,6 +10,7 @@ import { connectFace } from "./face";
 import { connectVHeartRate } from "./vheartrate";
 import { connectAudioRMS } from "./rms";
 import { connectLSL } from "./lsl";
+import { connectFaceSync } from "./face_sync";
 
 const connectionText = {
   disconnected: { text: "", type: "" },
@@ -28,12 +29,13 @@ const disabledStatus = {
 };
 
 const deviceConnectionFunctions = {
-  Muse: connectMuse,
-  LSL: connectLSL,
-  EMOTIV: connectEmotiv,
-  Face: connectFace,
-  VideoHeartRate: connectVHeartRate,
-  AudioVolume: connectAudioRMS,
+  "Muse": connectMuse,
+  "LSL": connectLSL,
+  "EMOTIV": connectEmotiv,
+  "Face": connectFace,
+  "Video Heart Rate": connectVHeartRate,
+  "AudioVolume": connectAudioRMS,
+  "Face Synchronicity": connectFaceSync,
 };
 
 export function DeviceConnection({ deviceName, deviceID }) {
