@@ -78,8 +78,9 @@ EEG sensing headband. The application interfaces with the Muse using the Chrome'
 A variety of wireless EEG headsets. EMOTIV provides access to derived EEG metrics using their launcher and the [Cortex API](https://github.com/Emotiv/cortex-example). Raw EEG metrics require a paid license in the EMOTIV launcher. Currently, the API keys and the license information can be specified in your own .env file.
 
 ## Visuals
-The project uses P5.js as the basis for the creative visualizations. The visuals are run in a code sandbox similar to the online P5.js editor, so that you can copy-paste the code. To call a variable
+The project uses P5.js as the basis for the creative visualizations. The visuals are run in a code sandbox similar to the online P5.js editor, so that you can copy-paste the code. The data is streamed into the iframe containing the P5.js instance by sending [Window messages](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage). It receives them outside of the visible code in a `data` object. To retrieve a parameter, use `data?.["PARAMETER NAME"]`.
 
+Currently, if you want to add a file, you would need to host it elsewhere on the web and directly link to it within the P5.js code or add it to the project directory, since the backend is not currently conected to a file server.
 
 ## Authorship
-This app was created at NYU 
+This app was created at NYU as part of a research project.
