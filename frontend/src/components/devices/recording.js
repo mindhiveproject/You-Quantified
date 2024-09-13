@@ -1,8 +1,7 @@
 import React from "react";
 
-import { subToStore, stopRecording } from "../../utility/recorder";
+import { subToStore, stopRecording, beginStream } from "../../utility/recorder";
 import { useSelector } from "react-redux";
-
 
 export function RecordComponent({ recording, setRecording, saveObject }) {
   // Save object might be changed to a hook?
@@ -19,6 +18,7 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
 
   const handleClick = () => {
     if (!recording) {
+      beginStream(saveObject);
       setRecording(subToStore(saveObject));
     } else {
       stopRecording(recording, saveObject, deviceMeta);
@@ -27,12 +27,12 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
   };
 
   if (Object.keys(deviceMeta).length === 0) {
-    return 
+    return;
   }
 
   return (
     <button className={buttonClassName} onClick={handleClick}>
-      <i className={iconClassName}> {recordingText}</i>
+      <i className={iconClassName}> </i>{recordingText}
     </button>
   );
 }

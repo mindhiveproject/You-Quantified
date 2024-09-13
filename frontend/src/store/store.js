@@ -1,6 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { loadParameters, loadMeta, loadParamsRuntime } from "./load_functions";
-import { normalizeValue, updateWithLocalStorage } from "./utility_functions";
 
 const initialState = {
   params: {},
@@ -57,7 +55,7 @@ function rootReducer(state = initialState, action) {
           [action.payload.name]: {
             value: 0,
             mapping: "Manual",
-            range: [0, 1]
+            range: [0, 1],
           },
         },
       };
@@ -105,7 +103,6 @@ function rootReducer(state = initialState, action) {
 
     case "devices/streamUpdate":
       // Logic to handle device stream updates
-      // If it's mapped to something, update the parameter
 
       return {
         ...state,
@@ -114,6 +111,7 @@ function rootReducer(state = initialState, action) {
           [action.payload.id]: {
             ...state.dataStream[action.payload.id],
             ...action.payload.data,
+            "timestamp": Date.now(),
           },
         },
       };

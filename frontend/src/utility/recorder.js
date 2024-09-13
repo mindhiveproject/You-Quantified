@@ -1,110 +1,133 @@
+import store from "../store/store";
+import Papa from "papaparse";
+import JSZip from "jszip";
+import devicesRaw from "../metadata/devices.json";
 
-import store from '../store/store';
-import Papa from 'papaparse';
-import JSZip from 'jszip';
-import devicesRaw from '../metadata/devices.json'
+// Add timestamps in the store.dispatch method
+// Ignore timestamps in the parameter dropdown
+
+// Changes to make to recording
+// - Don't add a new device while recording
+// - Better button
 
 function saveToObject(saveObject) {
-    saveObject.push(store.getState().dataStream);
+  // saveObject.push(store.getState().dataStream); - Push as one huge object
+  const currentStream = store.getState().dataStream;
 
-    // Code to save it to local storage (in case this works better for MindHive)
-    // const data = JSON.parse(sessionStorage.getItem("data"));
-    // data.push(store.getState().dataStream)
-    // sessionStorage.setItem("data", JSON.stringify(data));
-    
+  for (const device in currentStream) {
+    const currentDeviceData = currentStream[device];
+    const deviceDataArray = saveObject[device];
+    if (deviceDataArray[deviceDataArray.length - 1] !== currentDeviceData) {
+      deviceDataArray.push(currentDeviceData);
+    }
+  }
 }
 
 function _toObservable(store) {
-    return {
-      subscribe({ onNext }) {
-        let dispose = store.subscribe(() => onNext(store.getState()));
-        onNext(store.getState());
-        return { dispose };
-      }
-    }
+  return {
+    subscribe({ onNext }) {
+      let dispose = store.subscribe(() => onNext(store.getState()));
+      onNext(store.getState());
+      return { dispose };
+    },
+  };
 }
 
 export function subToStore(saveObject) {
-    const obversable = _toObservable(store);
-    const unsub = obversable.subscribe({onNext: ()=>saveToObject(saveObject)})
-    return unsub
+  const obversable = _toObservable(store);
+  const unsub = obversable.subscribe({
+    onNext: () => saveToObject(saveObject),
+  });
+  return unsub;
+}
+
+export function beginStream(saveObject) {
+  const currentStream = store.getState().dataStream;
+  for (const device in currentStream) {
+    const currentDeviceData = currentStream[device];
+    saveObject[device] = [currentDeviceData];
+  }
 }
 
 function autoCSVDownload(saveObject, deviceMeta) {
-    // CallBackFunction to download a CSV
-    const a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style = "display: none";
+  // CallBackFunction to download a CSV
+  const a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
 
-    const finalObject = {}
-    const currentDate = new Date();
-    const dateString = currentDate.fileName();
+  const finalObject = {};
+  const currentDate = new Date();
+  const dateString = currentDate.fileName();
 
-    var zip = new JSZip();
+  var zip = new JSZip();
 
-    var fileText = txtContent;
+  var fileText = txtContent;
 
-    fileText += "This folder contains the following files: ";
-    const metadataJSON = []
-    console.log("device metadata")
-    console.log(deviceMeta);
+  fileText += "This folder contains the following files: ";
+  const metadataJSON = [];
+  console.log("device metadata");
+  // Add units to the metadata
+  console.log(deviceMeta);
 
-    // Load each file into the zip
-    for (const key in saveObject[0]) {
-        finalObject[key] = saveObject.map((data)=>data[key]);
-        const json = JSON.stringify(finalObject[key]);
-        console.log(json)
-        const blob = new Blob([Papa.unparse(json)], {type: "text/csv"});
-        const thisFileName = key.toLowerCase().replace(/ /g, "_")+".csv";
+  // Load each file into the zip
+  for (const key in saveObject) {
+    const json = JSON.stringify(saveObject[key]);
 
-        const currentDeviceMeta = {"device name": deviceMeta[key]?.device, "recording id": key}
-        const deviceFromList = devicesRaw.find(({ heading }) => heading === deviceMeta[key]?.device);
+    const blob = new Blob([Papa.unparse(json)], { type: "text/csv" });
+    const thisFileName = key.toLowerCase().replace(/ /g, "_") + ".csv";
 
-        if (deviceFromList) {
-            currentDeviceMeta["type"] = deviceFromList["type"]
-            currentDeviceMeta["sampling rate"] = deviceFromList["sampling_rate"]
-        }
+    const currentDeviceMeta = {
+      "recording id": key,
+      "file name": thisFileName,
+      "device name": deviceMeta[key]?.device,
+    };
 
-        if (deviceMeta[key]?.samplingRate) {
-            currentDeviceMeta["sampling rate"] = deviceMeta?.sampling_rate
-        }
+    const deviceFromList = devicesRaw.find(
+      ({ heading }) => heading === deviceMeta[key]?.device
+    );
 
-        metadataJSON.push(currentDeviceMeta)
-        zip.file(thisFileName, blob);
-        fileText += thisFileName+", "
+    if (deviceFromList) {
+      currentDeviceMeta["type"] = deviceFromList["type"];
+      currentDeviceMeta["sampling rate"] = deviceFromList["sampling_rate"];
     }
 
-    const blob = new Blob([Papa.unparse(metadataJSON)], {type: "text/csv"});
-    zip.file("metadata.csv", blob);
+    if (deviceMeta[key]?.samplingRate) {
+      currentDeviceMeta["sampling rate"] = deviceMeta?.sampling_rate;
+    }
 
-    fileText += "metadata.csv";
-    zip.file("README.txt", fileText);
+    metadataJSON.push(currentDeviceMeta);
+    zip.file(thisFileName, blob);
+    fileText += thisFileName + ", ";
+  }
 
-    // Download the zip
-    zip.generateAsync({type:"blob"}).then(function(content) {
-        const url = window.URL.createObjectURL(content);
-        a.href = url;
-        a.download = "yq_rec_"+dateString+".zip";
-    
-        // Creates a hidden <a> object and clicks it
-        a.click();
-        window.URL.revokeObjectURL(url);
-    });
-    
+  const blob = new Blob([Papa.unparse(metadataJSON)], { type: "text/csv" });
+  zip.file("metadata.csv", blob);
+
+  fileText += "metadata.csv";
+  zip.file("README.txt", fileText);
+
+  // Download the zip
+  zip.generateAsync({ type: "blob" }).then(function (content) {
+    const url = window.URL.createObjectURL(content);
+    a.href = url;
+    a.download = "yq_rec_" + dateString + ".zip";
+
+    // Creates a hidden <a> object and clicks it
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
 }
 
 export function stopRecording(unsub, saveObject, deviceMeta) {
+  unsub.dispose();
+  autoCSVDownload(saveObject, deviceMeta);
 
-    unsub.dispose();
-    autoCSVDownload(saveObject, deviceMeta);
+  while (saveObject.length > 0) {
+    saveObject.pop();
+  }
 
-    while(saveObject.length > 0) {
-        saveObject.pop();
-    }
-
-    // sessionStorage.removeItem("data");
+  // sessionStorage.removeItem("data");
 }
-
 
 const txtContent = `
 Hi! I'm a small file meant to describe the contents of your folder. 
@@ -117,19 +140,19 @@ If you have questions or suggestions, please visit the repository at https://git
 
 `;
 
+Date.prototype.fileName = function () {
+  // YYYYMMDDThhmm - standard format for dates and times
+  var month = this.getMonth() + 1; // getMonth() is zero-based
+  var dd = this.getDate();
+  var hh = this.getHours();
+  var mm = this.getMinutes();
 
-Date.prototype.fileName = function() {
-    // YYYYMMDDThhmm - standard format for dates and times
-    var month = this.getMonth() + 1; // getMonth() is zero-based
-    var dd = this.getDate();
-    var hh = this.getHours();
-    var mm = this.getMinutes();
-
-    return [this.getFullYear(),
-            (month>9 ? '' : '0') + month,
-            (dd>9 ? '' : '0') + dd,
-            "T",
-            (hh>9 ? '' : '0') + hh,
-            (mm>9 ? '' : '0') + mm,
-           ].join('');
+  return [
+    this.getFullYear(),
+    (month > 9 ? "" : "0") + month,
+    (dd > 9 ? "" : "0") + dd,
+    "T",
+    (hh > 9 ? "" : "0") + hh,
+    (mm > 9 ? "" : "0") + mm,
+  ].join("");
 };

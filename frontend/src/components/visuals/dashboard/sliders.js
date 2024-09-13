@@ -101,6 +101,7 @@ export function DataAutoSlider({ dataMappings, parameter }) {
   const [formMin, setFormMin] = useState(range[0]); // Values to be shown when the user edits the form
   const [formMax, setFormMax] = useState(range[1]);
 
+  // This function is one of the most imoprtant functions since it updates the parameters
   useEffect(() => {
     dispatch({
       type: "params/update",
@@ -172,7 +173,7 @@ export function DataAutoSlider({ dataMappings, parameter }) {
       dispatch({
         type: "params/updateRange",
         payload: {
-          parameter: parameter,
+          name: parameter,
           range: [bufferMin, bufferMax],
         },
       });

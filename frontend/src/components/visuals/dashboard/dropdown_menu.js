@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 function NestedDropDown({
   option,
@@ -13,6 +13,7 @@ function NestedDropDown({
 
   const { hasDefault, notHasDefault } = dataStream.reduce(
     (acc, element) => {
+      if (element === "timestamp") return acc;
       const isDefault = checkDefault(element);
       acc[isDefault ? "hasDefault" : "notHasDefault"].push(element);
       return acc;

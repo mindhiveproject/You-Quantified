@@ -27,7 +27,7 @@ $gray-600: #6c757d;
 $gray-700: #495057;
 $gray-800: #343a40;
 $gray-900: #212529;
-$black: #000;
+$black: #1A1A1A;
 
 
 // Input customization
@@ -128,6 +128,45 @@ div.w-100 {
     z-index: 102;
 }*/
 
+.record-indicator {
+    width: 19px;
+    margin-left: 1px;
+    background-color: $danger;
+    height: 59px;
+    animation: flashRed 1.5s infinite step-end;
+}
+
+@keyframes flashRed {
+    0% {
+        background-color: $danger;
+    }
+
+    60% {
+        background-color: white;
+    }
+
+    100% {
+        background-color: $danger;
+    }
+}
+
+@keyframes flashRecord {
+    0% {
+        color: black;
+    }
+
+    60% {
+        color: $white;
+    }
+
+    100% {
+        color: black;
+    }
+}
+
+.flash-record {
+    animation: flashRecord 1.5s infinite step-end;
+}
 
 .edit-popup {
     position: absolute;
@@ -164,6 +203,7 @@ div.w-100 {
     width: -moz-fit-content;
     width: fit-content;
 }
+
 
 .btn-square {
     height: 50px;
@@ -588,7 +628,7 @@ canvas {
 }
 
 .styled-navbar .btn {
-    outline: 1px solid #1A1A1A;
+    outline: 1px solid #1A1A1A !important;
     border-radius: 0;
     border: 0;
     height: 100%;
@@ -617,12 +657,13 @@ canvas {
 }
 
 .styled-navbar .btn.active:active {
-    background: #7749F8;
+    background: #7849f8dd;
     color: #ffffff;
     box-shadow: inset 0px -8px 0px 0px #7749F8;
 }
 
 .styled-navbar .btn.active {
+    background: #7849f8dd;
     box-shadow: inset 0px -8px 0px 0px #7749F8;
     font-weight: 600;
 }
@@ -632,9 +673,8 @@ canvas {
     color: #ffffff;
 }
 
-
 .styled-navbar .btn:hover:active {
-    background: #7749F8;
+    background: #7849f8dd;
     color: #ffffff;
 }
 
@@ -1080,6 +1120,7 @@ input.vis-name-input::placeholder {
     border: none;
     color: $primary;
 }
+
 .menu-bar button:hover {
     background: #dbdbdb;
     border: none;

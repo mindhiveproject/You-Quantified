@@ -41,19 +41,21 @@ export function VisualsWindow({
   return (
     <div className={`${popupVisuals ? "d-none" : "h-100 w-100"}`}>
       {!popupVisuals && (
-        <FullScreen handle={fullScreenHandle} className="w-100 h-100">
+        
           <div className="w-100 h-100">
             {params && visMetadata?.editable ? (
+              <FullScreen handle={fullScreenHandle} className="w-100 h-100">
               <P5iFrame
                 code={code}
                 params={params}
                 popupVisuals={popupVisuals}
               />
+              </FullScreen>
             ) : (
               component
             )}
           </div>
-        </FullScreen>
+
       )}
       {popupVisuals && (
         <PopupComponent

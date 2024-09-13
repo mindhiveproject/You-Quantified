@@ -38,104 +38,13 @@ export const lists: Lists = {
       }),
       password: password({ validation: { isRequired: true } }),
       visuals: relationship({ ref: "Visual.author", many: true }),
-      lessons: relationship({ ref: "Lesson.author", many: true }),
-      userLessons: relationship({ref: "UserLesson.author", many: true}),
       isAdmin: checkbox(),
       createdAt: timestamp({
         defaultValue: { kind: "now" },
       }),
     },
   }),
-  Lesson: list({
-    access: {
-      operation: {
-        query: () => true,
-      },
-      item: {
-        update: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-        create: ({ session }) => !!session,
-        delete: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-      },
-    },
 
-    // this is the fields for our Post list
-    fields: {
-      title: text({ validation: { isRequired: true } }),
-      content: json(),
-      author: relationship({ ref: "User.lessons", many: false }),
-      createdAt: timestamp({
-        defaultValue: { kind: "now" },
-      }),
-      code: file({ storage: "p5_visuals" }),
-      parameters: json({
-        defaultValue: [
-          {
-            name: "Untitled",
-            suggested: ["Alpha"],
-          },
-        ],
-      }),
-      visual: relationship({ref: "Visual", many: false}),
-      unit: relationship({ ref: "Unit.lessons", many: false }),
-      userLessons: relationship({ref: "UserLesson.lesson", many: true})
-    },
-  }),
-  UserLesson: list({
-    access: {
-      operation: {
-        query: () => true,
-      },
-      item: {
-        update: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-        create: ({ session }) => !!session,
-        delete: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-      },
-    },
-    // this is the fields for our Post list
-    fields: {
-      title: text({ validation: { isRequired: true } }),
-      content: json(),
-      author: relationship({ ref: "User.userLessons", many: false }),
-      startedAt: timestamp({
-        defaultValue: { kind: "now" },
-      }),
-      completedAt: timestamp(),
-      code: file({ storage: "p5_visuals" }),
-      parameters: json({
-        defaultValue: [
-          {
-            name: "Untitled",
-            suggested: ["Alpha"],
-          },
-        ],
-      }),
-      lesson: relationship({ ref: "Lesson.userLessons", many: false }),
-    },
-  }),
-  Unit: list({
-    access: {
-      operation: {
-        query: () => true,
-      },
-      item: {
-        update: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-        create: ({ session }) => !!session,
-        delete: ({ session, item }) =>
-          item.authorId === session?.itemId || session?.isAdmin,
-      },
-    },
-    fields: {
-      title: text({ validation: { isRequired: true } }),
-      duration: integer(),
-      description: text(),
-      lessons: relationship({ ref: "Lesson.unit", many: true }),
-    },
-  }),
   Tag: list({
     access: {
       operation: allowAll,
@@ -150,6 +59,9 @@ export const lists: Lists = {
     access: {
       operation: {
         query: () => true,
+        update: () => true,
+        create: () => true,
+        delete: ()=>true,
       },
       item: {
         update: ({ session, item }) =>

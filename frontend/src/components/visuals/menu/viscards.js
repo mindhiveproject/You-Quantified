@@ -79,7 +79,15 @@ export function VisualizationCards({
   }
 
   if (currentSearch) {
-    whereValue["title"] = { contains: currentSearch };
+    whereValue["title"] =
+      process.env.NODE_ENV === "development"
+        ? {
+            contains: currentSearch,
+          }
+        : {
+            contains: currentSearch,
+            mode: "insensitive",
+          };
   }
 
   const { loading, error, data } = useQuery(MY_VISUALS, {
@@ -90,7 +98,7 @@ export function VisualizationCards({
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
-  
+
   let customSources = data.visuals.map((visual) => (
     <ImageCard
       parameters={visual.parameters}
@@ -98,7 +106,7 @@ export function VisualizationCards({
       description={visual.description}
       title={visual.title}
       visId={visual.id}
-      key = {visual.id}
+      key={visual.id}
     />
   ));
 

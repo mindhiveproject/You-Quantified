@@ -12,62 +12,13 @@ generator client {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  name        String       @default("")
-  email       String       @unique @default("")
-  password    String
-  visuals     Visual[]     @relation("Visual_author")
-  lessons     Lesson[]     @relation("Lesson_author")
-  userLessons UserLesson[] @relation("UserLesson_author")
-  isAdmin     Boolean      @default(false)
-  createdAt   DateTime?    @default(now())
-}
-
-model Lesson {
-  id            String       @id @default(cuid())
-  title         String       @default("")
-  content       String?
-  author        User?        @relation("Lesson_author", fields: [authorId], references: [id])
-  authorId      String?      @map("author")
-  createdAt     DateTime?    @default(now())
-  code_filesize Int?
-  code_filename String?
-  parameters    String?      @default("[{\"name\":\"Untitled\",\"suggested\":[\"Alpha\"]}]")
-  visual        Visual?      @relation("Lesson_visual", fields: [visualId], references: [id])
-  visualId      String?      @map("visual")
-  unit          Unit?        @relation("Lesson_unit", fields: [unitId], references: [id])
-  unitId        String?      @map("unit")
-  userLessons   UserLesson[] @relation("UserLesson_lesson")
-
-  @@index([authorId])
-  @@index([visualId])
-  @@index([unitId])
-}
-
-model UserLesson {
-  id            String    @id @default(cuid())
-  title         String    @default("")
-  content       String?
-  author        User?     @relation("UserLesson_author", fields: [authorId], references: [id])
-  authorId      String?   @map("author")
-  startedAt     DateTime? @default(now())
-  completedAt   DateTime?
-  code_filesize Int?
-  code_filename String?
-  parameters    String?   @default("[{\"name\":\"Untitled\",\"suggested\":[\"Alpha\"]}]")
-  lesson        Lesson?   @relation("UserLesson_lesson", fields: [lessonId], references: [id])
-  lessonId      String?   @map("lesson")
-
-  @@index([authorId])
-  @@index([lessonId])
-}
-
-model Unit {
-  id          String   @id @default(cuid())
-  title       String   @default("")
-  duration    Int?
-  description String   @default("")
-  lessons     Lesson[] @relation("Lesson_unit")
+  id        String    @id @default(cuid())
+  name      String    @default("")
+  email     String    @unique @default("")
+  password  String
+  visuals   Visual[]  @relation("Visual_author")
+  isAdmin   Boolean   @default(false)
+  createdAt DateTime? @default(now())
 }
 
 model Tag {
@@ -78,27 +29,26 @@ model Tag {
 }
 
 model Visual {
-  id                 String    @id @default(cuid())
-  title              String    @default("")
-  cover_filesize     Int?
-  cover_extension    String?
-  cover_width        Int?
-  cover_height       Int?
-  cover_id           String?
-  code_filesize      Int?
-  code_filename      String?
-  description        String    @default("")
-  author             User?     @relation("Visual_author", fields: [authorId], references: [id])
-  authorId           String?   @map("author")
-  createdAt          DateTime? @default(now())
-  parameters         String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
-  docs               String?
-  docsVisible        Boolean   @default(false)
-  published          Boolean   @default(false)
-  editable           Boolean   @default(false)
-  tags               Tag[]     @relation("Visual_tags")
-  from_Lesson_visual Lesson[]  @relation("Lesson_visual")
-  from_Tag_visuals   Tag[]     @relation("Tag_visuals")
+  id               String    @id @default(cuid())
+  title            String    @default("")
+  cover_filesize   Int?
+  cover_extension  String?
+  cover_width      Int?
+  cover_height     Int?
+  cover_id         String?
+  code_filesize    Int?
+  code_filename    String?
+  description      String    @default("")
+  author           User?     @relation("Visual_author", fields: [authorId], references: [id])
+  authorId         String?   @map("author")
+  createdAt        DateTime? @default(now())
+  parameters       String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
+  docs             String?
+  docsVisible      Boolean   @default(false)
+  published        Boolean   @default(false)
+  editable         Boolean   @default(false)
+  tags             Tag[]     @relation("Visual_tags")
+  from_Tag_visuals Tag[]     @relation("Tag_visuals")
 
   @@index([authorId])
 }

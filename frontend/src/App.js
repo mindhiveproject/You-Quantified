@@ -14,30 +14,37 @@ import { AUTH_USER } from "./queries/user";
 import { NewVisual } from "./components/visuals/menu/new";
 import { MainViewLesson } from "./components/lessons/editor/main";
 import { LessonMenu } from "./components/lessons/menu/main";
+import { useSelector } from "react-redux";
+import { stopRecording } from "./utility/recorder";
 
-function NavBar({ setShowDevices }) {
+function NavBar({ setShowDevices, recording, setRecording }) {
+  const deviceMeta = useSelector((state) => state?.deviceMeta);
+
+  function endRecording() {
+    stopRecording(recording, saveObject, deviceMeta);
+    setRecording(false);
+  }
+
   return (
     <nav className="navbar styled-navbar g-0 p-0 d-flex justify-content-between align-items-center">
       <NavLink className="navbar-brand m-0 ms-4 h5" to="/">
         <span className="fw-normal">You:</span> Quantified
       </NavLink>
       <div className="h-100 m-0 g-0 d-flex align-items-center">
-        {/*<NavLink className="nav-link" to="/lessons">
-          Lessons
-  </NavLink>*/}
         <NavLink className="nav-link" to="/visuals">
           Visuals
         </NavLink>
         <button className="btn" onClick={() => setShowDevices(true)}>
           Data
         </button>
+        {recording && <div className="record-indicator" />}
       </div>
     </nav>
   );
 }
 
 // Object where recording is temporarily stored - Save Object Origin
-const saveObject = [];
+const saveObject = {};
 
 function DesktopApp() {
   const [showDevices, setShowDevices] = useState(false);
@@ -45,7 +52,7 @@ function DesktopApp() {
 
   return (
     <>
-      <NavBar setShowDevices={setShowDevices} />
+      <NavBar setShowDevices={setShowDevices} recording={recording} setRecording={setRecording}/>
       <div className="hv-100">
         {showDevices && (
           <DevicesManager

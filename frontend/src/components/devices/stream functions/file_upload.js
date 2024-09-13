@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import devicesRaw from "../../../metadata/devices";
 import { useDispatch, useSelector } from "react-redux";
 
-import Modal from "react-bootstrap/Modal";
+import JSZip from "jszip";
 import store from "../../../store/store";
 import { createSelector } from "reselect";
 
@@ -17,6 +17,12 @@ const getDataIDs = createSelector(
 );
 
 window.recordings = {};
+
+Papa.parsePromise = function (file, config) {
+  return new Promise(function (complete, error) {
+    Papa.parse(file, { ...config, complete, error });
+  });
+};
 
 export function FileUploader({ setCurrentScreen }) {
   const dispatch = useDispatch();
@@ -33,39 +39,35 @@ export function FileUploader({ setCurrentScreen }) {
   });
 
   async function uploadFile(e) {
-    if (recordingDevice === "") {
-      setSuccessText("You must first specify the device, please try again");
-      return;
-    }
-
     const form = e.currentTarget;
     const [file] = await form.files;
 
-    // If I were working with a server, I could post the files to a URL
-    // The current solution is to save them into session storage
-    // The limitation is that this limits the size of session storage
-    Papa.parse(file, {
+    console.log(file);
+
+    var zip = new JSZip();
+    const zipUpload = await zip.loadAsync(file);
+
+    let dataFilesList = Object.keys(zipUpload.files);
+    console.log(dataFilesList);
+
+    if (
+      !dataFilesList.includes("metadata.csv") ||
+      !dataFilesList.includes("README.txt")
+    ) {
+      setSuccessText(
+        "There was an error with the folder you uploaded, the files might have been modified"
+      );
+      return;
+    }
+
+    dataFilesList = dataFilesList.filter(
+      (e) => e !== ("metadata.csv" || "README.txt")
+    );
+
+    const metaDataFile = await zipUpload.files?.["metadata.csv"].async("blob");
+
+    const metadataRaw = await Papa.parsePromise(metaDataFile, {
       header: true,
-      complete: (results) => {
-        // results.data - contains the uploaded file output
-        window.recordings[id] = new UploadedFile(
-          results.data,
-          recordingDevice,
-          id
-        );
-        dispatch({
-          type: "devices/create",
-          payload: {
-            id: id,
-            metadata: {
-              device: recordingDevice,
-              playing: false,
-              looping: false,
-            },
-          },
-        });
-        setSuccessText("Uploaded!");
-      },
       error: (error) => {
         setSuccessText(
           "There was an error with the file you uploaded, please try again."
@@ -73,57 +75,59 @@ export function FileUploader({ setCurrentScreen }) {
         console.log(error);
       },
     });
+
+    const devicesMetadata = metadataRaw.data.reduce((acc, obj) => {
+      acc[obj["file name"]] = { ...obj };
+      return acc
+    }, {});
+
+    console.log(devicesMetadata);
+
+    for (const fileName of dataFilesList) {
+      if (fileName.split(".").pop() === "csv") {
+        const fileContent = await zipUpload.files[fileName].async("blob");
+        Papa.parse(fileContent, {
+          header: true,
+          complete: (results) => {
+            const currentDeviceMeta = devicesMetadata[fileName];
+            console.log(currentDeviceMeta);
+            // results.data - contains the uploaded file output
+            let id = currentDeviceMeta["recording id"];
+            window.recordings[id] = new UploadedFile(
+              results.data,
+              currentDeviceMeta["device name"],
+              id,
+              currentDeviceMeta["sampling rate"],
+            );
+            setSuccessText("Uploaded!");
+          },
+          error: (error) => {
+            setSuccessText(
+              "There was an error with the file you uploaded, please try again."
+            );
+            console.log(error);
+          },
+        });
+      }
+    }
   }
 
   const successTextStyle =
     successText !== "Uploaded!" ? "text-warning" : "text-success";
 
-  const deviceList = ["EMOTIV"];
-  const dropdownMenu = deviceList.map((item) => (
-    <option value={item} key={item}>
-      {item}
-    </option>
-  ));
-
-  function nameDevice(e) {
-    const regex = /[!@#$%^&*+{}\[\]:;<>,.?~\\|\/\="']/g;
-    const string = e.target.value.replace(regex, "");
-    e.target.value = string;
-    setID(string);
-  }
-
   return (
     <div className="w-50">
-      <h2>
-        <input
-          type="text"
-          className="h4 m-0 invisible-input"
-          placeholder="Pre-recorded device"
-          onBlur={nameDevice}
-        ></input>
-      </h2>
+      <h2>Multi-File Upload</h2>
       <div>
-        Upload the recorded file from your computer. It is important that you
-        specify the device that was used to record that file.
+        Upload the recorded zip file from your computer.
         <div className="row mt-3">
-          <div className="col-4">
-            <select
-              className="form-select"
-              defaultValue=""
-              onChange={(e) => setRecordingDevice(e.target.value)}
-            >
-              <option value="">Choose the device</option>
-              {dropdownMenu}
-            </select>
-          </div>
           <div className="input-group col">
             <input
               type="file"
               className="form-control"
               id="inputUpload"
-              accept="text/csv"
+              accept=".zip,.rar,.7zip"
               onChange={uploadFile}
-              disabled={recordingDevice === ""}
             />
           </div>
         </div>
@@ -140,14 +144,26 @@ class UploadedFile {
   looping = false;
   playing = false;
 
-  constructor(file, device, id) {
+  constructor(file, device, id, sampling_rate) {
     this.file = file;
-    console.log(this.file);
     this.device = device;
     this.id = id;
-    this.sampling_rate = devicesRaw.find(
-      ({ heading }) => heading === device
-    ).sampling_rate;
+    this.sampling_rate =
+      devicesRaw.find(({ heading }) => heading === device)?.sampling_rate ||
+      sampling_rate;
+
+    store.dispatch({
+      type: "devices/create",
+      payload: {
+        id: id,
+        metadata: {
+          device: this.device,
+          "sampling rate": this.sampling_rate,
+          playing: false,
+          looping: false,
+        },
+      },
+    });
   }
 
   startPlayback() {

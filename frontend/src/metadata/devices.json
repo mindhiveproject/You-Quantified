@@ -206,8 +206,8 @@
   },
   {
     "heading": "Video Heart Rate",
-    "short_description": "This sensor allows you to measure yout heart rate from a video input",
-    "description": "This sensor allows you to measure yout heart rate from a video input",
+    "short_description": "This sensor allows you to measure your heart rate from a video input",
+    "description": "This sensor allows you to measure your heart rate from a video input",
     "image": "/HeartRateLine.png",
     "type": "Video",
     "sampling_rate": 15,

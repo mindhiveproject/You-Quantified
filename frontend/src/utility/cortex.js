@@ -590,16 +590,9 @@ class CortexPower extends Cortex {
       //'X': motionVector[0],
       //'Y': motionVector[1],
       //'Z': motionVector[2],
-      time: time,
+      Time: time,
     };
 
-    /*
-        //append the raw channels
-        for (let i = 0; i < chns.length; i++) {
-            let key = chns[i];
-            let val = rawVector[i];
-            newData[key] = val;
-        }*/
     store.dispatch({
       type: "devices/streamUpdate",
       payload: { id: this.headsetId, data: newData },

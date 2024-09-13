@@ -49,13 +49,6 @@ export function VisualScreen({
             isEditable={isEditable}
           />
         )}
-        {currentScreen.left == "data" && (
-          <DataManagementWindow
-            visInfo={visMetadata}
-            custom={isEditable}
-            setVisInfo={setVisMetadata}
-          />
-        )}
         {currentScreen.left == "docs" && (
           <DocsWindow
             updateDocsData={updateDocsData}
@@ -65,6 +58,11 @@ export function VisualScreen({
             isDocsVisible={isDocsVisible}
           />
         )}
+        <DataManagementWindow
+          visInfo={visMetadata}
+          custom={isEditable}
+          setVisInfo={setVisMetadata}
+        />
       </SplitPaneLeft>
       <Divider />
       <SplitPaneRight>
