@@ -58,12 +58,21 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
 }
 
 function LoginScreen() {
+  const [authSuccess, setAuthSuccess] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
     update(cache, { data }) {
+      console.log("data");
+      console.log(data);
+      console.log("error");
+      console.log(error);
       if (data?.authenticateUserWithPassword?.item) {
         setAuthSuccess(true);
         setCurrentUser(data?.authenticateUserWithPassword?.item);
       } else if (data?.authenticateUserWithPassword?.message) {
+        setErrorMessage(data?.authenticateUserWithPassword?.message);
+
         setAuthSuccess(false);
       } else {
         setAuthSuccess(null);
@@ -73,11 +82,8 @@ function LoginScreen() {
 
   const { setCurrentUser } = useContext(UserContext);
 
-
   let userInput;
   let passwordInput;
-
-  const [authSuccess, setAuthSuccess] = useState(null);
 
   return (
     <div>
@@ -122,6 +128,7 @@ function LoginScreen() {
               ref={(node) => (passwordInput = node)}
             ></input>
           </div>
+          {errorMessage && <p className="text-danger">{errorMessage}</p>}
           <p className="text-primary">Forgot your password?</p>
           <button
             type="submit"
