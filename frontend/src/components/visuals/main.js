@@ -96,8 +96,6 @@ function VisTopBar({
   const isEditable = visMetadata?.author?.id === currentUser?.id;
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
 
-  console.log(visMetadata);
-
   return (
     <div className="vis-bar">
       <div className="d-flex align-items-center">

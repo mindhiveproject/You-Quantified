@@ -125,7 +125,6 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     if (checkConfirmation) {
       deleteVisual();
       navigate("/visuals")
-      console.log("let's delete the visual uwu")
     }
   }
 
