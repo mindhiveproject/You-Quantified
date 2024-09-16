@@ -36,7 +36,7 @@ export function VisualScreen({
 
   const { currentUser } = useContext(UserContext);
   const isEditable = visMetadata?.author?.id === currentUser?.id;
-  const isDocsVisible = visMetadata?.docsVisible || isEditable;
+  const isDocsVisible = visMetadata?.docsVisible;
 
   return (
     <SplitPane className="split-pane-row">
@@ -95,6 +95,8 @@ function VisTopBar({
   const { currentUser } = useContext(UserContext);
   const isEditable = visMetadata?.author?.id === currentUser?.id;
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
+
+  console.log(visMetadata);
 
   return (
     <div className="vis-bar">

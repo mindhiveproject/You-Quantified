@@ -19,6 +19,7 @@ export const MY_VISUALS = gql`
       parameters
       id
       docs
+      docsVisible
       editable
     }
   }

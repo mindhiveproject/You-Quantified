@@ -236,9 +236,12 @@ export default function DocsWindow({
   const [_isDocsVisible, _setIsDocsVisible] = useState(isDocsVisible);
 
   function setIsDocsVisible(input) {
+    console.log(input);
     setDocsVisibility(input);
     _setIsDocsVisible(input);
   }
+  
+  
 
   const [isAddingLink, setIsAddingLink] = useState(false);
   const linkPopupRef = React.useRef(null);

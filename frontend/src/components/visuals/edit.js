@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { DELETE_VISUAL, NEW_VISUAL } from "../../queries/visuals";
 import { useMutation } from "@apollo/client";
 import { profanity } from "@2toad/profanity";
-
+import { MY_VISUALS } from "../../queries/visuals";
 export function EditModalManager({
   visMetadata,
   setShowEdit,
@@ -52,7 +52,9 @@ function SignInEditPopup() {
 function CopyEditPopup({ visMetadata }) {
   const { currentUser } = useContext(UserContext);
 
-  const [createNewVisual, { data, loading, error }] = useMutation(NEW_VISUAL);
+  const [createNewVisual, { data, loading, error }] = useMutation(NEW_VISUAL, {
+    refetchQueries: MY_VISUALS,
+  });
 
   async function createVisualCopy() {
     const response = await fetch(visMetadata?.code?.url);
@@ -120,8 +122,14 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     const checkConfirmation = confirm(
       "Are you sure you want to delete the current visual?"
     );
-    if (checkConfirmation) deleteVisual;
+    if (checkConfirmation) {
+      deleteVisual();
+      navigate("/visuals")
+      console.log("let's delete the visual uwu")
+    }
   }
+
+
 
   function validateName(input) {
     const regex = /^(?!.*[%$\-\/])[^\n\r]{1,50}$/;
@@ -133,7 +141,6 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     setVisName(input);
     setErrorMessage();
   }
-
 
   function validateDescription(input) {
     const regex = /^(?!.*[%$\-\/])[^\n\r]{1,1000}$/;

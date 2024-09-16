@@ -94,6 +94,7 @@ export function VisualizationCards({
     variables: {
       where: whereValue,
     },
+    fetchPolicy: "network-only",
   });
 
   if (loading) return <p>Loading...</p>;
