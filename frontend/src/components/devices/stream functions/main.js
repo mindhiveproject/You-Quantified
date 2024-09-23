@@ -7,6 +7,7 @@ import devicesRaw from "../../../metadata/devices.json";
 import { connectMuse } from "./muse";
 import { connectEmotiv } from "./emotiv";
 import { connectFace } from "./face";
+import { connectPose } from "./pose";
 import { connectVHeartRate } from "./vheartrate";
 import { connectAudioRMS } from "./rms";
 import { connectLSL } from "./lsl";
@@ -36,6 +37,7 @@ const deviceConnectionFunctions = {
   "Video Heart Rate": connectVHeartRate,
   "AudioVolume": connectAudioRMS,
   "Face Synchronicity": connectFaceSync,
+  "Pose Detection": connectPose,
 };
 
 export function DeviceConnection({ deviceName, deviceID }) {
@@ -47,7 +49,6 @@ export function DeviceConnection({ deviceName, deviceID }) {
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const device = devicesRaw.find(({ heading }) => heading === deviceName);
   console.log(deviceName);
-  console.log(device);
 
   const [connText, setConnInfo] = useState({ text: "", type: "" });
   const [disabled, setDisabled] = useState(false);

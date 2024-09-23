@@ -110,3 +110,44 @@ export function FileDeviceButton({ data, name, handleShow }) {
     </div>
   );
 }
+
+export function EventMarkerButton({ data, name }) {
+  const deviceMeta = useSelector((state) => state.deviceMeta);
+
+  const [connectionText, setConnectionText] = useState(
+    connText["disconnected"]
+  );
+
+  function changeConnectionStatus(status) {
+    setConnectionText(connText[status]);
+  }
+
+  useEffect(() => {
+    if (!deviceMeta?.[name]) return;
+    const connStatus = deviceMeta?.[name]?.connected;
+    if (!connStatus) {
+      changeConnectionStatus("lost");
+    } else {
+      changeConnectionStatus("connected");
+    }
+  }, [deviceMeta]);
+
+  const segments = name.split("_");
+  const visName = segments[segments.length - 1];
+
+  return (
+    <div className="card rounded-0 mb-2 mt-1">
+      <button className="card-body btn btn-link text-decoration-none text-start">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 className="card-title g-0 m-0">Event Markers</h5>
+            <small className="g-0 m-0">{`Vis ID: ${visName}`}</small>
+          </div>
+          <p className={`g-0 m-0 h-100 ${connectionText.type}`}>
+            {connectionText.text}
+          </p>
+        </div>
+      </button>
+    </div>
+  );
+}

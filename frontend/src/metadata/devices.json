@@ -190,6 +190,21 @@
     ]
   },
   {
+    "heading": "Pose Detection",
+    "short_description": "This device allows you to use your webcam to track the movements of your body.",
+    "description": "This device allows you to use your webcam to track the movements of your body.",
+    "image": "/face_landmark.png",
+    "type": "Video",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Body Movements",
+        "description": "Different Facial Movements",
+        "type": "Pose Landmarks"
+      }
+    ]
+  },
+  {
     "heading": "Face Synchronicity",
     "short_description": "This sensor allows you to measure the synchronicity of facial expressions",
     "description": "This sensor allows you to measure the synchronicity of facial expressions",

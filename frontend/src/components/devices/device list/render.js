@@ -19,6 +19,7 @@ export default function RenderDevices({ setCurrentScreen, setCurrentDevice }) {
 
   const deviceButtonList = Object.keys(deviceMeta)?.map((id) => {
     const currDev = deviceMeta[id];
+
     let data = devicesRaw.find(({ heading }) => currDev.device === heading) || {
       heading: currDev?.["device"],
       type: currDev?.["device"],
@@ -40,7 +41,8 @@ export default function RenderDevices({ setCurrentScreen, setCurrentDevice }) {
     }
 
     const uploaded = "playing" in deviceMeta[id];
-
+    console.log(id);
+    
     return (
       <DeviceList
         data={data}

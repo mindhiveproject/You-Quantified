@@ -27,7 +27,7 @@ export default function HomePage() {
             </Link>
             <a
               className="fw-bold btn btn-outline-dark w-btn me-3"
-              href="https://creative-quantified-self.gitbook.io/docs/"
+              href="https://docs.youquantified.com"
               target="_blank"
             >
               Docs

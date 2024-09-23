@@ -1,9 +1,14 @@
 import React, { useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { EventMarkerStream } from "../../devices/stream functions/event_markers";
 
 export function P5iFrame({ code, params }) {
   const iframeRef = useRef(null);
 
+  const { visID } = useParams();
   const paramsRef = useRef(params);
+
+  const eventStream = new EventMarkerStream(visID);
   paramsRef.current = params;
 
   const errorScript = `
@@ -13,7 +18,6 @@ export function P5iFrame({ code, params }) {
       display.innerText = error.message;
     });
     `;
-    
 
   const receiveValues = `
     var data = ${JSON.stringify(params)};
@@ -24,6 +28,14 @@ export function P5iFrame({ code, params }) {
     })
     console.log(data);
     `;
+
+  const sendEvents = `
+    function sendEvent(message) {
+      if (typeof message === 'object') {
+        window.parent.postMessage(JSON.stringify(message));
+      }
+    }
+  `;
 
   useEffect(() => {
     const source = /* html */ `
@@ -47,6 +59,7 @@ export function P5iFrame({ code, params }) {
         <div id="app"></div>
         <span id="error-display"></span>
         <script>${receiveValues}</script>
+        <script>${sendEvents}</script>
         <script>${errorScript}</script>
         <script>${code}</script>
       </body>
@@ -62,6 +75,19 @@ export function P5iFrame({ code, params }) {
       );
     }
   }, [params]);
+
+  function handleWindowMessage(message) {
+    if (message.source != iframeRef.current?.contentWindow) return;
+    eventStream.streamEventMarkers(message);
+  }
+
+  useEffect(() => {
+    window.addEventListener("message", handleWindowMessage);
+    return () => {
+      window.removeEventListener("message", handleWindowMessage);
+      eventStream.unmountEventMarkers();
+    };
+  }, []);
 
   return (
     <iframe

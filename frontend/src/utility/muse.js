@@ -201,6 +201,7 @@ export class MuseDevice {
       mag = mag.map((mag) => mag / sample.length); // Normalize FFT by sample length
 
       for (const key in this.bandPowers) {
+        // Reconsider the addition of res[key]
         res[key] =
           res[key] +
           this.electrodePowerWeights[i] *
