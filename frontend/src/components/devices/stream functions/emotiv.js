@@ -31,7 +31,7 @@ export function connectEmotiv(changeConnectionStatus) {
           id: id,
           metadata: {
             device: "EMOTIV",
-            type: "default",
+            type: "eeg",
             id: id,
             connected: true,
           },

@@ -7,14 +7,6 @@ import JSZip from "jszip";
 import store from "../../../store/store";
 import { createSelector } from "reselect";
 
-const getDataIDs = createSelector(
-  [(state) => state.deviceMeta],
-  (deviceMeta) => {
-    return Object.keys(deviceMeta).filter(
-      (name) => "playing" in deviceMeta[name]
-    );
-  }
-);
 
 window.recordings = {};
 
@@ -24,19 +16,11 @@ Papa.parsePromise = function (file, config) {
   });
 };
 
-export function FileUploader({ setCurrentScreen }) {
-  const dispatch = useDispatch();
-  const prevRecordIDs = useSelector(getDataIDs);
-  const [recordingDevice, setRecordingDevice] = useState("");
+export function FileUploader() {
+
+
   const [successText, setSuccessText] = useState("");
-  const [id, setID] = useState(() => {
-    const rec = prevRecordIDs.length;
-    if (rec != 0) {
-      return "Pre-recorded " + (rec + 1);
-    } else {
-      return "Pre-recorded";
-    }
-  });
+
 
   async function uploadFile(e) {
     const form = e.currentTarget;
@@ -81,7 +65,6 @@ export function FileUploader({ setCurrentScreen }) {
       return acc
     }, {});
 
-    console.log(devicesMetadata);
 
     for (const fileName of dataFilesList) {
       if (fileName.split(".").pop() === "csv") {

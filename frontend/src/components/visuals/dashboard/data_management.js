@@ -30,8 +30,8 @@ function DataCard({
   dataMappings,
   custom,
   deleteParameter,
-  setVisInfo,
   visInfo,
+  indx,
   claves,
 }) {
   // Represents an individual parameter
@@ -57,7 +57,7 @@ function DataCard({
         className="d-flex align-items-center pt-1 pb-1"
         key={visParameter.name}
       >
-        {custom && (visInfo?.parameters?.length > 1) && (
+        {custom && visInfo?.parameters?.length > 1 && (
           <button
             className="btn btn-link text-center p-0 me-2 ms-n1 delete-btn"
             onClick={() => {
@@ -88,7 +88,7 @@ function DataCard({
           }
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target={"#" + visParameter.name.replace(" ", "_")}
+          data-bs-target={"#" + indx}
           aria-expanded="false"
           aria-controls="collapseTwo"
           onClick={() => setExpanded(!expanded)}
@@ -96,7 +96,7 @@ function DataCard({
           <i className="bi bi-three-dots-vertical"></i>
         </button>
       </div>
-      <div id={visParameter.name.replace(" ", "_")} className="collapse">
+      <div id={indx} className="collapse">
         <div>
           <ul className="list-group list-group-flush">
             <ParameterManager
@@ -123,13 +123,13 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
   const dataMappings = useSelector(selectDataMappings);
   const claves = useSelector(getDataStreamKeys);
 
-  const dataCards = visInfo?.parameters?.map((parameter) => (
+  const dataCards = visInfo?.parameters?.map((parameter, indx) => (
     <DataCard
       visParameter={parameter}
       key={parameter.name}
       dataMappings={dataMappings}
       deleteParameter={deleteParameter}
-      setVisInfo={setVisInfo}
+      indx={indx}
       visInfo={visInfo}
       custom={custom}
       claves={claves}
@@ -150,30 +150,41 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
   }
 
   function newParameter() {
-    const newText = newParamName;
-    //const utf8Data = newText.replace(/[^\x20-\x7E]+/g, '');
-    const utf8Data = newText;
-
-    const currentProperties = visInfo.parameters.map(({ name }) => name);
-    if (currentProperties.includes(utf8Data)) {
-      setValid(false);
-      return;
-    }
-
-    if (utf8Data == "") {
-      setValid(false);
-      return;
-    }
+    if (!checkValidity()) return;
 
     dispatch({
       type: "params/create",
       payload: {
-        name: utf8Data,
+        name: newParamName,
       },
     });
 
-    setVisInfo([...visInfo.parameters, { name: utf8Data, suggested: [] }]);
+    setVisInfo([...visInfo.parameters, { name: newParamName, suggested: [] }]);
     setShow(false);
+  }
+
+  function checkValidity() {
+    const blacklistedCharacters = ["-", "#", "/", "(", ")", "="];
+    const currentProperties = visInfo.parameters.map(({ name }) => name);
+
+    if (currentProperties.includes(newParamName)) {
+      setValid(false);
+      return false;
+    } else if (newParamName == "") {
+      setValid(false);
+      return false;
+    } else if (
+      blacklistedCharacters.some((char) => newParamName.includes(char))
+    ) {
+      setValid(false);
+      return false;
+    } else if (newParamName.length > 20) {
+      setValid(false);
+      return false;
+    } else {
+      setValid(true);
+      return true;
+    }
   }
 
   useOutsideAlerter(overlayRef, setShow);
@@ -195,7 +206,7 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
               onChange={(e) => {
                 e.preventDefault();
                 setNewParamName(e.target.value);
-                setValid(true);
+                checkValidity(e.target.value);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -206,7 +217,11 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
             />
             <label htmlFor="max">Name</label>
           </form>
-          <button className="btn btn-primary" onClick={newParameter}>
+          <button
+            className="btn btn-primary"
+            onClick={newParameter}
+            disabled={!valid}
+          >
             Create
           </button>
         </div>

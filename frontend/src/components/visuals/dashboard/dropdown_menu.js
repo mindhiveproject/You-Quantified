@@ -118,6 +118,7 @@ export function ParameterDropDown({
           </button>
         </li>
         {claves.map((option) => {
+          if (option.device.includes("event_markers")) return;
           return (
             <li key={option.device}>
               <button

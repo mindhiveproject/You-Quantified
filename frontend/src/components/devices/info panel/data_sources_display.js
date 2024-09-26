@@ -3,17 +3,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import Overlay from 'react-bootstrap/Overlay';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { useSelector } from 'react-redux';
-import devicesRaw from '../../metadata/devices';
-import { selectDevices } from './main';
+import devicesRaw from '../../../metadata/devices.json';
+import { selectDevices } from '../main';
 
-const devices = devicesRaw;
 
 function PopupItem({item}) {
     const [show, setShow] = useState(false);
     const target = useRef(null);
     
     return (
-        <div className="col border border-primary-subtle rounded-pill me-2 mt-2" onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} key={item.name}>
+        <div className="col border border-primary-subtle mt-2 me-n0-1" onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} key={item.name}>
             <div className='d-flex m-2 justify-content-between align-items-start' key={item.name}>
                 <div  ref={target}>{item.name} </div>
                 <Overlay className="custom-tooltip" target={target.current} show={show} placement="bottom">
@@ -36,17 +35,17 @@ function DataCards({source, groupData}) {
     const dataArray=[];
 
     function appendToArray(value, info) {
-        const datatoAppend=info.find(x => x.heading===value).data.map((obj)=>{
+        const datatoAppend=info.find(x => x.device===value).data.map((obj)=>{
                 obj["source"]=value;
                 return obj;
             });
         return datatoAppend;
     }
 
-    for (const valor of source) {
-        dataArray.push(appendToArray(valor, devices));
-    }
-
+    console.log("DataCards + Source");
+    console.log(source);
+    
+    dataArray.push(appendToArray(source, devicesRaw));
     const showData=dataArray.flat();
 
     // Group data by type if it's defined
@@ -61,8 +60,8 @@ function DataCards({source, groupData}) {
         const groupDataCards=groupNames.map((group)=>{
             return (
                 <div key={group}>
-                    <h6 className='g-0 m-0 mb-2 ms-n1'>{group}</h6>
-                    <div className="row row-cols-auto mb-3 justify-content-end">
+                    <h6 className='g-0 mb-2'>{group}</h6>
+                    <div className="row row-cols-auto mb-3 ms-1">
                     {groupedData[group].map((item)=>{
                         return <PopupItem item={item} key={item.name}/>
                     })}
@@ -78,7 +77,7 @@ function DataCards({source, groupData}) {
     } else {
         return (  
             <div>   
-                <div className="row row-cols-auto mb-3 justify-content-end">
+                <div className="row row-cols-auto mb-3 justify-content-start">
                     {(showData.length!==0)?showData.map((item)=>{
                         return <PopupItem item={item} key={item.name}/>
                     })
@@ -106,7 +105,7 @@ export default function AvailableDataInformation() {
     useEffect(()=>updateDataCard(<DataCards source={source}/>), [source]);
     
     return (
-        <div className='container'>
+        <div>
             {dataCard}
         </div>
     )
@@ -119,7 +118,7 @@ export function ModalDataInformation({source, groupData}) {
     const dataCard=<DataCards source={source} groupData={groupData}/>;
     
     return (
-        <div className='container'>
+        <div>
             {dataCard}
         </div>
     )  

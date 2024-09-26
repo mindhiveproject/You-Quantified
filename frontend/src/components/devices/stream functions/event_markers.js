@@ -21,7 +21,7 @@ export class EventMarkerStream {
         id: this.id,
         metadata: {
           device: "Event Markers",
-          type: "event",
+          type: "event marker",
           id: this.id,
           connected: true,
         },

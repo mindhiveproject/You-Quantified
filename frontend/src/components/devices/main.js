@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-import RenderDevices from "./device list/render";
-
-import { FileUploader } from "./stream functions/file_upload";
 import { createSelector } from "reselect";
-import { DeviceConnection } from "./stream functions/main";
-import devicesRaw from "../../metadata/devices.json";
 import { RecordComponent } from "./recording";
+import { LeftInfoPane } from "./info panel/main";
+import { GenericDeviceButtonsList } from "./buttons/generic";
+import { FileUploadButton } from "./buttons/upload";
 
 const selectData = (state) => state.dataStream;
 const selectDeviceMeta = (state) => state.deviceMeta;
-
-const getDataIDs = createSelector([selectDeviceMeta], (deviceMeta) => {
-  return Object.keys(deviceMeta).filter((name) =>
-    deviceMeta[name]?.id?.includes("EPOC")
-  );
-});
 
 export const selectDevices = createSelector(
   [selectData, selectDeviceMeta],
@@ -33,202 +24,119 @@ export function DevicesManager({
   recording,
   setRecording,
 }) {
-  const [previousScreen, setPreviousScreen] = useState();
-  const [currentScreen, _setCurrentScreen] = useState("main");
   const [currentDevice, setCurrentDevice] = useState();
 
-  function setCurrentScreen(val) {
-    if (val === "new") {
-      setPreviousScreen("main");
-    } else if (val === "main") {
-      setPreviousScreen();
-    } else {
-      setPreviousScreen(currentScreen);
-    }
-    _setCurrentScreen(val);
+  function handleMouseLeave() {
+    setCurrentDevice({ device: "none", card_type: "none" });
   }
-
-  const previousScreenName = {
-    main: "Data sources",
-    new: "New devices",
-  };
 
   return (
     <div className="h-100 overflow-scroll disable-scrollbar devices-overlay">
-      <div className="d-flex justify-content-end">
-        {previousScreen && (
-          <button
-            className="btn btn-link text-decoration-none fw-medium"
-            onClick={() => setCurrentScreen(previousScreen)}
-          >
-            <i className="bi bi-arrow-left me-1"></i>
-            {previousScreenName[previousScreen]}
-          </button>
-        )}
-        <button
-          className="btn btn-link text-decoration-none"
-          onClick={() => setShowDevices(false)}
-        >
-          <i className="bi bi-x h4"></i>
-        </button>
-      </div>
-      <div className="d-flex justify-content-end align-items-end text-end me-3">
-        {currentScreen === "main" && (
-          <MainWindow
-            setCurrentScreen={setCurrentScreen}
-            setCurrentDevice={setCurrentDevice}
-            saveObject={saveObject}
-            recording={recording}
-            setRecording={setRecording}
-          />
-        )}
-        {currentScreen === "new" && (
-          <NewDevicesWindow
-            setCurrentScreen={setCurrentScreen}
-            setCurrentDevice={setCurrentDevice}
-          />
-        )}
-        {currentScreen === "device" && (
-          <DeviceScreen
-            setCurrentScreen={setCurrentScreen}
-            setCurrentDevice={setCurrentDevice}
-            currentDevice={currentDevice}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-const areThereDevices = createSelector(
-  [(state) => state.deviceMeta],
-  (deviceMeta) => {
-    return Object.keys(deviceMeta).length > 0;
-  }
-);
-
-function MainWindow({
-  setCurrentScreen,
-  setCurrentDevice,
-  saveObject,
-  recording,
-  setRecording,
-}) {
-  const areDevices = useSelector(areThereDevices);
-
-  return (
-    <div className="w-50">
-      <h2 className="mb-2 fw-bold ms-5">Data sources</h2>
-      <div className="d-flex p-0 m-0 justify-content-end">
-        {true && (
-          <RecordComponent
-            saveObject={saveObject}
-            recording={recording}
-            setRecording={setRecording}
-          />
-        )}
-
-        <button
-          className="btn btn-secondary btn-outline-dark fw-medium mb-2 ms-2"
-          onClick={() => setCurrentScreen("new")}
-        >
-          <i className="bi bi-plus m-0 p-0 me-1"></i>New source
-        </button>
-      </div>
-      <div>
-        <RenderDevices
-          setCurrentScreen={setCurrentScreen}
-          setCurrentDevice={setCurrentDevice}
+      <div className="record-button">
+        <RecordComponent
+          saveObject={saveObject}
+          recording={recording}
+          setRecording={setRecording}
         />
       </div>
-    </div>
-  );
-}
-
-function NewDevicesWindow({ setCurrentScreen, setCurrentDevice }) {
-  function changeDevice(input) {
-    setCurrentDevice({ name: input });
-    setCurrentScreen("device");
-  }
-
-  return (
-    <div>
-      <h2 className="mb-2 fw-bold">Add a new source</h2>
-
-      <div className="button-list mt-3">
+      <div className="sources-top">
+        <div className="d-flex justify-content-end mb-n2">
+          <button
+            className="btn btn-link text-decoration-none"
+            onClick={() => setShowDevices(false)}
+          >
+            <i className="bi bi-x h4"></i>
+          </button>
+        </div>
+        <div className="text-end me-3 ms-3 p-0">
+          <h2 className="mb-2 fw-bold ms-5">Data sources</h2>
+          <p>
+            Manage and connect to new devices. All from within this dashboard
+          </p>
+        </div>
+      </div>
+      <div className="d-flex p-0 m-0 justify-content-end">
         <div
-          className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
-          onClick={() => changeDevice("Upload")}
+          className="sources-pane-left w-100"
+          onMouseLeave={handleMouseLeave}
         >
-          <div className="card-body">
-            <p className="m-0 text-body-tertiary">Any</p>
-            <h5 className="card-title">Upload a file</h5>
-            <p className="card-text">
-              Upload a file from a stream that was recorded using this app
-            </p>
+          <div className="h-100">
+            <LeftInfoPane currentDevice={currentDevice} />
           </div>
         </div>
-        {devicesRaw.map((device) => (
-          <NewDeviceButton setCurrentDevice={changeDevice} device={device} />
-        ))}
+        <RightPane setCurrentDevice={setCurrentDevice} />
       </div>
     </div>
   );
 }
 
-function DeviceScreen({ currentDevice, setCurrentScreen }) {
-  if (currentDevice?.name === "Upload") {
-    return <FileUploader setCurrentScreen={setCurrentScreen} />;
+function RightPane({ setCurrentDevice }) {
+  return (
+    <div className="sources-pane-right disable-scrollbar me-3">
+      <FileUploadButton />
+      <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
+    </div>
+  );
+}
+
+
+
+// Event Marker Indicators
+function EventMarkerCard() {
+  const deviceMeta = useSelector((state) => state.deviceMeta);
+
+  const eventMarkerStreams = Object.entries(deviceMeta).filter(
+    ([key, value]) => value.type === "event marker"
+  );
+
+  const eventMarkerIndicators = eventMarkerStreams?.map((obj) => {
+    return <EventMarkerIndicator name={obj.name} deviceMeta={deviceMeta} />;
+  });
+
+  return (
+    <div className="card rounded-0 mb-2 mt-1">
+      <button className="card-body btn btn-link text-decoration-none text-start">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 className="card-title g-0 m-0">Event Markers</h5>
+          </div>
+        </div>
+      </button>
+      <ul className="list-group list-group-flush">{eventMarkerIndicators}</ul>
+    </div>
+  );
+}
+
+function EventMarkerIndicator({ name, deviceMeta }) {
+  const [connectionText, setConnectionText] = useState(
+    connText["disconnected"]
+  );
+
+  function changeConnectionStatus(status) {
+    setConnectionText(connText[status]);
   }
-  console.log("Current device");
-  console.log(currentDevice);
+
+  useEffect(() => {
+    if (!deviceMeta?.[name]) return;
+    const connStatus = deviceMeta?.[name]?.connected;
+    if (!connStatus) {
+      changeConnectionStatus("lost");
+    } else {
+      changeConnectionStatus("connected");
+    }
+  }, [deviceMeta]);
+
+  const segments = name.split("_");
+  const visName = segments[segments.length - 1];
+
   return (
-    <DeviceConnection
-      deviceName={currentDevice?.name}
-      deviceID={currentDevice?.id}
-    />
+    <li className="list-group-item">
+      <div className="d-flex justify-content-between">
+        <span>{visName}</span>
+        <span className={`fw-bold ${connectionText.type}`}>
+          {connectionText.text}
+        </span>
+      </div>
+    </li>
   );
 }
-
-function NewDeviceButton({ setCurrentDevice, device }) {
-  return (
-    <div
-      className="btn btn-link text-decoration-none rounded-0 card text-start p-0 mb-2"
-      onClick={() => setCurrentDevice(device.heading)}
-    >
-      <div className="card-body">
-        <p className="mb-1 text-body-tertiary">{device?.type}</p>
-        <h5 className="card-title">{device?.heading}</h5>
-        {device?.short_description && (
-          <p className="card-text">{device.short_description}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* Device Rendering With Images 
-
-      <div className="row g-0 align-items-center">
-        // Left column
-        <div className="col-md-4 d-flex justify-content-center">
-          <img
-            src={device?.image || '/placeholder.jpg'}
-            alt={device?.heading}
-            className="img-fluid rounded-start"
-            style={{ maxHeight: '100px', objectFit: 'contain' }} // Ensures the image fits nicely
-          />
-        </div>
-        // Right column
-        <div className="col-md-8">
-          <div className="card-body">
-            <p className="mb-1 text-body-tertiary">{device?.type}</p>
-            <h5 className="card-title">{device?.heading}</h5>
-            {device?.short_description && (
-              <p className="card-text">{device.short_description}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-*/

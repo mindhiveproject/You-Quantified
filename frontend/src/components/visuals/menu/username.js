@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { UserContext } from "../../../App";
 import { useMutation } from "@apollo/client";
 import { END_SESSION } from "../../../queries/user";
@@ -11,6 +11,58 @@ export function MyUserName() {
       setCurrentUser(undefined);
     },
   });
+
+  const [showUserID, setShowUserID] = useState(false);
+
+  const konamiCode = [
+    "ArrowUp",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowRight",
+    "b",
+    "a",
+  ];
+
+  const [konamiIndex, setKonamiIndex] = useState(0);
+
+  const konamiIndexRef = useRef(konamiIndex);
+  konamiIndexRef.current = konamiIndex;
+
+  function konamiCodeFunc(event, konamiIndexRef) {
+    // Check if the key pressed matches the current konami sequence key
+    console.log(konamiIndexRef.current);
+    if (event.key === konamiCode[konamiIndexRef.current]) {
+      setKonamiIndex((prevIndex) => prevIndex + 1);
+      // If the entire Konami code is successfully entered
+      if (konamiIndexRef.current + 1 === konamiCode.length) {
+        setShowUserID(true);
+        setKonamiIndex(0); // Reset the index
+      }
+    } else {
+      // Reset the index if the key doesn't match
+      setKonamiIndex(0);
+    }
+  }
+
+  function copyUserName() {
+    navigator.clipboard.writeText(currentUser?.id);
+    alert("Copied user ID to clipboard");
+  }
+  useEffect(() => {
+    document.addEventListener("keydown", (event) =>
+      konamiCodeFunc(event, konamiIndexRef)
+    );
+
+    return () => {
+      document.removeEventListener("keydown", (event) =>
+        konamiCodeFunc(event, konamiIndexRef)
+      );
+    };
+  }, []);
 
   if (loading) return <div>Logging out...</div>;
 
@@ -43,6 +95,13 @@ export function MyUserName() {
             Sign Out
           </a>
         </li>
+        {showUserID && (
+          <li>
+            <a className="dropdown-item" onClick={copyUserName}>
+              {currentUser?.id}<i className="ms-3 bi bi-clipboard"></i>
+            </a>
+          </li>
+        )}
       </ul>
     </div>
   );
