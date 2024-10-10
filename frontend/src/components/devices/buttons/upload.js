@@ -30,15 +30,15 @@ async function uploadFile(e, setConnText) {
   let dataFilesList = Object.keys(zipUpload.files);
 
   if (
-    !dataFilesList.includes("metadata.csv") ||
-    !dataFilesList.includes("README.txt")
+    !dataFilesList.includes("metadata.csv")
   ) {
+    console.log("error, data files incomplete")
     setConnText(connectionText["failed"]);
     return;
   }
 
   dataFilesList = dataFilesList.filter(
-    (e) => e !== ("metadata.csv" || "README.txt")
+    (e) => !e.includes('metadata')
   );
 
   const metaDataFile = await zipUpload.files?.["metadata.csv"].async("blob");
@@ -51,10 +51,14 @@ async function uploadFile(e, setConnText) {
     },
   });
 
+  console.log(metadataRaw);
+
   const devicesMetadata = metadataRaw.data.reduce((acc, obj) => {
     acc[obj["file name"]] = { ...obj };
     return acc;
   }, {});
+
+  console.log(devicesMetadata);
 
   for (const fileName of dataFilesList) {
     if (fileName.split(".").pop() === "csv") {
@@ -63,6 +67,8 @@ async function uploadFile(e, setConnText) {
         header: true,
         complete: (results) => {
           const currentDeviceMeta = devicesMetadata[fileName];
+          console.log(fileName)
+          console.log(currentDeviceMeta)
 
           // results.data - contains the uploaded file output
           let id = currentDeviceMeta["recording id"] + " Recording";
@@ -75,9 +81,7 @@ async function uploadFile(e, setConnText) {
           setConnText(connectionText["connected"]);
         },
         error: (error) => {
-          setSuccessText(
-            "There was an error with the file you uploaded, please try again."
-          );
+          setConnText(connectionText["failed"]);
           console.log(error);
         },
       });

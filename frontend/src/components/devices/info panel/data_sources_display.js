@@ -41,9 +41,6 @@ function DataCards({source, groupData}) {
             });
         return datatoAppend;
     }
-
-    console.log("DataCards + Source");
-    console.log(source);
     
     dataArray.push(appendToArray(source, devicesRaw));
     const showData=dataArray.flat();

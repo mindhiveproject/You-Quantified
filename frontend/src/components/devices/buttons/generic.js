@@ -36,7 +36,6 @@ function closestEdge(mouse, elem) {
 }
 
 export function GenericDeviceButtonsList({ setCurrentDevice }) {
-  console.log(devicesRaw);
   const deviceCards = devicesRaw.map((jsonMeta) => {
     return (
       <GenericDeviceButton
@@ -134,7 +133,6 @@ function DeviceConnectionIndicator({ myDeviceMeta }) {
   }
 
   useEffect(() => {
-    console.log(myDeviceMeta);
     const connStatus = deviceMeta?.[myDeviceMeta?.id]?.connected;
     if (!connStatus) {
       changeConnectionStatus("lost");

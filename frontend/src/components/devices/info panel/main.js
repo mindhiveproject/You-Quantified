@@ -8,8 +8,6 @@ export function LeftInfoPane({ currentDevice }) {
       return <FileUploader />;
     }*/
   
-    console.log(currentDevice);
-  
     return (
       <div className="w-100 h-100 ms-3 pe-4-5 mb-5">
         {currentDevice?.card_type === "generic" && (

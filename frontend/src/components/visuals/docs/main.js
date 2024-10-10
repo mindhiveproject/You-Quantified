@@ -249,16 +249,6 @@ export default function DocsWindow({
 
   return (
     <div>
-      {/*
-      <div
-        className="d-flex justify-content-between align-items-center"
-        style={{ color: "white", backgroundColor: "#1A1A1A" }}
-      >
-        <h5 className="ms-2 p-2 pt-3 align-self-center">Documentation</h5>
-        <button className="btn btn-link" onClick={() => console.log("Hi!")}>
-          <i className="bi bi-download code-download"></i>
-        </button>
-      </div>*/}
       {isEditable && (
         <div className="d-flex flex-column">
           <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { EventMarkerStream } from "../../devices/stream functions/event_markers";
 
 export function P5iFrame({ code, params }) {
@@ -7,6 +7,9 @@ export function P5iFrame({ code, params }) {
 
   const { visID } = useParams();
   const paramsRef = useRef(params);
+  let [searchParams, setSearchParams] = useSearchParams();
+  const doNotExecute = searchParams.get("execute");
+
 
   const eventStream = new EventMarkerStream(visID);
   paramsRef.current = params;
@@ -38,6 +41,9 @@ export function P5iFrame({ code, params }) {
   `;
 
   useEffect(() => {
+    if (doNotExecute==="false") {
+      return
+    }
     const source = /* html */ `
       <html>
       <head>
@@ -88,6 +94,7 @@ export function P5iFrame({ code, params }) {
       eventStream.unmountEventMarkers();
     };
   }, []);
+
 
   return (
     <iframe
