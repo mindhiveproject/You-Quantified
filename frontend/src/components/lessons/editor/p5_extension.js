@@ -2,6 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import { P5iFrame } from "../../visuals/P5Plugin/p5iframe";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import React, { useRef, useEffect, useState } from "react";
 import DataManagement from "../../visuals/dashboard/data_management";
 import { useQuery } from "@apollo/client";
@@ -51,6 +52,9 @@ function LoadP5LessonVisuals({ visMetadata, setVisMetadata }) {
   const [dispCode, setDispCode] = useState(false);
   const [code, setCode] = useState("");
 
+  let [searchParams, setSearchParams] = useSearchParams();
+  const isExecuting = searchParams.get("execute");
+
   useEffect(() => {
     fetchCode(visMetadata?.code?.url)
       .then((response) => setCode(response))
@@ -68,7 +72,7 @@ function LoadP5LessonVisuals({ visMetadata, setVisMetadata }) {
       />
       <div className="mb-n5" />
       <div className="p5-container-lessons">
-        <P5iFrame params={params} code={code} />
+        <P5iFrame params={params} code={code} isExecuting={isExecuting}/>
       </div>
     </>
   );

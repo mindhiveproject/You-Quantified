@@ -5,6 +5,7 @@ import { RecordComponent } from "./recording";
 import { LeftInfoPane } from "./info panel/main";
 import { GenericDeviceButtonsList } from "./buttons/generic";
 import { FileUploadButton } from "./buttons/upload";
+import { LSLDeviceButton } from "./buttons/lsl";
 
 const selectData = (state) => state.dataStream;
 const selectDeviceMeta = (state) => state.deviceMeta;
@@ -57,7 +58,7 @@ export function DevicesManager({
       </div>
       <div className="d-flex p-0 m-0 justify-content-end">
         <div
-          className="sources-pane-left w-100"
+          className="sources-pane-left disable-scrollbar w-100"
           onMouseLeave={handleMouseLeave}
         >
           <div className="h-100">
@@ -73,13 +74,12 @@ export function DevicesManager({
 function RightPane({ setCurrentDevice }) {
   return (
     <div className="sources-pane-right disable-scrollbar me-3">
-      <FileUploadButton />
+      <FileUploadButton setCurrentDevice={setCurrentDevice} />
+      <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
       <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
     </div>
   );
 }
-
-
 
 // Event Marker Indicators
 function EventMarkerCard() {

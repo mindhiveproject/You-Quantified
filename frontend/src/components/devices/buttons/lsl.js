@@ -1,63 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import devicesRaw from "../../../metadata/devices.json";
 
-import { deviceConnectionFunctions } from "../stream functions/main";
 import { connectionText } from "./connectionText";
+import { closestEdge } from "./generic";
+import { connectLSL } from "../stream functions/lsl";
 
-export function closestEdge(mouse, elem) {
-  var elemBounding = elem.getBoundingClientRect();
-
-  var elementLeftEdge = elemBounding.left;
-  var elementTopEdge = elemBounding.top;
-  var elementRightEdge = elemBounding.right;
-  var elementBottomEdge = elemBounding.bottom;
-
-  var mouseX = mouse.pageX;
-  var mouseY = mouse.pageY;
-
-  var topEdgeDist = Math.abs(elementTopEdge - mouseY);
-  var bottomEdgeDist = Math.abs(elementBottomEdge - mouseY);
-  var leftEdgeDist = Math.abs(elementLeftEdge - mouseX);
-  var rightEdgeDist = Math.abs(elementRightEdge - mouseX);
-
-  var min = Math.min(topEdgeDist, bottomEdgeDist, leftEdgeDist, rightEdgeDist);
-
-  switch (min) {
-    case leftEdgeDist:
-      return "left";
-    case rightEdgeDist:
-      return "right";
-    case topEdgeDist:
-      return "top";
-    case bottomEdgeDist:
-      return "bottom";
-  }
-}
-
-export function GenericDeviceButtonsList({ setCurrentDevice }) {
-  const deviceCards = devicesRaw.map((jsonMeta) => {
-    return (
-      <GenericDeviceButton
-        jsonMeta={jsonMeta}
-        setCurrentDevice={setCurrentDevice}
-      />
-    );
-  });
-
-  return <div>{deviceCards}</div>;
-}
-
-function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
+export function LSLDeviceButton({ setCurrentDevice }) {
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const divRef = useRef(null);
 
   const deviceStreams = Object.entries(deviceMeta).filter(
-    ([key, value]) => value.device === jsonMeta.device
+    ([key, value]) => value.device === "LSL"
   );
 
   const handleMouseEnter = () => {
-    setCurrentDevice({ device: jsonMeta.device, card_type: "generic" });
+    setCurrentDevice({ device: "any", card_type: "LSL" });
   };
 
   const handleMouseLeave = (mouse) => {
@@ -66,7 +23,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
     setCurrentDevice({ device: "none", card_type: "none" });
   };
 
-  const onButtonConnect = deviceConnectionFunctions[jsonMeta.device];
+  const onButtonConnect = connectLSL;
 
   const [connText, setConnInfo] = useState({ text: "", type: "" });
   const [disabled, setDisabled] = useState(false);
@@ -74,15 +31,6 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
   function changeConnectionStatus(status) {
     setConnInfo(connectionText[status]);
   }
-
-  useEffect(() => {
-    if (typeof navigator.bluetooth === "undefined" && device === "Muse") {
-      setDisabled(true);
-    }
-    if (jsonMeta.connections !== "multiple" && deviceStreams.length > 0) {
-      setDisabled(true);
-    }
-  }, [connText]);
 
   return (
     <div className="mb-3 d-flex flex-column">
@@ -103,8 +51,8 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
         >
           <div className="d-flex text-start justify-content-between">
             <div>
-              <small className="g-0 m-0">{jsonMeta.type}</small>
-              <h5 className="card-title g-0 m-0">{jsonMeta.device}</h5>
+              <small className="g-0 m-0">Any</small>
+              <h5 className="card-title g-0 m-0">LSL Stream Connection</h5>
             </div>
             <div className="align-self-center">
               {connText.text !== "Connected" && <span>{connText.text}</span>}
@@ -115,7 +63,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
       {deviceStreams.length > 0 && (
         <ul className="list-group list-group-flush">
           {deviceStreams.map((obj) => (
-            <DeviceConnectionIndicator myDeviceMeta={obj[1]} />
+            <LSLConnectionIndicator myDeviceMeta={obj[1]} />
           ))}
         </ul>
       )}
@@ -123,7 +71,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
   );
 }
 
-function DeviceConnectionIndicator({ myDeviceMeta }) {
+function LSLConnectionIndicator({myDeviceMeta}) {
   const deviceMeta = useSelector((state) => state.deviceMeta);
 
   const [connText, setConnText] = useState(connectionText["disconnected"]);

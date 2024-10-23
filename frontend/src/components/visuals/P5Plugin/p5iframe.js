@@ -2,13 +2,12 @@ import React, { useRef, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { EventMarkerStream } from "../../devices/stream functions/event_markers";
 
-export function P5iFrame({ code, params }) {
+export function P5iFrame({ code, params, isExecuting }) {
   const iframeRef = useRef(null);
 
   const { visID } = useParams();
   const paramsRef = useRef(params);
-  let [searchParams, setSearchParams] = useSearchParams();
-  const doNotExecute = searchParams.get("execute");
+
 
 
   const eventStream = new EventMarkerStream(visID);
@@ -41,7 +40,7 @@ export function P5iFrame({ code, params }) {
   `;
 
   useEffect(() => {
-    if (doNotExecute==="false") {
+    if (isExecuting==="false") {
       return
     }
     const source = /* html */ `

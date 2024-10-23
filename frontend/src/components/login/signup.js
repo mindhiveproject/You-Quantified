@@ -7,15 +7,17 @@ import {
 } from "../../queries/user";
 import { LoggedInScreen } from "./main";
 import { UserContext } from "../../App";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 
 export default function SignUp() {
   const [currScreen, setCurrScreen] = useState("email-password");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState("");
   const { currentUser, setCurrentUser } = useContext(UserContext);
+  const [email, setEmail] = useState("");
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
 
   if (currentUser && currScreen !== "signed-up") {
     return (
@@ -39,8 +41,9 @@ export default function SignUp() {
         )}
       </div>
       {currScreen === "email-password" && (
-        <PassswordEmailInput
+        <PasswordEmailInput
           setEmail={setEmail}
+          password={password}
           setPassword={setPassword}
           setCurrScreen={setCurrScreen}
         />
@@ -59,13 +62,20 @@ export default function SignUp() {
           password={password}
           user={user}
           setCurrentUser={setCurrentUser}
+          currentUser={currentUser}
         />
       )}
     </div>
   );
 }
 
-function SignedUpScreen({ email, password, user, setCurrentUser }) {
+function SignedUpScreen({
+  email,
+  password,
+  user,
+  setCurrentUser,
+  currentUser,
+}) {
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
     update(cache, { data }) {
       if (data?.authenticateUserWithPassword?.item) {
@@ -86,7 +96,7 @@ function SignedUpScreen({ email, password, user, setCurrentUser }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const redirectVisual = searchParams.get("visual");
 
-  if (redirectVisual) {
+  if (redirectVisual && currentUser) {
     return <Navigate to={`/visuals/${redirectVisual}`} />;
   }
 
@@ -100,183 +110,124 @@ function SignedUpScreen({ email, password, user, setCurrentUser }) {
   );
 }
 
-export function PassswordEmailInput({ setEmail, setPassword, setCurrScreen }) {
-  const [errorState, setErrorState] = useState({ error: true, message: "" });
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [passwordInput, setPasswordInput] = useState();
-  const [emailInput, setEmailInput] = useState();
-  const [confirmPasswordInput, setConfirmPasswordInput] = useState();
+const SignupSchema = Yup.object().shape({
+  email: Yup.string().email("Invalid email").required("Required"),
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters long")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[@$!%*-?_&]/,
+      "Password must contain at least one special character"
+    ),
+});
 
-  const [checkRepeatedUser, { data, error }] = useLazyQuery(
-    CHECK_REPEATED_USER,
-    {
-      onCompleted: (data) => {
-        setErrorState({
-          error: data?.usersCount > 0,
-          message: data?.usersCount > 0 ? "Email is already registered" : "",
-        });
-      },
-    }
-  );
-  function checkUserOrEmail(input) {
-    checkRepeatedUser({ variables: input });
-    if (errorState?.message == "Invalid email address") {
-      checkValidEmail(input.email);
-    }
-  }
-
-  function checkValidEmail(input) {
-    if (errorState?.message === "Email is already registered") {
-      return;
-    }
-    const isValidEmail = validateEmail(input);
-    setErrorState({
-      error: !isValidEmail,
-      message: isValidEmail ? "" : "Invalid email address",
-    });
-  }
-
-  function checkValidPassword(input) {
-    setPasswordInput(input);
-    const isValidPass = validateEmail(input);
-    setErrorState({
-      error: !isValidPass,
-      message: isValidPass
-        ? ""
-        : "Password must be 8 characters with a number and capital letter.",
-    });
-  }
-
-  function checkPasswordsMatch(e) {
-    if (e.target.value !== passwordInput) {
-      setErrorState({ error: true, message: "Passwords do not match" });
-    } else {
-      setErrorState({ error: false, message: "" });
-    }
-  }
-
-  useEffect(() => {
-    if (
-      passwordInput &&
-      emailInput &&
-      confirmPasswordInput &&
-      !errorState.error
-    ) {
-      setIsFormValid(true);
-      console.log("Valid!");
-    } else {
-      setIsFormValid(false);
-      console.log("Invalid!");
-    }
-  }, [passwordInput, emailInput, confirmPasswordInput, errorState]);
+export function PasswordEmailInput({ setEmail, setPassword, setCurrScreen }) {
+  const [checkRepeatedUser, { data, error }] =
+    useLazyQuery(CHECK_REPEATED_USER);
 
   if (error) return <span>Error</span>;
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (isFormValid) {
-          setEmail(emailInput);
-          setPassword(passwordInput);
+    <Formik
+      initialValues={{
+        email: "",
+        password: "",
+      }}
+      validationSchema={SignupSchema}
+      onSubmit={async (values, { setErrors, setSubmitting }) => {
+        // Run the check for repeated user
+        const { data } = await checkRepeatedUser({
+          variables: { email: values.email },
+        });
+
+        if (data?.usersCount > 0) {
+          // If the email is already registered, show an error message
+          setErrors({ email: "Email is already registered" });
+          setSubmitting(false); // Stop the form submission process
+        } else {
+          // If email is not repeated, proceed to the next step
+          setEmail(values.email);
+          setPassword(values.password);
           setCurrScreen("username");
         }
       }}
+      validateOnMount={true}
     >
-      <div className="mb-3">
-        <label htmlFor="inputEmail">Email</label>
-        <input
-          type="email"
-          className="form-control"
-          id="inputEmail"
-          onChange={(e) => {
-            checkUserOrEmail({ email: e.target.value });
-            setEmailInput(e.target.value);
-          }}
-          onBlur={(e) => checkValidEmail(e.target.value)}
-          autoComplete="email"
-        ></input>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="inputPassword">Password</label>
-        <input
-          type="password"
-          className="form-control"
-          id="inputPassword"
-          onChange={(e) => checkValidPassword(e.target.value)}
-          autoComplete="new-password"
-        ></input>
-      </div>
-      <div className="mb-3">
-        <label htmlFor="confirmInputPassword">Confirm your password</label>
-        <input
-          type="password"
-          className="form-control"
-          id="confirmInputPassword"
-          onChange={(e) => {
-            setConfirmPasswordInput(e.target.value);
-            checkPasswordsMatch(e);
-          }}
-          autoComplete="new-password"
-        ></input>
-      </div>
-      {errorState?.error && (
-        <p className="text-warning">{errorState?.message}</p>
-      )}
-      <button
-        type="submit"
-        className={`btn btn-primary ${!isFormValid && "disabled"}`}
-      >
-        Submit
-      </button>
-    </form>
+      {({ errors }) => {
+        return (
+          <Form>
+            <label htmlFor="email">Email</label>
+
+            <Field name="email" type="email" className="form-control" />
+            {errors.email ? (
+              <div className="text-body-tertiary">{errors.email}</div>
+            ) : null}
+            <label htmlFor="password" className="mt-3">
+              Password
+            </label>
+
+            <Field name="password" type="password" className="form-control" />
+            {errors.password ? (
+              <div className="text-body-tertiary">{errors.password}</div>
+            ) : null}
+            <button
+              type="submit"
+              className={`btn btn-primary mt-3 ${
+                (errors?.password || errors?.email) && "disabled"
+              }`}
+            >
+              Submit
+            </button>
+          </Form>
+        );
+      }}
+    </Formik>
   );
 }
 
 function UserSignUp({ email, password, setUser, setCurrScreen }) {
   const [userInput, setUserInput] = useState();
-  const [errorState, setErrorState] = useState({});
+  const [error, setError] = useState();
 
-  const [signupFunction, { loading }] = useMutation(REGISTER_USER);
+  const [signupFunction] = useMutation(REGISTER_USER);
 
-  const [checkRepeatedUser] = useLazyQuery(CHECK_REPEATED_USER, {
-    onCompleted: (data) => {
-      setErrorState({
-        error: data?.usersCount > 0,
-        message: data?.usersCount > 0 ? "Username is already taken" : "",
-      });
-    },
-  });
+  const [checkRepeatedUser] = useLazyQuery(CHECK_REPEATED_USER);
 
   function checkInputValid(input) {
     setUserInput(input);
     if (input != "" && validateUsername(input)) {
-      checkRepeatedUser({ variables: { name: input } });
-      setErrorState({ error: false, message: "" });
+      setError();
     } else {
-      setErrorState({
-        error: true,
-        message: "Username must not contain any spaces or special characters",
-      });
+      setError("Username must not contain any spaces or special characters");
     }
   }
 
-  function submitCallback(e) {
+  async function submitCallback(e) {
     e.preventDefault();
-    if (!loading) {
+
+    const { data } = await checkRepeatedUser({
+      variables: { name: userInput },
+    });
+
+    if (data?.usersCount > 0) {
+      setError("Username is already taken");
+    } else {
+      setUser(userInput);
       signupFunction({
         variables: {
           data: { email, password, name: userInput },
         },
       });
       setCurrScreen("signed-up");
-      setUser(userInput);
     }
   }
 
   return (
     <form onSubmit={submitCallback}>
-      <div className="mb-3">
+      <div>
         <label htmlFor="inputUser">Username</label>
         <input
           type="text"
@@ -287,12 +238,10 @@ function UserSignUp({ email, password, setUser, setCurrScreen }) {
           }}
         ></input>
       </div>
-      {errorState?.error && (
-        <p className="text-warning">{errorState?.message}</p>
-      )}
+      {error && <p className="text-body-tertiary">{error}</p>}
       <button
         type="submit"
-        className={`btn btn-primary ${errorState?.error && "disabled"}`}
+        className={`btn btn-primary mt-3 ${error && "disabled"}`}
       >
         Submit
       </button>
@@ -300,26 +249,16 @@ function UserSignUp({ email, password, setUser, setCurrScreen }) {
   );
 }
 
-function validateEmail(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-}
-
-function validatePassword(password) {
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
-
-  // Explanation of the regex:
-  // ^               Start of string
-  // (?=.*[a-z])     At least one lowercase letter
-  // (?=.*[A-Z])     At least one uppercase letter
-  // (?=.*\d)        At least one digit
-  // {8,}$           At least 8 digit-length
-
-  return regex.test(password);
-}
-
 function validateUsername(username) {
-  // Regular expression to allow only alphanumeric characters and underscores
-  const regex = /^[a-zA-Z0-9_]+$/;
-  return regex.test(username);
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
+  if (
+    username.length > 3 &&
+    username.length < 18 &&
+    usernameRegex.test(username)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
 }

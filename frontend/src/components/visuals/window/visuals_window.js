@@ -5,6 +5,7 @@ import { FullScreen } from "react-full-screen";
 import { useSelector } from "react-redux";
 import React, { useEffect, useRef, useState } from "react";
 import { selectParamValues } from "../utility/selectors";
+import { useSearchParams } from "react-router-dom";
 
 export function VisualsWindow({
   visMetadata,
@@ -21,6 +22,7 @@ export function VisualsWindow({
 
   const [component, setComponent] = useState(null);
 
+  
   useEffect(() => {
     // The following function imports components that are not P5.js visuals by using the default export
     // Checks engine to see if it should handle it as a P5.js visualization
@@ -38,6 +40,9 @@ export function VisualsWindow({
     }
   }, [code]);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isExecuting = searchParams.get("execute")
+
   return (
     <div className={`${popupVisuals ? "d-none" : "h-100 w-100"}`}>
       {!popupVisuals && (
@@ -48,7 +53,8 @@ export function VisualsWindow({
               <P5iFrame
                 code={code}
                 params={params}
-                popupVisuals={popupVisuals}
+                isExecuting = {isExecuting}
+                
               />
               </FullScreen>
             ) : (
@@ -67,6 +73,7 @@ export function VisualsWindow({
             secureOrigin={window.location.origin}
             initialCode={code}
             initialParams={params}
+            isExecuting = {isExecuting}
           />
         </PopupComponent>
       )}

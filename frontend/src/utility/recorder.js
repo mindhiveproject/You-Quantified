@@ -66,8 +66,6 @@ function autoCSVDownload(saveObject, deviceMeta) {
   fileText += "This folder contains the following files: ";
   const metadataJSON = [];
   console.log("device metadata");
-  // Add units to the metadata
-  console.log(deviceMeta);
 
   // Load each file into the zip
   for (const key in saveObject) {
@@ -86,13 +84,18 @@ function autoCSVDownload(saveObject, deviceMeta) {
       ({ heading }) => heading === deviceMeta[key]?.device
     );
 
+    // Check the JSON device list
     if (deviceFromList) {
       currentDeviceMeta["type"] = deviceFromList["type"];
       currentDeviceMeta["sampling rate"] = deviceFromList["sampling_rate"];
     }
 
-    if (deviceMeta[key]?.samplingRate) {
-      currentDeviceMeta["sampling rate"] = deviceMeta?.sampling_rate;
+    // Check device meta to assign additional properties
+    if (deviceMeta[key]?.["sampling rate"]) {
+      currentDeviceMeta["sampling rate"] = deviceMeta[key]?.["sampling rate"];
+    }
+    if (deviceMeta[key]?.["type"]) {
+      currentDeviceMeta["type"] = deviceMeta[key]?.["type"];
     }
 
     metadataJSON.push(currentDeviceMeta);

@@ -4,6 +4,7 @@
 import { MuseClient } from "muse-js";
 import store from "../store/store";
 import * as math from "mathjs";
+import { PolynomialRegression } from "ml-regression-polynomial";
 
 export class MuseDevice {
   channelNames = {
@@ -36,7 +37,7 @@ export class MuseDevice {
     this.id = this.muse.deviceName;
     this.connected = false;
 
-    this.numberOfChannels = 3;
+    this.numberOfChannels = 4;
     const arrayLength = this.WINDOW_SIZE * this.sfreq;
 
     this.PPG_WINDOW_SIZE = 10;
@@ -45,15 +46,8 @@ export class MuseDevice {
     this.ppgBuffer = new Array(this.PPG_WINDOW_SIZE * this.ppg_sfreq).fill(0);
 
     this.buffer = new Array(this.numberOfChannels);
-    for (let i = 0; i <= this.numberOfChannels; i++) {
+    for (let i = 0; i < this.numberOfChannels; i++) {
       this.buffer[i] = new Array(arrayLength).fill(0);
-    }
-
-    for (const key in this.bandPowers) {
-      this.bandPowers[key] = [
-        this.bandPowers[key][0] * this.WINDOW_SIZE,
-        this.bandPowers[key][1] * this.WINDOW_SIZE - 1,
-      ];
     }
   }
 
@@ -70,6 +64,7 @@ export class MuseDevice {
             device: "Muse",
             connected: true,
             id: this.id,
+            "sampling rate": this.sfreq,
             type: "default",
           },
         },
@@ -131,6 +126,8 @@ export class MuseDevice {
     this.muse.ppgReadings.subscribe((ppgReading) => {
       if (this.connected) {
         if (ppgReading.ppgChannel === 2) {
+          console.log("PPG Samples Length");
+          console.log(ppgReading.samples.length);
           this.ppgBuffer.splice(0, ppgReading.samples.length);
           this.ppgBuffer.push(...ppgReading.samples);
           for (let i = 0; i < ppgReading.samples.length; i++) {
@@ -151,284 +148,301 @@ export class MuseDevice {
     this.startMetricStream(); // Existing EEG metrics stream
   }
 
-  async _calculate_heart_rate() {
-    const heartRate = this.getHeartRateFromPPG();
-    console.log("Heart Rate");
-    console.log(heartRate);
-    store.dispatch({
-      type: "devices/streamUpdate",
-      payload: {
-        id: this.id,
-        data: { HR: heartRate },
-      },
-    });
-  }
-
-  async _calculate_eeg_metrics() {
-    const res = Object.keys(this.bandPowers).reduce((acc, key) => {
-      acc[key] = 0;
-      return acc;
-    }, {});
-
-    for (let i = 0; i < this.numberOfChannels; i++) {
-      let sample = this.buffer[i];
-      sample = applyHanningWindow(sample); // Hanning window on the data
-
-      const fft = math.fft(sample);
-      let mag = fft.map((elem) =>
-        math.sqrt(elem.re * elem.re + elem.im * elem.im)
-      ); // Get the magnitude
-      mag = mag.splice(0, Math.floor(sample.length / 2)); // Get first bins of Fourier Transform
-      mag = mag.map((mag) => mag / sample.length); // Normalize FFT by sample length
-
-      for (const key in this.bandPowers) {
-        // Reconsider the addition of res[key]
-        res[key] =
-          res[key] +
-          this.electrodePowerWeights[i] *
-            math.mean(
-              mag.slice(this.bandPowers[key][0], this.bandPowers[key][1])
-            );
-      }
-    }
-
-    for (const key in res) {
-      res[key] = res[key] / this.numberOfChannels;
-    }
-
-    store.dispatch({
-      type: "devices/streamUpdate",
-      payload: {
-        id: this.id,
-        data: res,
-      },
-    });
-  }
-
   async startMetricStream() {
-    this.metricStream = setInterval(() => {
+    this.eegMetricStream = setInterval(() => {
       if (this.connected) {
-        this._calculate_eeg_metrics();
-        this._calculate_heart_rate();
+        calculate_eeg_metrics(this.buffer, this.id);
+        // this._calculate_heart_rate();
       } else {
-        clearInterval(this.metricStream);
+        clearInterval(this.eegMetricStream);
       }
     }, 100);
-  }
-
-  getHeartRateFromPPG() {
-    const coeffs = [
-      -0.00588043, -0.00620177, -0.00106799, 0.02467073, 0.07864882, 0.15035629,
-      0.21289894, 0.23779528, 0.21289894, 0.15035629, 0.07864882, 0.02467073,
-      -0.00106799, -0.00620177, -0.00588043,
-    ];
-
-    const filteredSignal = applyFIRFilter(this.ppgBuffer, coeffs);
-    const normalizedArray = normalizeArray(filteredSignal);
-    console.log("Normalized array");
-    console.log(normalizedArray);
-    store.dispatch({
-      type: "devices/streamUpdate",
-      payload: {
-        id: this.id,
-        data: {
-          "Normalized PPG": normalizedArray[normalizedArray.length-1],
-        },
-      },
-    });
-    const { waveform, peaksAmps, peaksLocs } = adaptiveThreshold(
-      normalizedArray,
-      this.ppg_sfreq
-    );
-    const currHR = calculateHeartRate(peaksLocs, this.ppg_sfreq);
-
-    return currHR;
+    this.ppgMetricStream = setInterval(() => {
+      if (this.connected) {
+        calculate_ppg_metrics(this.ppgBuffer, this.id);
+        // this._calculate_heart_rate();
+      } else {
+        clearInterval(this.ppgMetricStream);
+      }
+    }, 1000);
   }
 }
 
-function applyHanningWindow(signal) {
-  function hann(i, N) {
-    return 0.5 * (1 - Math.cos((6.283185307179586 * i) / (N - 1)));
+async function calculate_eeg_metrics(muse_eeg, deviceID) {
+  const fs = 256;
+
+  const avrg_bandpowers = {};
+  const bandpowers = {
+    Theta: [4, 8],
+    Alpha: [8, 12],
+    "Low beta": [12, 16],
+    "High beta": [16, 25],
+    Gamma: [25, 45],
+  };
+
+  for (let [channel, data] of Object.entries(muse_eeg)) {
+    const data_mean = average(data);
+    const centered_data = data.map((val) => val - data_mean);
+    const sample = applyHammingWindow(centered_data); // Hanning window on the data
+    const N = sample.length;
+
+    const raw_fft = math.fft(sample);
+    let psd = raw_fft.map((elem) =>
+      math.sqrt(elem.re * elem.re + elem.im * elem.im)
+    ); // Get the magnitude
+    psd = psd.slice(0, Math.floor(N / 2)); // Get first bins of Fourier Transform
+    psd = psd.map((mag) => (2 * mag) / N); // Normalize FFT by sample length
+
+    for (let [key, freq_range] of Object.entries(bandpowers)) {
+      const idx_start = Math.floor((freq_range[0] * N) / fs);
+      const idx_end = Math.floor((freq_range[1] * N) / fs);
+      avrg_bandpowers[key] = avrg_bandpowers[key] ?? {};
+      avrg_bandpowers[key][channel] = average(psd.slice(idx_start, idx_end));
+    }
+  }
+
+  const avrg = {};
+
+  for (let col in avrg_bandpowers) {
+    const bandpowers_arr = Object.keys(avrg_bandpowers[col]).map((val) =>
+      parseFloat(avrg_bandpowers[col][val])
+    );
+    avrg[col] = average(bandpowers_arr);
+  }
+
+  store.dispatch({
+    type: "devices/streamUpdate",
+    payload: {
+      id: deviceID,
+      data: avrg,
+    },
+  });
+}
+
+async function calculate_ppg_metrics(muse_ppg, deviceID) {
+  const coeffs = [
+    -0.00588043, -0.00620177, -0.00106799, 0.02467073, 0.07864882, 0.15035629,
+    0.21289894, 0.23779528, 0.21289894, 0.15035629, 0.07864882, 0.02467073,
+    -0.00106799, -0.00620177, -0.00588043,
+  ];
+
+  const ppg_fs = 64;
+
+  const ppg_time = [];
+  const length = muse_ppg.length;
+  for (let i = 0; i < length; i++) {
+    ppg_time.push(i / ppg_fs);
+  }
+
+  const filtered_signal = filtfilt(coeffs, [1.0], muse_ppg);
+  const normalized_signal = normalizeArray(filtered_signal, ppg_time);
+
+  const {
+    x: waveform,
+    peaks_amps,
+    peak_locs,
+  } = adaptiveThreshold(normalized_signal, ppg_fs);
+
+  const hr = getHeartRateFromPeaks(peak_locs, ppg_fs);
+
+  store.dispatch({
+    type: "devices/streamUpdate",
+    payload: {
+      id: deviceID,
+      data: { HR: hr },
+    },
+  });
+}
+
+const average = (arr) =>
+  arr.reduce((a, b) => {
+    const parsedA = parseFloat(a);
+    const parsedB = parseFloat(b);
+
+    // Handle cases where parseFloat returns NaN
+    return (isNaN(parsedA) ? 0 : parsedA) + (isNaN(parsedB) ? 0 : parsedB);
+  }, 0) / arr.length;
+
+function applyHammingWindow(signal) {
+  function hamm(i, N) {
+    return 0.54 - 0.46 * Math.cos((Math.PI * 2 * i) / (N - 1));
   }
 
   const array = [];
   for (let i = 0; i < signal.length; i++) {
-    array.push(signal[i] * hann(i, signal.length));
+    array.push(signal[i] * hamm(i, signal.length));
   }
+
   return array;
 }
 
-function applyFIRFilter(data, coeffs) {
-  const filteredData = [];
-  const order = coeffs.length;
-
-  for (let i = 0; i < data.length; i++) {
-    let acc = 0;
-    for (let j = 0; j < order; j++) {
-      if (i - j >= 0) {
-        acc += coeffs[j] * data[i - j];
-      }
-    }
-    filteredData.push(acc);
+// Implementation from: https://www.sciencedirect.com/science/article/pii/S0010482509001826
+export function filtfilt(
+  b,
+  a,
+  x,
+  axis = -1,
+  padtype = "odd",
+  padlen = null,
+  method = "pad",
+  irlen = null
+) {
+  // Normalize the filter coefficients if a[0] is not 1
+  if (a[0] !== 1) {
+    b = b.map((coef) => coef / a[0]);
+    a = a.map((coef) => coef / a[0]);
   }
-  return filteredData;
-}
 
-// 1. Normalize Array Function
-function normalizeArray(arr) {
-  // Subtract the mean
-  const meanVal = arr.reduce((a, b) => a + b, 0) / arr.length;
-  const centered = arr.map((val) => val - meanVal);
+  // Set default padlen if not provided
+  if (padlen === null) {
+    padlen = 3 * Math.max(a.length, b.length);
+  }
 
-  // Scale to [0, 1]
-  const minVal = Math.min(...centered);
-  const maxVal = Math.max(...centered);
-  const range = maxVal - minVal || 1; // Avoid division by zero
-  const normArr = centered.map((val) => (val - minVal) / range);
+  // Check that padlen is less than the length of x minus 1
+  if (padlen >= x.length - 1) {
+    throw new Error("padlen must be less than x.length - 1.");
+  }
 
-  return normArr;
-}
+  // Handle padding based on padtype
+  let x_padded;
+  if (padlen > 0) {
+    if (padtype === "odd") {
+      const edge_left = x[0];
+      const edge_right = x[x.length - 1];
 
-function standardDeviation(values) {
-  const mean = values.reduce((a, b) => a + b) / values.length;
-  return Math.sqrt(
-    values.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b) /
-      values.length
-  );
-}
+      const pad_left_slice = x.slice(1, padlen + 1).reverse();
+      const pad_left = pad_left_slice.map((value) => 2 * edge_left - value);
 
-function adaptiveThreshold(arr, sfreq) {
-  const len = arr.length;
-  const x = new Array(len).fill(0);
-  x[0] = Math.max(...arr) * 0.2;
-  const std = standardDeviation(arr);
-  const peaksAmps = [];
-  const peaksLocs = [];
-  const refractoryPeriod = 0.2 * sfreq; // in samples
+      const pad_right_slice = x
+        .slice(x.length - padlen - 1, x.length - 1)
+        .reverse();
+      const pad_right = pad_right_slice.map((value) => 2 * edge_right - value);
 
-  for (let i = 1; i < len; i++) {
-    x[i] =
-      x[i - 1] -
-      0.6 * Math.abs((peaksAmps[peaksAmps.length - 1] || 0 + std) / sfreq);
-
-    if (arr[i] > x[i]) {
-      x[i] = arr[i];
+      x_padded = pad_left.concat(x).concat(pad_right);
+    } else if (padtype === "even") {
+      // Implement even padding if needed
+    } else if (padtype === "constant") {
+      const pad_left = Array(padlen).fill(x[0]);
+      const pad_right = Array(padlen).fill(x[x.length - 1]);
+      x_padded = pad_left.concat(x).concat(pad_right);
     } else {
-      if (x[i - 1] === arr[i - 1]) {
-        peaksAmps.push(x[i - 1]);
-        peaksLocs.push(i - 1);
-      }
+      throw new Error("padtype must be 'odd', 'even', or 'constant'.");
     }
+  } else {
+    x_padded = x.slice();
   }
 
-  return { waveform: x, peaksAmps, peaksLocs };
-}
+  // Implement the filtering function
+  function lfilter(b, a, x) {
+    const y = new Array(x.length);
+    const len = Math.max(a.length, b.length);
+    const a_coeffs = a.slice(1);
+    const b_coeffs = b.slice(1);
 
-function calculateHeartRate(peaksLocs, sfreq) {
-  const heartRates = [];
-
-  for (let i = 0; i < peaksLocs.length - 1; i++) {
-    const timeDiff = (peaksLocs[i + 1] - peaksLocs[i]) / sfreq; // in seconds
-    const bpm = (1 / timeDiff) * 60; // Convert to bpm
-    heartRates.push(bpm);
-  }
-
-  return heartRates;
-}
-
-/*
-Old code
-function applyFIRFilter(signal, coeffs) {
-  const output = new Array(signal.length).fill(0);
-
-  for (let n = 0; n < signal.length; n++) {
-    let filteredValue = 0;
-
-    for (let k = 0; k < coeffs.length; k++) {
-      if (n - k >= 0) {
-        filteredValue += signal[n - k] * coeffs[k]; // Consistent order
-      }
-    }
-    output[n] = filteredValue;
-  }
-
-  return output;
-}
-
-const average = (arr) => arr.reduce((a, b) => a + b) / arr.length;
-
-function normalizeArray(arr) {
-  // Calculate the average (mean) of the array
-  let mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
-
-  // Subtract the mean from each element to center the data
-  let centeredArray = arr.map((val) => val - mean);
-
-  // Get the min and max of the centered array
-  let minVal = Math.min(...centeredArray);
-  let maxVal = Math.max(...centeredArray);
-
-  // Normalize the values between 0 and 1
-  let normalizedArray = centeredArray.map(
-    (val) => (val - minVal) / (maxVal - minVal)
-  );
-
-  return normalizedArray;
-}
-
-function adaptiveThreshold(arr, sfreq) {
-  let x = Array(arr.length).fill(0);
-  x[0] = Math.max(...arr) * 0.2; // Initialize first value of x
-  const std = mathStd(arr); // Ensure this function returns a valid standard deviation
-  let peaksAmps = [];
-  let peaksLocs = [];
-
-  const refractoryPeriod = 0.6; // in seconds
-  const refractoryPeriodSamples = refractoryPeriod * sfreq; // Convert to samples
-  const epsilon = 1e-6; // for floating-point comparison
-
-  for (let i = 1; i < arr.length; i++) {
-    const lastPeakAmp = peaksAmps.length > 0 ? peaksAmps[peaksAmps.length - 1] : 0;
-
-    x[i] = x[i - 1] - 0.6 * Math.abs((lastPeakAmp + std) / sfreq);
-
-    if (arr[i] > x[i]) {
-      x[i] = arr[i];
-      if (peaksLocs.length > 0) {
-        let peakDiff = i - peaksLocs[peaksLocs.length - 1];
-        if (peakDiff < refractoryPeriodSamples) {
-          // Within refractory period, do not detect as a new peak
-          continue;
+    for (let i = 0; i < x.length; i++) {
+      y[i] = b[0] * x[i];
+      for (let j = 0; j < b_coeffs.length; j++) {
+        if (i - j - 1 >= 0) {
+          y[i] += b_coeffs[j] * x[i - j - 1];
         }
       }
+      for (let j = 0; j < a_coeffs.length; j++) {
+        if (i - j - 1 >= 0) {
+          y[i] -= a_coeffs[j] * y[i - j - 1];
+        }
+      }
+    }
+    return y;
+  }
+
+  // Forward filter
+  let y = lfilter(b, a, x_padded);
+
+  // Reverse the signal
+  y = y.reverse();
+
+  // Backward filter
+  y = lfilter(b, a, y);
+
+  // Reverse the signal again
+  y = y.reverse();
+
+  // Remove the padding
+  const start = padlen;
+  const end = y.length - padlen;
+  const y_final = y.slice(start, end);
+
+  return y_final;
+}
+
+export function normalizeArray(arr, time) {
+  // Fit a degree-6 polynomial to the data
+  const regression = new PolynomialRegression(time, arr, 6);
+
+  // Evaluate the polynomial (trend) at each time point
+  const trend = time.map((t) => regression.predict(t));
+
+  // Subtract the trend from the original array to detrend the data
+  const normArr = arr.map((val, idx) => val - trend[idx]);
+
+  // Find the minimum and maximum of the detrended array
+  const min = Math.min(...normArr);
+  const max = Math.max(...normArr);
+
+  // Normalize the detrended array to the range [0, 1]
+  const normalizedArr = normArr.map((val) => (val - min) / (max - min));
+
+  return normalizedArr;
+}
+
+export function adaptiveThreshold(arr, sfreq) {
+  let x = new Array(arr.length).fill(0);
+  x[0] = Math.max(...arr) * 0.2;
+  let std = stdDev(arr);
+  let peak_amps = [0];
+  let peak_locs = [0];
+
+  for (let i = 1; i < arr.length; i++) {
+    x[i] =
+      x[i - 1] -
+      0.6 * Math.abs((peak_amps[peak_amps.length - 1] + std) / sfreq);
+    if (arr[i] > x[i]) {
+      if (peak_locs.length > 1) {
+        const peak_diff =
+          peak_locs[peak_amps.length - 2] - peak_locs[peak_amps.length - 1];
+        let refractory_period = 0.6;
+        if (peak_diff / sfreq < refractory_period) {
+          x[i] = arr[i];
+        }
+      } else {
+        x[i] = arr[i];
+      }
     } else {
-      if (Math.abs(x[i - 1] - arr[i - 1]) < epsilon) {
-        peaksAmps.push(x[i - 1]);
-        peaksLocs.push(i - 1);
+      if (x[i - 1] === arr[i - 1]) {
+        peak_amps.push(x[i - 1]);
+        peak_locs.push(i - 1);
       }
     }
   }
-
-  return { x, peaksAmps, peaksLocs };
+  return { x, peak_amps, peak_locs };
 }
 
+// Helper function to calculate standard deviation
+function stdDev(arr) {
+  const n = arr.length;
+  const mean = arr.reduce((acc, val) => acc + val, 0) / n;
+  const variance =
+    arr.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / n;
+  return Math.sqrt(variance);
+}
 
-function getHeartRateFromPeaks(peakLocs, ppgFs) {
+export function getHeartRateFromPeaks(peakLocs, ppgFs) {
   let heartRateMuseMoving = [0];
 
-  for (let i = 0; i < peakLocs.length - 1; i++) {
-    let heartRate = (ppgFs / (peakLocs[i + 1] - peakLocs[i])) * 60;
+  for (let i = 1; i < peakLocs.length - 1; i++) {
+    let heartRate = ((peakLocs[i + 1] - peakLocs[i]) / ppgFs) * 60;
     heartRateMuseMoving.push(heartRate);
   }
 
-  return average(heartRateMuseMoving);
+  return Math.floor(average(heartRateMuseMoving));
 }
-
-// Custom standard deviation function
-function mathStd(arr) {
-  const mean = arr.reduce((acc, val) => acc + val, 0) / arr.length;
-  return Math.sqrt(
-    arr.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / arr.length
-  );
-}
-*/

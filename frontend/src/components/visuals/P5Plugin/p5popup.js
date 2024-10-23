@@ -1,7 +1,7 @@
 import { P5iFrame } from "./p5iframe";
 import React, { useEffect, useState } from "react";
 
-export function P5PopupVisuals({ secureOrigin, initialCode, initialParams }) {
+export function P5PopupVisuals({ secureOrigin, initialCode, initialParams, isExecuting }) {
     const [params, setParams] = useState(initialParams);
     const [code, setCode] = useState(initialCode);
   
@@ -27,7 +27,7 @@ export function P5PopupVisuals({ secureOrigin, initialCode, initialParams }) {
   
     return (
       <div className="h-100 w-100">
-        <P5iFrame params={params} code={code} />
+        <P5iFrame params={params} code={code} isExecuting={isExecuting}/>
       </div>
     );
   }

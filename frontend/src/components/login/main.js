@@ -46,13 +46,14 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
   return (
     <div>
       <p>Logged in as {currentUser?.name}</p>
-      <span>Not you? </span>
+      <p>Not you? </p>
       <button
         className="btn btn-link link-primary m-0 p-0"
         onClick={endSession}
       >
         Sign out
       </button>
+      {redirectVisual && <p>Redirecting you to the last visual...</p>}
     </div>
   );
 }

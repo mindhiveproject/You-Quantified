@@ -13,6 +13,159 @@ const connectionText = {
 
 window.recordings = {};
 
+export function FileUploadButton({ setCurrentDevice }) {
+  const [connText, setConnText] = useState({ text: "", type: "" });
+  const deviceMeta = useSelector((state) => state.deviceMeta);
+  const divRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const uploadedStreams = Object.entries(deviceMeta).filter(([key, value]) =>
+    value.hasOwnProperty("playing")
+  );
+
+  const handleClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleMouseEnter = () => {
+    setCurrentDevice({ device: "file", card_type: "upload" });
+  };
+
+  const handleMouseLeave = (mouse) => {
+    const closeEdge = closestEdge(mouse, divRef.current);
+    if (closeEdge === "left") return;
+    setCurrentDevice({ device: "none", card_type: "none" });
+  };
+
+  return (
+    <div className="mb-3 d-flex flex-column">
+      <div
+        className="card rounded-0 black-hover border-dark"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        ref={divRef}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".zip,.7zip"
+          style={{ display: "none" }}
+          onChange={(e) => uploadFile(e, setConnText)}
+          disabled={connText.text === "Uploading"}
+        />
+        <button
+          className={`${
+            connText.text === "Connecting" ? "btn-connect" : ""
+          } card-body btn btn-link text-decoration-none text-start`}
+          onClick={handleClick}
+          disabled={connText.text === "Uploading"}
+          key="UploadKey"
+        >
+          <div className="d-flex text-start justify-content-between">
+            <div>
+              <small className="g-0 m-0">Pre-recorded stream</small>
+              <h5 className="card-title g-0 m-0">Upload a file</h5>
+            </div>
+            <div className="align-self-center">
+              {connText.text !== "Connected" && <span>{connText.text}</span>}
+            </div>
+          </div>
+        </button>
+      </div>
+      {uploadedStreams.length > 0 && (
+        <ul className="list-group list-group-flush">
+          {uploadedStreams.map((obj) => (
+            <FileConnectionIndicator deviceID={obj[0]} myDeviceMeta={obj[1]} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
+  const streamObject = window.recordings[deviceID];
+
+  const playing = useSelector((state) => state?.deviceMeta[deviceID]?.playing);
+  const looping = useSelector((state) => state?.deviceMeta[deviceID]?.looping);
+
+  function startStreaming() {
+    streamObject.startPlayback();
+  }
+
+  function pauseStreaming() {
+    streamObject.pausePlayback();
+  }
+
+  function loopStreaming() {
+    streamObject.loopPlayback();
+  }
+
+  function restartStreaming() {
+    streamObject.restartPlayback();
+  }
+
+  return (
+    <li className="list-group-item border p-0 border-dark mt-n01">
+      <div className="d-flex justify-content-between">
+        <span className="align-self-center ps-3">{deviceID}</span>
+        <div>
+          <button className="btn btn-link" onClick={restartStreaming}>
+            <i className="bi bi-rewind" />
+          </button>
+          {playing ? (
+            <button className="btn btn-link">
+              <i className="bi bi-pause" onClick={pauseStreaming} />
+            </button>
+          ) : (
+            <button className="btn btn-link">
+              <i className="bi bi-play" onClick={startStreaming} />
+            </button>
+          )}
+          <button className="btn btn-link">
+            <i
+              className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
+              onClick={loopStreaming}
+            />
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function closestEdge(mouse, elem) {
+  var elemBounding = elem.getBoundingClientRect();
+
+  var elementLeftEdge = elemBounding.left;
+  var elementTopEdge = elemBounding.top;
+  var elementRightEdge = elemBounding.right;
+  var elementBottomEdge = elemBounding.bottom;
+
+  var mouseX = mouse.pageX;
+  var mouseY = mouse.pageY;
+
+  var topEdgeDist = Math.abs(elementTopEdge - mouseY);
+  var bottomEdgeDist = Math.abs(elementBottomEdge - mouseY);
+  var leftEdgeDist = Math.abs(elementLeftEdge - mouseX);
+  var rightEdgeDist = Math.abs(elementRightEdge - mouseX);
+
+  var min = Math.min(topEdgeDist, bottomEdgeDist, leftEdgeDist, rightEdgeDist);
+
+  switch (min) {
+    case leftEdgeDist:
+      return "left";
+    case rightEdgeDist:
+      return "right";
+    case topEdgeDist:
+      return "top";
+    case bottomEdgeDist:
+      return "bottom";
+  }
+}
+
 Papa.parsePromise = function (file, config) {
   return new Promise(function (complete, error) {
     Papa.parse(file, { ...config, complete, error });
@@ -24,24 +177,28 @@ async function uploadFile(e, setConnText) {
   const form = e.currentTarget;
   const [file] = await form.files;
 
+  console.log(file);
+
   var zip = new JSZip();
   const zipUpload = await zip.loadAsync(file);
 
   let dataFilesList = Object.keys(zipUpload.files);
 
-  if (
-    !dataFilesList.includes("metadata.csv")
-  ) {
-    console.log("error, data files incomplete")
+  const dataInSubFolder =
+    dataFilesList[0].endsWith("/") &&
+    dataFilesList.includes(dataFilesList[0] + "metadata.csv");
+
+  if (!dataFilesList.includes("metadata.csv") && !dataInSubFolder) {
+    console.log("error, data files incomplete");
     setConnText(connectionText["failed"]);
     return;
   }
 
-  dataFilesList = dataFilesList.filter(
-    (e) => !e.includes('metadata')
-  );
+  const metadataFileDirectory = dataInSubFolder ? dataFilesList[0] + "metadata.csv" : "metadata.csv";
 
-  const metaDataFile = await zipUpload.files?.["metadata.csv"].async("blob");
+  const metaDataFile = await zipUpload.files?.[metadataFileDirectory].async(
+    "blob"
+  );
 
   const metadataRaw = await Papa.parsePromise(metaDataFile, {
     header: true,
@@ -60,15 +217,28 @@ async function uploadFile(e, setConnText) {
 
   console.log(devicesMetadata);
 
+  if (dataInSubFolder) {
+    dataFilesList = dataFilesList.filter(
+      (dataFile) => dataFile.replace(/[^\/]/g, "").length === 1
+    );
+  }
+
+  dataFilesList = dataFilesList.filter((dataFile) => {
+    return metadataRaw.data.some((val) => dataFile.includes(val["file name"]));
+  });
+
+  console.log(dataFilesList);
+
   for (const fileName of dataFilesList) {
     if (fileName.split(".").pop() === "csv") {
       const fileContent = await zipUpload.files[fileName].async("blob");
       Papa.parse(fileContent, {
         header: true,
         complete: (results) => {
-          const currentDeviceMeta = devicesMetadata[fileName];
-          console.log(fileName)
-          console.log(currentDeviceMeta)
+          const fileDirectory = dataInSubFolder ? fileName.split('/')[1] : fileName;
+          const currentDeviceMeta = devicesMetadata[fileDirectory];
+          console.log(fileDirectory);
+          console.log(currentDeviceMeta);
 
           // results.data - contains the uploaded file output
           let id = currentDeviceMeta["recording id"] + " Recording";
@@ -182,113 +352,4 @@ class UploadedFile {
       this.pausePlayback();
     }
   }
-}
-
-export function FileUploadButton() {
-  const [connText, setConnText] = useState({ text: "", type: "" });
-  const deviceMeta = useSelector((state) => state.deviceMeta);
-  const fileInputRef = useRef(null);
-
-  const uploadedStreams = Object.entries(deviceMeta).filter(([key, value]) =>
-    value.hasOwnProperty("playing")
-  );
-
-  const handleClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  return (
-    <div className="mb-3 d-flex flex-column">
-      <div className="card rounded-0 black-hover border-dark">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".zip,.rar,.7zip"
-          style={{ display: "none" }}
-          onChange={(e) => uploadFile(e, setConnText)}
-          disabled={connText.text === "Uploading"}
-        />
-        <button
-          className={`${
-            connText.text === "Connecting" ? "btn-connect" : ""
-          } card-body btn btn-link text-decoration-none text-start`}
-          type="file"
-          accept=".zip,.rar,.7zip"
-          onClick={handleClick}
-          disabled={connText.text === "Uploading"}
-        >
-          <div className="d-flex text-start justify-content-between">
-            <div>
-              <small className="g-0 m-0">Pre-recorded stream</small>
-              <h5 className="card-title g-0 m-0">Upload a file</h5>
-            </div>
-            <div className="align-self-center">
-              {connText.text !== "Connected" && <span>{connText.text}</span>}
-            </div>
-          </div>
-        </button>
-      </div>
-      {uploadedStreams.length > 0 && (
-        <ul className="list-group list-group-flush">
-          {uploadedStreams.map((obj) => (
-            <FileConnectionIndicator deviceID={obj[0]} myDeviceMeta={obj[1]} />
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
-
-  const streamObject = window.recordings[deviceID];
-
-  const playing = useSelector((state) => state?.deviceMeta[deviceID]?.playing);
-  const looping = useSelector((state) => state?.deviceMeta[deviceID]?.looping);
-
-  function startStreaming() {
-    streamObject.startPlayback();
-  }
-
-  function pauseStreaming() {
-    streamObject.pausePlayback();
-  }
-
-  function loopStreaming() {
-    streamObject.loopPlayback();
-  }
-
-  function restartStreaming() {
-    streamObject.restartPlayback();
-  }
-
-  return (
-    <li className="list-group-item border p-0 border-dark mt-n01">
-      <div className="d-flex justify-content-between">
-        <span className="align-self-center ps-3">{deviceID}</span>
-        <div>
-          <button className="btn btn-link" onClick={restartStreaming}>
-            <i className="bi bi-rewind" />
-          </button>
-          {playing ? (
-            <button className="btn btn-link">
-              <i className="bi bi-pause" onClick={pauseStreaming} />
-            </button>
-          ) : (
-            <button className="btn btn-link">
-              <i className="bi bi-play" onClick={startStreaming} />
-            </button>
-          )}
-          <button className="btn btn-link">
-            <i
-              className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
-              onClick={loopStreaming}
-            />
-          </button>
-        </div>
-      </div>
-    </li>
-  );
 }
