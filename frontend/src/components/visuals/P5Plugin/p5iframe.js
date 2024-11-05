@@ -8,8 +8,6 @@ export function P5iFrame({ code, params, isExecuting }) {
   const { visID } = useParams();
   const paramsRef = useRef(params);
 
-
-
   const eventStream = new EventMarkerStream(visID);
   paramsRef.current = params;
 
@@ -39,16 +37,18 @@ export function P5iFrame({ code, params, isExecuting }) {
   `;
 
   useEffect(() => {
-    if (isExecuting==="false") {
-      return
+    if (isExecuting === "false") {
+      return;
     }
-    const additionalPackages = ["https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.js"];
-    
+    let additionalPackages = [
+      "https://cdnjs.cloudflare.com/ajax/libs/p5.js/2.0.0/addons/p5.sound.js",
+    ];
+
     const source = /* html */ `
       <html>
       <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-        ${additionalPackages.map((item)=>`<script src=${item}></script>`)}
+        ${additionalPackages.map((item) => `<script src=${item}></script>`)}
         <style>
           body {
             margin: 0px;
@@ -95,13 +95,13 @@ export function P5iFrame({ code, params, isExecuting }) {
     };
   }, []);
 
-
   return (
     <iframe
       id="visFrame"
       title="embedded-visualization"
       ref={iframeRef}
-      sandbox
+      src="https://sandbox.youquantified.com"
+      sandbox="allow-same-origin allow-scripts"
       className="h-100 w-100"
     />
   );

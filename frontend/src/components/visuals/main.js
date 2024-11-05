@@ -396,6 +396,7 @@ export function MainView({ visID, queryData }) {
     setDocsVisibility,
     updateDocsData,
     setExtensions,
+    setPopupVisuals,
   };
 
   return (
