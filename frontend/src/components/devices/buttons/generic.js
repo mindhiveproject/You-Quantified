@@ -76,7 +76,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
   }
 
   useEffect(() => {
-    if (typeof navigator.bluetooth === "undefined" && device === "Muse") {
+    if (typeof navigator.bluetooth === "undefined" && jsonMeta.device === "Muse") {
       setDisabled(true);
     }
     if (jsonMeta.connections !== "multiple" && deviceStreams.length > 0) {
