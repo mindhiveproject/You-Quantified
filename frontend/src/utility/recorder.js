@@ -70,7 +70,8 @@ function autoCSVDownload(saveObject, deviceMeta) {
   // Load each file into the zip
   for (const key in saveObject) {
     const json = JSON.stringify(saveObject[key]);
-
+    console.log(json);
+    
     const blob = new Blob([Papa.unparse(json)], { type: "text/csv" });
     const thisFileName = key.toLowerCase().replace(/ /g, "_") + ".csv";
 

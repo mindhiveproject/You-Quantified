@@ -1014,7 +1014,7 @@ canvas {
     initial-value: 0turn;
 }
 
-.height-40px {
+.height-40px {
     height: 40px !important;
 }
 
@@ -1192,36 +1192,70 @@ input.vis-name-input::placeholder {
     border: none;
 }
 
-// Menu bar
-.menu-bar {
-    background-color: #f8f9fa;
+
+
+.menu-bar-code {
+    background-color: #1A1A1A;
     border: solid 1px #1A1A1A;
-    margin-top: -1px;
+    color: #f8f9fa;
     height: 40px;
+    margin-top: -1px;
 }
 
-.menu-bar button {
+.menu-bar-code button {
     background: none;
     border: none;
+    color: #f8f9fa;
     width: 40px;
+    height: 40px;
+    text-decoration: none;
 }
+.menu-bar-code button:hover {
+    color: #f8f9fa;
+    background: #6a6a6a;
+} 
 
-.menu-bar button.is-active {
+.menu-bar-code button.is-active {
     background: none;
     border: none;
     color: $primary;
 }
 
-.menu-bar button:hover {
-    background: #dbdbdb;
-    border: none;
+.h-40 {
+    height: 40px;
 }
 
-.menu-bar .vertical-line {
-    border-left: #d3d3d3 solid 1.25px;
-    height: 38px;
-}
+// Menu bar for the docs
+.docs {
+    .menu-bar {
+        background-color: #f8f9fa;
+        border: solid 1px #1A1A1A;
+        margin-top: -1px;
+        height: 40px;
+    }
 
+    .menu-bar button {
+        background: none;
+        border: none;
+        width: 40px;
+    }
+
+    .menu-bar button.is-active {
+        background: none;
+        border: none;
+        color: $primary;
+    }
+
+    .menu-bar button:hover {
+        background: #dbdbdb;
+        border: none;
+    }
+
+    .menu-bar .vertical-line {
+        border-left: #d3d3d3 solid 1.25px;
+        height: 38px;
+    }
+}
 
 [type="color"] {
     display: inline-flex;

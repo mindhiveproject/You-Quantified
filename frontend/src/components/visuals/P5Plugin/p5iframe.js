@@ -28,7 +28,6 @@ export function P5iFrame({ code, params, isExecuting }) {
         data = JSON.parse(event.data);
       }
     })
-    console.log(data);
     `;
 
   const sendEvents = `
@@ -43,11 +42,13 @@ export function P5iFrame({ code, params, isExecuting }) {
     if (isExecuting==="false") {
       return
     }
+    const additionalPackages = ["https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.js"];
+    
     const source = /* html */ `
       <html>
       <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.js"></script>
+        ${additionalPackages.map((item)=>`<script src=${item}></script>`)}
         <style>
           body {
             margin: 0px;
@@ -100,6 +101,7 @@ export function P5iFrame({ code, params, isExecuting }) {
       id="visFrame"
       title="embedded-visualization"
       ref={iframeRef}
+      sandbox
       className="h-100 w-100"
     />
   );

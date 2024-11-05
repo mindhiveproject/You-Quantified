@@ -43,6 +43,7 @@ model Visual {
   authorId         String?   @map("author")
   createdAt        DateTime? @default(now())
   parameters       String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
+  extensions       String?   @default("{\"current\":[]}")
   docs             String?
   docsVisible      Boolean   @default(false)
   published        Boolean   @default(false)

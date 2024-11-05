@@ -193,6 +193,7 @@ type Visual {
   author: User
   createdAt: DateTime
   parameters: JSON
+  extensions: JSON
   docs: JSON
   docsVisible: Boolean
   published: Boolean
@@ -266,6 +267,7 @@ input VisualUpdateInput {
   author: UserRelateToOneForUpdateInput
   createdAt: DateTime
   parameters: JSON
+  extensions: JSON
   docs: JSON
   docsVisible: Boolean
   published: Boolean
@@ -310,6 +312,7 @@ input VisualCreateInput {
   author: UserRelateToOneForCreateInput
   createdAt: DateTime
   parameters: JSON
+  extensions: JSON
   docs: JSON
   docsVisible: Boolean
   published: Boolean

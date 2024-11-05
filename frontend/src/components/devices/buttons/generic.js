@@ -41,6 +41,7 @@ export function GenericDeviceButtonsList({ setCurrentDevice }) {
       <GenericDeviceButton
         jsonMeta={jsonMeta}
         setCurrentDevice={setCurrentDevice}
+        key={jsonMeta.device}
       />
     );
   });
@@ -115,7 +116,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
       {deviceStreams.length > 0 && (
         <ul className="list-group list-group-flush">
           {deviceStreams.map((obj) => (
-            <DeviceConnectionIndicator myDeviceMeta={obj[1]} />
+            <DeviceConnectionIndicator myDeviceMeta={obj[1]} key={obj[1]?.id}/>
           ))}
         </ul>
       )}

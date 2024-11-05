@@ -250,7 +250,7 @@ export default function DocsWindow({
   return (
     <div>
       {isEditable && (
-        <div className="d-flex flex-column">
+        <div className="d-flex flex-column docs">
           <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
           <button
             className={`btn ${

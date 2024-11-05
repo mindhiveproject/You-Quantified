@@ -61,7 +61,7 @@ export const lists: Lists = {
         query: () => true,
         update: () => true,
         create: () => true,
-        delete: ()=>true,
+        delete: () => true,
       },
       item: {
         update: ({ session, item }) =>
@@ -90,6 +90,7 @@ export const lists: Lists = {
           },
         ],
       }),
+      extensions: json({ defaultValue: { current: [] } }),
       docs: json(),
       docsVisible: checkbox(),
       published: checkbox(),

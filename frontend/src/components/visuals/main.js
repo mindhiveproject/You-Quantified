@@ -21,15 +21,11 @@ import { UserContext } from "../../App";
 
 export function VisualScreen({
   visMetadata,
-  setCode,
   code,
-  setVisMetadata,
   popupVisuals,
-  setPopupVisuals,
   currentScreen,
-  updateDocsData,
-  setDocsVisibility,
   docsContent,
+  setters,
 }) {
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
@@ -44,15 +40,17 @@ export function VisualScreen({
         {currentScreen.left == "code" && (
           <CodePane
             visName={visName}
-            setCode={setCode}
+            setCode={setters.setCode}
             code={code}
             isEditable={isEditable}
+            extensions={visMetadata?.extensions}
+            setVisExtensions={setters.setExtensions}
           />
         )}
         {currentScreen.left == "docs" && (
           <DocsWindow
-            updateDocsData={updateDocsData}
-            setDocsVisibility={setDocsVisibility}
+            updateDocsData={setters.updateDocsData}
+            setDocsVisibility={setters.setDocsVisibility}
             docsContent={docsContent}
             isEditable={isEditable}
             isDocsVisible={isDocsVisible}
@@ -61,7 +59,7 @@ export function VisualScreen({
         <DataManagementWindow
           visInfo={visMetadata}
           custom={isEditable}
-          setVisInfo={setVisMetadata}
+          setVisInfo={setters.setVisMetadata}
         />
       </SplitPaneLeft>
       <Divider />
@@ -71,7 +69,7 @@ export function VisualScreen({
           visMetadata={visMetadata}
           fullScreenHandle={fullScreenHandle}
           popupVisuals={popupVisuals}
-          setPopupVisuals={setPopupVisuals}
+          setPopupVisuals={setters.setPopupVisuals}
         />
       </SplitPaneRight>
     </SplitPane>
@@ -95,6 +93,10 @@ function VisTopBar({
   const { currentUser } = useContext(UserContext);
   const isEditable = visMetadata?.author?.id === currentUser?.id;
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
+
+  console.log("Full screen handle button")
+  console.log(fullScreenHandle);
+
 
   return (
     <div className="vis-bar">
@@ -214,8 +216,6 @@ export function QueryMainView() {
     return <NoVisualScreen />;
   }
 
-  console.log("Hey, I'm tring to load");
-  console.log(data);
   return <MainView visID={visID} queryData={data?.visuals[0]} />;
 }
 
@@ -245,8 +245,10 @@ function NoVisualScreen() {
     if (event.key === konamiCode[konamiIndexRef.current]) {
       setKonamiIndex((prevIndex) => prevIndex + 1);
       // If the entire Konami code is successfully entered
-      if (konamiIndexRef.current +1  === konamiCode.length) {
-        alert("Stranger, whoever you are, open this to find what will amaze you");
+      if (konamiIndexRef.current + 1 === konamiCode.length) {
+        alert(
+          "Stranger, whoever you are, open this to find what will amaze you"
+        );
         setIsDino(true);
         setKonamiIndex(0); // Reset the index
       }
@@ -256,13 +258,19 @@ function NoVisualScreen() {
     }
   }
 
-  const dinoiFrame = <iframe width="500" height="400" src="https://dinosaurgame.app" />;
+  const dinoiFrame = (
+    <iframe width="500" height="400" src="https://dinosaurgame.app" />
+  );
 
   useEffect(() => {
-    document.addEventListener("keydown", (event) => konamiCodeFunc(event, konamiIndexRef));
+    document.addEventListener("keydown", (event) =>
+      konamiCodeFunc(event, konamiIndexRef)
+    );
 
     return () => {
-      document.removeEventListener("keydown", (event) => konamiCodeFunc(event, konamiIndexRef));
+      document.removeEventListener("keydown", (event) =>
+        konamiCodeFunc(event, konamiIndexRef)
+      );
     };
   }, []);
 
@@ -303,6 +311,21 @@ export function MainView({ visID, queryData }) {
 
   const [code, _setCode] = useState("");
   const [docsContent, _setDocsContent] = useState();
+
+  function setExtensions(input) {
+    // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview
+    _setVisMetadata({
+      ...visMetadata,
+      extensions: input,
+    });
+    changeVisMetadata({
+      variables: {
+        data: {
+          extensions: input,
+        },
+      },
+    });
+  }
 
   function setCode(str) {
     localStorage.setItem(`visuals/${visID}`, str);
@@ -367,6 +390,14 @@ export function MainView({ visID, queryData }) {
   const fullScreenHandle = useFullScreenHandle();
   const [popupVisuals, setPopupVisuals] = useState(false);
 
+  const setters = {
+    setCode,
+    changeVisParameters,
+    setDocsVisibility,
+    updateDocsData,
+    setExtensions,
+  };
+
   return (
     <div className="h-100">
       <VisTopBar
@@ -381,16 +412,12 @@ export function MainView({ visID, queryData }) {
       />
       <VisualScreen
         visMetadata={visMetadata}
-        setCode={setCode}
         code={code}
-        setVisMetadata={changeVisParameters}
-        setPopupVisuals={setPopupVisuals}
         popupVisuals={popupVisuals}
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}
-        updateDocsData={updateDocsData}
-        setDocsVisibility={setDocsVisibility}
         docsContent={docsContent}
+        setters={setters}
       />
     </div>
   );

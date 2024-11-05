@@ -75,8 +75,8 @@ function RightPane({ setCurrentDevice }) {
   return (
     <div className="sources-pane-right disable-scrollbar me-3">
       <FileUploadButton setCurrentDevice={setCurrentDevice} />
-      <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
       <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
+      <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
     </div>
   );
 }
