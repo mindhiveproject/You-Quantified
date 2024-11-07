@@ -255,5 +255,19 @@
         "type": "Audio Feature"
       }
     ]
+  },
+  {
+    "device": "Voice Emotion",
+    "short_description": "This sensor allows you to measure the valence and arousal of emotion in your voice",
+    "description": "This sensor allows you to measure the valence and arousal of emotion in your voice",
+    "type": "Audio",
+    "sampling_rate": 15,
+    "data": [
+      {
+        "name": "Voice Emotion",
+        "description": "The valence and arousal of emotion in your voice",
+        "type": "Audio Feature"
+      }
+    ]
   }
 ]

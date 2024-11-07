@@ -12,8 +12,6 @@ import SignUp from "./components/login/signup";
 import { useQuery } from "@apollo/client";
 import { AUTH_USER } from "./queries/user";
 import { NewVisual } from "./components/visuals/menu/new";
-import { MainViewLesson } from "./components/lessons/editor/main";
-import { LessonMenu } from "./components/lessons/menu/main";
 import { useSelector } from "react-redux";
 import { stopRecording } from "./utility/recorder";
 
@@ -63,8 +61,6 @@ function DesktopApp() {
           />
         )}
         <Routes>
-          <Route path="/lessons" element={<LessonMenu />} />
-          <Route path="/lessons/:lessonID" element={<MainViewLesson />} />
           <Route path="/visuals" element={<MainMenu />} />
           <Route path="/visuals-new" element={<NewVisual />} />
           <Route path="/visuals/:visID" element={<QueryMainView />} />
