@@ -40,14 +40,16 @@ export function P5iFrame({ code, params, isExecuting }) {
     if (isExecuting === "false") {
       return;
     }
+
+    // Sound library not working
     let additionalPackages = [
-      "https://cdnjs.cloudflare.com/ajax/libs/p5.js/2.0.0/addons/p5.sound.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.js",
     ];
 
     const source = /* html */ `
       <html>
       <head>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
         ${additionalPackages.map((item) => `<script src=${item}></script>`)}
         <style>
           body {
