@@ -23,6 +23,7 @@ export class Heartbeat {
     this.windowSize = windowSize;
     this.rppgInterval = rppgInterval;
   }
+  
   // Start the video stream
   async startStreaming() {
     try {

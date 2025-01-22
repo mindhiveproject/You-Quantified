@@ -130,6 +130,7 @@ async function predictWebcam() {
         window.requestAnimationFrame(predictWebcam);
     }
 }
+
 function drawBlendShapes(el, blendShapes) {
     if (!blendShapes.length) {
         return;

@@ -1,8 +1,8 @@
 [
   {
     "device": "EMOTIV",
-    "short_description": "The EMOTIV is a consumer-grade EEG headset used for research and brain-computer interfaces, capable of reading brain signals, providing derived metrics, and tracking head movement.",
-    "description": "The EMOTIV is an electroencephalography (EEG) headset that reads brain signals and sends them into a computer. This is a consumer-grade device generally used for research outside of laboratories and brain-computer interfaces (BCIs). EMOTIV not only acquires the raw signals, but it also provides meaningful metrics derived from the signal. It also has motion data to track head movement.",
+    "short_description": "A consumer-grade electroencephalography (EEG) headset for research, cognitive training, and brain-computer interfaces (BCIs). EMOTIV captures raw EEG signals, derives metrics, and tracks head motion.",
+    "description": "The EMOTIV headset is a consumer-grade EEG device designed for neuroscience research, cognitive training, and brain-computer interface (BCI) applications. Equipped with multiple sensors, it captures high-resolution brain activity data across various regions of the scalp.",
     "image": "/EMOTIV_EPOC.webp",
     "type": "EEG",
     "connections": "multiple",
@@ -122,10 +122,10 @@
   },
   {
     "device": "Muse",
-    "description": "The Muse is a consumer EEG grade-headset. This one is generally intended for sleep studies, and meditation. It mainly acquires signals from the frontal lobe.",
-    "short_description": "The Muse is another consumer EEG grade-headset. This one is generally intended for sleep studies, and meditation. It mainly acquires signals from the frontal lobe.",
+    "description": "A wearable electroencephalography (EEG) headset that tracks brain activity, offering real-time insights into focus and relaxation.",
+    "short_description": "The Muse is a popular device for meditation, stress management, and neurofeedback training. It captures and streams brain signals from the frontal and temporal lobes, while also providing heart rate data through its integrated photoplethysmography (PPG) sensors.",
     "image": "/Muse2.webp",
-    "type": "EEG",
+    "type": "EEG & PPG",
     "connections": "multiple",
     "sampling_rate": 256,
     "data": [
@@ -171,15 +171,25 @@
       },
       {
         "name": "AF8",
-        "description": "EEG activity from the right temporal lobe",
+        "description": "EEG activity from the right temporal lobe.",
         "type": "Raw EEG channels"
+      },
+      {
+        "name": "PPG",
+        "description": "Photoplethysmography activity from the forehead.",
+        "type": "PPG"
+      },
+      {
+        "name": "Heart rate",
+        "description": "Heart rate derived from PPG.",
+        "type": "Heart rate"
       }
     ]
   },
   {
-    "device": "Face",
-    "short_description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
-    "description": "This sensor allows you to capture video of your face and detect specific movements and gestures",
+    "device": "Face Landmarker",
+    "short_description": "Streams face movements and expressions from a live video feed.",
+    "description": "This device uses machine learning models to analyze a live video feed and generate scores representing facial expressions and movements. To ensure proper functionality, keep the window active in the background during operation.",
     "image": "/face_landmark.png",
     "type": "Video",
     "connections": "single",
@@ -188,7 +198,7 @@
       {
         "name": "Facial Movements",
         "description": "Different Facial Movements",
-        "type": "Face Landmark"
+        "type": "Face Landmarks"
       }
     ]
   },
@@ -203,31 +213,31 @@
     "data": [
       {
         "name": "Body Movements",
-        "description": "Different Facial Movements",
+        "description": "Different limb positions",
         "type": "Pose Landmarks"
       }
     ]
   },
   {
-    "device": "Face Synchronicity",
-    "short_description": "This sensor allows you to measure the synchronicity of facial expressions",
-    "description": "This sensor allows you to measure the synchronicity of facial expressions",
+    "device": "Face Synchrony",
+    "short_description": "Measure synchrony in facial expressions during live video tracking.",
+    "description": "This device tracks facial landmarks from a live video feed to measure the synchrony between facial expressions. Values closer to one indicate greater similarity in facial landmark positions, while lower values reflect reduced synchrony.",
     "image": "/face_landmark.png",
     "type": "Video",
     "connections": "single",
     "sampling_rate": 15,
     "data": [
       {
-        "name": "Facial Synchronicity",
-        "description": "Syncrhonicity between facial expressions",
-        "type": "Syncrhonicity"
+        "name": "Face Synchrony",
+        "description": "Synchrony between facial expressions",
+        "type": "Synchrony & Face Landmarks"
       }
     ]
   },
   {
     "device": "Video Heart Rate",
-    "short_description": "This sensor allows you to measure your heart rate from a video input",
-    "description": "This sensor allows you to measure your heart rate from a video input",
+    "short_description": "This demo runs a simple variant of rPPG directly in your browser to measure your heart rate based on subtle changes in skin color.",
+    "description": "This demo runs a simple variant of rPPG directly in your browser to measure your heart rate based on subtle changes in skin color captured by your webcam. For best results, try in a constantly well lit space with minimal device and subject motion.",
     "image": "/HeartRateLine.png",
     "type": "Video",
     "connections": "single",
@@ -236,14 +246,14 @@
       {
         "name": "Heart rate",
         "description": "Heart rate estimated from changes in the color of your face",
-        "type": "Heart"
+        "type": "Heart rate"
       }
     ]
   },
   {
-    "device": "AudioVolume",
-    "short_description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
-    "description": "This sensor allows you to measure the volume (Root Mean Square) of audio from the microphone",
+    "device": "Audio Volume",
+    "short_description": "Measure your microphone’s audio volume with a single metric.",
+    "description": "This tool calculates microphone audio volume using the Root Mean Square (RMS) method. Levels are expressed in decibels relative to full scale (dBFS), with values represented as negative numbers relative to the maximum peak (0 dBFS).",
     "image": "/speaker-high-volume.png",
     "type": "Audio",
     "connections": "single",
@@ -258,8 +268,8 @@
   },
   {
     "device": "Voice Emotion",
-    "short_description": "This sensor allows you to measure the valence and arousal of emotion in your voice",
-    "description": "This sensor allows you to measure the valence and arousal of emotion in your voice",
+    "short_description": "Analyze the valence and arousal of emotions in your voice.",
+    "description": "This tool uses Mel-Frequency Cepstral Coefficients (MFCCs) to analyze voice emotion by estimating valence (positivity or negativity) and arousal (energy level). It provides insights into emotional expression from audio input.",
     "type": "Audio",
     "sampling_rate": 15,
     "data": [

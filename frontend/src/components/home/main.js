@@ -15,15 +15,14 @@ export default function HomePage() {
           </Reveal>
           <Reveal>
             <p>
-              A platform to connect your data to graphic and  <br></br>{" "}
-              interactive experiences
+            A platform to bridge the gap between data and creativity, allowing you to connect biosensing devices to interactive and customizable real-time visuals.
             </p>
           </Reveal>
         </div>
         <div className="col-6 text-start foreground">
           <div className="mb-0 ps-5">
             <Link className="fw-bold btn btn-dark w-btn me-3" to="/visuals">
-              Explore visuals
+              Explore Visuals
             </Link>
             <a
               className="fw-bold btn btn-outline-dark w-btn me-3"

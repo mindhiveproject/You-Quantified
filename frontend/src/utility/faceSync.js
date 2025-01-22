@@ -22,7 +22,7 @@ class FaceSync {
         let newData= {}
         for (const shape of data){
             newData["Difference in " + shape.categoryName]=shape.score
-            //newData["Synchronicity score of "+ shape.categoryName]=shape.diff_score
+            //newData["Synchrony score of "+ shape.categoryName]=shape.diff_score
         };
 
         /*
@@ -32,7 +32,7 @@ class FaceSync {
             let val = rawVector[i];
             newData[key] = val;
         }*/
-        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Synchronicity", data: newData } })
+        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Synchrony", data: newData } })
     }
 
     isOpen(){

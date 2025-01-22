@@ -16,8 +16,7 @@ export function MainMenu() {
         {currentUser && <MyUserName currentUser={currentUser} />}
         <h2 className="mt-5 mb-2 fw-bold">Visuals</h2>
         <p>
-          These are some of the visuals we have made or selected. <br></br>Feel
-          free to modify the code, create your own visual or explore.
+          Explore and modify our curated <a href="https://p5js.org" target="blank" className="link text-decoration-none">p5.js visuals</a> or build your own data exploration.
         </p>
       </div>
       {currentUser ? (
@@ -26,7 +25,7 @@ export function MainMenu() {
             to="/visuals-new"
             className="btn btn-secondary btn-outline-dark fw-medium me-3"
           >
-            <i className="bi bi-plus m-0 p-0 me-1"></i>New visual
+            <i className="bi bi-plus m-0 p-0 me-1"></i>New Visual
           </Link>
         </div>
       ) : (
@@ -53,20 +52,18 @@ export function MainMenu() {
         ></input>
         <button
           onClick={() => setCurrentFilter("all")}
-          className={`filter-button pe-2 ${
-            currentFilter === "all" ? "active" : ""
-          }`}
+          className={`filter-button pe-2 ${currentFilter === "all" ? "active" : ""
+            }`}
         >
-          Published visuals
+          Public Visuals
         </button>
         {currentUser?.id && (
           <button
             onClick={() => setCurrentFilter("my")}
-            className={`filter-button pe-2 ${
-              currentFilter === "my" ? "active" : ""
-            }`}
+            className={`filter-button pe-2 ${currentFilter === "my" ? "active" : ""
+              }`}
           >
-            My visuals
+            My Visuals
           </button>
         )}
       </div>

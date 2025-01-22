@@ -30,7 +30,7 @@ class Face {
             let val = rawVector[i];
             newData[key] = val;
         }*/
-        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Landmarks", data: newData } })
+        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Landmarker", data: newData } })
     }
 
     isOpen(){

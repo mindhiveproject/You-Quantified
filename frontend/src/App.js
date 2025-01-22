@@ -1,6 +1,6 @@
 import "./App.scss";
 import React, { useState, createContext, useEffect } from "react";
-import { QueryMainView } from "./components/visuals/main";
+import { QueryMainView } from "./components/visuals/dashboard/main";
 import { MainMenu } from "./components/visuals/menu/menu";
 import { DevicesManager } from "./components/devices/main";
 import { Routes, Route, NavLink } from "react-router-dom";

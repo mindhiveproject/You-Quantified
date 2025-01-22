@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { EventMarkerStream } from "../../devices/stream functions/event_markers";
+import { EventMarkerStream } from "../../../devices/stream functions/event_markers";
 
 export function P5iFrame({ code, params, isExecuting }) {
   const iframeRef = useRef(null);
@@ -44,6 +44,7 @@ export function P5iFrame({ code, params, isExecuting }) {
     // Sound library not working
     let additionalPackages = [
       "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.35/Tone.min.js"
     ];
 
     const source = /* html */ `

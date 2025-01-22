@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
+import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 import { useSelector, useDispatch } from "react-redux";
 import { DataManualSlider, DataAutoSlider } from "./sliders";
 import { ParameterDropDown } from "./dropdown_menu";
-import { selectDataMappings, getDataStreamKeys } from "../utility/selectors";
+import { selectDataMappings, getDataStreamKeys } from "../../utility/selectors";
 
 function ParameterManager({ parameter, dataMappings }) {
   // Manages if parameters are managed manually or automatically

@@ -1,10 +1,10 @@
-import { PopupComponent } from "./popup";
-import { P5PopupVisuals } from "../P5Plugin/p5popup";
-import { P5iFrame } from "../P5Plugin/p5iframe";
+import { PopupComponent } from "./popup_component";
+import { P5PopupVisuals } from "./p5popup";
+import { P5iFrame } from "./p5iframe";
 import { FullScreen } from "react-full-screen";
 import { useSelector } from "react-redux";
 import React, { useEffect, useRef, useState } from "react";
-import { selectParamValues } from "../utility/selectors";
+import { selectParamValues } from "../../utility/selectors";
 import { useSearchParams } from "react-router-dom";
 import { useFullScreenHandle } from "react-full-screen";
 
@@ -23,6 +23,7 @@ export function VisualsWindow({
 
   const [component, setComponent] = useState(null);
 
+  /*
   useEffect(() => {
     // The following function imports components that are not P5.js visuals by using the default export
     // Checks engine to see if it should handle it as a P5.js visualization
@@ -38,7 +39,7 @@ export function VisualsWindow({
       const CustomComponent = module.default;
       setComponent(<CustomComponent value={paramsRef} />);
     }
-  }, [code]);
+  }, [code]);*/
 
   const [searchParams, setSearchParams] = useSearchParams();
   const isExecuting = searchParams.get("execute");

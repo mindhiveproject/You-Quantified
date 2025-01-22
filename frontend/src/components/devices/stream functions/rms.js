@@ -17,7 +17,7 @@ export function connectAudioRMS(changeConnectionStatus) {
                 payload: {
                 id: id,
           metadata: {
-            device: "AudioVolume",
+            device: "Audio Volume",
             type: "default",
             id: id,
             connected: true,

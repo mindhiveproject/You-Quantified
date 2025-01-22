@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
-import downloadCode from "../../utility/code_download";
-import { useOutsideAlerter } from "../../utility/outsideClickDetection";
+import downloadCode from "../../../../utility/code_download";
+import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 import { useState, useRef } from "react";
 
 // Code Editor Made Using monaco-editor/react

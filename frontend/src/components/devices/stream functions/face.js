@@ -9,7 +9,7 @@ export function connectFace(changeConnectionStatus) {
 
   changeConnectionStatus("awaiting");
   setTimeout(() => {
-    const id = "Face Landmarks";
+    const id = "Face Landmarker";
     if (face.isOpen()) {
       changeConnectionStatus("connected");
       store.dispatch({
@@ -17,7 +17,7 @@ export function connectFace(changeConnectionStatus) {
         payload: {
           id: id,
           metadata: {
-            device: "Face",
+            device: "Face Landmarker",
             type: "video",
             id: id,
             connected: true,

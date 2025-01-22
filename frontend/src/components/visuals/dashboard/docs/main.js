@@ -10,8 +10,8 @@ import StarterKit from "@tiptap/starter-kit";
 import React, { useState, useCallback } from "react";
 import javascript from "highlight.js/lib/languages/javascript";
 import { createLowlight } from "lowlight";
-import { sanitizeURL } from "../../../utility/sanitize_urls";
-import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
+import { sanitizeURL } from "../../../../utility/sanitize_urls";
+import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 
 const lowlight = createLowlight();
 lowlight.register("js", javascript);

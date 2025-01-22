@@ -1,11 +1,11 @@
 import { useContext, useLayoutEffect, useState, useRef } from "react";
-import { UserContext } from "../../App";
+import { UserContext } from "../../../App";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { DELETE_VISUAL, NEW_VISUAL } from "../../queries/visuals";
 import { useMutation } from "@apollo/client";
 import { profanity } from "@2toad/profanity";
-import { MY_VISUALS } from "../../queries/visuals";
+import { MY_VISUALS, DELETE_VISUAL, NEW_VISUAL } from "../../../queries/visuals";
+
 export function EditModalManager({
   visMetadata,
   setShowEdit,

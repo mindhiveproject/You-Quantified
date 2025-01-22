@@ -30,10 +30,10 @@ export const deviceConnectionFunctions = {
   "Muse": connectMuse,
   "LSL": connectLSL,
   "EMOTIV": connectEmotiv,
-  "Face": connectFace,
+  "Face Landmarker": connectFace,
   "Video Heart Rate": connectVHeartRate,
-  "AudioVolume": connectAudioRMS,
-  "Face Synchronicity": connectFaceSync,
+  "Audio Volume": connectAudioRMS,
+  "Face Synchrony": connectFaceSync,
   "Pose Detection": connectPose,
   "Voice Emotion": connectVoiceEmotion,
 };

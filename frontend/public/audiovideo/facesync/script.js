@@ -125,11 +125,11 @@ function enableCam(event) {
     }
     if (webcamRunning === true) {
         webcamRunning = false;
-        enableWebcamButton.innerText = "ENABLE PREDICTIONS";
+        enableWebcamButton.innerText = "Enable Predictions";
     }
     else {
         webcamRunning = true;
-        enableWebcamButton.innerText = "DISABLE PREDICTIONS";
+        enableWebcamButton.innerText = "Disable Predictions";
     }
     // getUsermedia parameters.
     const constraints = {
@@ -198,7 +198,7 @@ function drawBlendShapes(el, blendShapes) {
     let [firstBlendShape, secondBlendShape] = blendShapes;
     console.log(firstBlendShape)
     let absoluteDifferences = firstBlendShape.categories.map((item, index) => {
-        const absDiff = 1 - (2*Math.abs(item.score - secondBlendShape.categories[index].score));
+        const absDiff = 1 - (Math.abs(item.score - secondBlendShape.categories[index].score));
         const categoryName = item.categoryName;
 
         // Initialize score for this categoryName if it doesn't already exist
