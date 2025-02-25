@@ -35,7 +35,6 @@ export function VisualScreen({
 
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("dashboard");
-  console.log(viewParam);
   const showDashboard = viewParam === "true" || viewParam === null;
 
   return (
@@ -200,8 +199,6 @@ function PrivacyDropdown({ visMetadata, changeVisMetadata }) {
       },
     });
   }
-
-  console.log(visMetadata);
 
   return (
     <div className="dropdown me-1">
@@ -421,11 +418,9 @@ export function MainView({ visID, queryData }) {
   const fullScreenHandle = useFullScreenHandle();
 
   const { currentUser } = useContext(UserContext);
-  console.log("currentUser", currentUser);
   const isEditable =
     visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
-  console.log("isEditable", isEditable);
-  console.log("visMetadata", visMetadata);
+
 
   function setExtensions(input) {
     // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview

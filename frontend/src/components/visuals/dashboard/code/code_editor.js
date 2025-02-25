@@ -247,8 +247,6 @@ async function checkCDNPackage(inputURL) {
     packageFiles = (packageMetadata.files || []).map(unpackageFileNames);
   }
 
-  console.log("Package Files", packageFiles);
-
   // Step 6: Prepare final info
   const packageInfo = {
     name: packageMetadata.name,

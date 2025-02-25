@@ -263,8 +263,6 @@ export function VisualizationCards({
     );
   if (error) return <p>Error: {error.message}</p>;
 
-  console.log(data);
-
   const sortedArray = sortVisuals(
     data.visuals,
     currentSort.type,

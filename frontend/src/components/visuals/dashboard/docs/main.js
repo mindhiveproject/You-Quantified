@@ -227,7 +227,6 @@ export default function DocsWindow({
     onUpdate: ({ editor }) => {
       if (editor) {
         const content = editor.getJSON();
-        console.log(content);
         updateDocsData(content);
       }
     },
@@ -236,7 +235,6 @@ export default function DocsWindow({
   const [_isDocsVisible, _setIsDocsVisible] = useState(isDocsVisible);
 
   function setIsDocsVisible(input) {
-    console.log(input);
     setDocsVisibility(input);
     _setIsDocsVisible(input);
   }
