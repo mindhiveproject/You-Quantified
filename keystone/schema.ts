@@ -25,13 +25,13 @@ import {
 
 // when using Typescript, you can refine your types to a stricter subset by importing
 // the generated types from '.keystone/types'
-import type { Lists } from ".keystone/types";
+import type { Lists, UserWhereUniqueInput } from ".keystone/types";
 
 export const lists: Lists = {
   User: list({
     access: allowAll,
     fields: {
-      name: text(),
+      name: text({isIndexed: "unique"}),
       email: text({
         validation: { isRequired: true },
         isIndexed: "unique",
@@ -42,19 +42,27 @@ export const lists: Lists = {
       createdAt: timestamp({
         defaultValue: { kind: "now" },
       }),
+      liked: relationship({ ref: "Visual.likes", many: true }),
+      following: relationship({ ref: 'Friendship.requester', many: true }),
+      followers: relationship({ ref: 'Friendship.recipient', many: true })
     },
   }),
-
-  Tag: list({
-    access: {
-      operation: allowAll,
-    },
+  Friendship: list({
+    access: allowAll,
     fields: {
-      label: text(),
-      visuals: relationship({ ref: "Visual", many: true }),
-    },
+      requester: relationship({ ref: 'User.following', many: false }),
+      recipient: relationship({ ref: 'User.followers', many: false }),
+      status: select({
+        options: [
+          { label: "Pending", value: "pending" },
+          { label: "Accepted", value: "accepted" },
+          { label: "Rejected", value: "rejected" }
+        ],
+        defaultValue: "pending",
+      }),
+      createdAt: timestamp({ defaultValue: { kind: "now" } })
+    }
   }),
-
   Visual: list({
     access: {
       operation: {
@@ -90,12 +98,31 @@ export const lists: Lists = {
           },
         ],
       }),
-      extensions: json({ defaultValue: { current: [] } }),
+      likes: relationship({ ref: "User.liked", many: true }),
+      extensions: json({ defaultValue: [] }),
       docs: json(),
       docsVisible: checkbox(),
       published: checkbox(),
       editable: checkbox(),
-      tags: relationship({ ref: "Tag", many: true }),
+      tags: relationship({ ref: "Tag.visuals", many: true }),
+      privacy: select({
+        options: [
+          { label: "Friends", value: "friends" },
+          { label: "Public", value: "public" },
+          { label: "Private", value: "private" },
+          { label: "Unlisted", value: "unlisted" },
+        ],
+        defaultValue: "private",
+      })
+    },
+  }),
+  Tag: list({
+    access: {
+      operation: allowAll,
+    },
+    fields: {
+      label: text(),
+      visuals: relationship({ ref: "Visual.tags", many: true }),
     },
   }),
 };

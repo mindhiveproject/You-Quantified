@@ -7,16 +7,29 @@ import { MyUserName } from "./username";
 
 export function MainMenu() {
   const { currentUser } = useContext(UserContext);
-  const [currentFilter, setCurrentFilter] = useState("all");
+  const [currentFilter, setCurrentFilter] = useState("featured");
   const [currentSearch, setCurrentSearch] = useState("");
+  const [currentSort, setCurrentSort] = useState({
+    type: "alphabetical",
+    isDescending: true,
+  });
 
+  // Add a sort useState here
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start">
         {currentUser && <MyUserName currentUser={currentUser} />}
         <h2 className="mt-5 mb-2 fw-bold">Visuals</h2>
         <p>
-          Explore and modify our curated <a href="https://p5js.org" target="blank" className="link text-decoration-none">p5.js visuals</a> or build your own data exploration.
+          Explore and modify our curated{" "}
+          <a
+            href="https://p5js.org"
+            target="blank"
+            className="link text-decoration-none"
+          >
+            p5.js visuals
+          </a>{" "}
+          or build your own data exploration.
         </p>
       </div>
       {currentUser ? (
@@ -41,7 +54,7 @@ export function MainMenu() {
           </Link>
         </div>
       )}
-      <div className="mt-4">
+      <div className="pt-4 sticky-top bg-white z-1 pb-2">
         <input
           type="text"
           className="form-control mb-3"
@@ -50,30 +63,133 @@ export function MainMenu() {
           autoComplete="off"
           onChange={(e) => setCurrentSearch(e.target.value)}
         ></input>
-        <button
-          onClick={() => setCurrentFilter("all")}
-          className={`filter-button pe-2 ${currentFilter === "all" ? "active" : ""
-            }`}
-        >
-          Public Visuals
-        </button>
-        {currentUser?.id && (
-          <button
-            onClick={() => setCurrentFilter("my")}
-            className={`filter-button pe-2 ${currentFilter === "my" ? "active" : ""
+        <div className="d-flex justify-content-between">
+          <div>
+            <button
+              onClick={() => setCurrentFilter("featured")}
+              className={`filter-button pe-3 ${
+                currentFilter === "featured" ? "active" : ""
               }`}
-          >
-            My Visuals
-          </button>
-        )}
+            >
+              Featured
+            </button>
+            {currentUser?.id && (
+              <button
+                onClick={() => setCurrentFilter("my")}
+                className={`filter-button pe-3 ${
+                  currentFilter === "my" ? "active" : ""
+                }`}
+              >
+                Yours
+              </button>
+            )}
+            {currentUser?.id && (
+              <button
+                onClick={() => setCurrentFilter("favorites")}
+                className={`filter-button pe-3 ${
+                  currentFilter === "favorites" ? "active" : ""
+                }`}
+              >
+                Liked
+              </button>
+            )}
+
+            {currentUser?.id && (
+              <button
+                onClick={() => setCurrentFilter("friends")}
+                className={`filter-button pe-3 ${
+                  currentFilter === "friends" ? "active" : ""
+                }`}
+              >
+                Friends
+              </button>
+            )}
+          </div>
+          <VisualSortMenu
+            currentSort={currentSort}
+            setCurrentSort={setCurrentSort}
+          />
+        </div>
       </div>
       <div>
         <VisualizationCards
           currentFilter={currentFilter}
           currentSearch={currentSearch}
           currentUser={currentUser}
+          currentSort={currentSort}
+          showAuthor={currentFilter !== "my"}
         />
       </div>
+    </div>
+  );
+}
+
+export function VisualSortMenu({ currentSort, setCurrentSort }) {
+  return (
+    <div className="d-flex align-items-center p-0">
+      <div className="dropdown p-0">
+        <button
+          className="filter-button d-flex align-items-center"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <span className="material-symbols-outlined me-1">sort</span>Sort
+        </button>
+        <ul className="dropdown-menu">
+          <li>
+            <button
+              className={`dropdown-item ${
+                currentSort.type === "alphabetical"
+                  ? "fw-semibold disabled"
+                  : ""
+              }`}
+              onClick={() =>
+                setCurrentSort({ ...currentSort, type: "alphabetical" })
+              }
+            >
+              Alphabetical
+            </button>
+          </li>
+          <li>
+            <button
+              className={`dropdown-item ${
+                currentSort.type === "createdAt" ? "fw-semibold disabled" : ""
+              }`}
+              onClick={() =>
+                setCurrentSort({ ...currentSort, type: "createdAt" })
+              }
+            >
+              Date created
+            </button>
+          </li>
+          <li>
+            <button
+              className={`dropdown-item ${
+                currentSort.type === "likes" ? "fw-semibold disabled" : ""
+              }`}
+              onClick={() => setCurrentSort({ ...currentSort, type: "likes" })}
+            >
+              Likes
+            </button>
+          </li>
+        </ul>
+      </div>
+      <button
+        className="filter-button text-decoration-none d-flex p-0"
+        onClick={() =>
+          setCurrentSort({
+            ...currentSort,
+            isDescending: !currentSort.isDescending,
+          })
+        }
+      >
+        {currentSort.isDescending ? (
+          <span className="material-symbols-outlined">arrow_upward_alt</span>
+        ) : (
+          <span className="material-symbols-outlined">arrow_downward_alt</span>
+        )}
+      </button>
     </div>
   );
 }

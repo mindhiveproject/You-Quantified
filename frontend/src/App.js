@@ -14,6 +14,7 @@ import { AUTH_USER } from "./queries/user";
 import { NewVisual } from "./components/visuals/menu/new";
 import { useSelector } from "react-redux";
 import { stopRecording } from "./utility/recorder";
+import { User } from "./components/profile/main";
 
 function NavBar({ setShowDevices, recording, setRecording }) {
   const deviceMeta = useSelector((state) => state?.deviceMeta);
@@ -66,6 +67,7 @@ function DesktopApp() {
           <Route path="/visuals/:visID" element={<QueryMainView />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/user/:userID" element={<User />} />
           <Route path="/" element={<HomePage />} />
         </Routes>
       </div>
@@ -79,7 +81,7 @@ export default function App() {
   ) : (
     <DesktopApp />
   );
-  const { data } = useQuery(AUTH_USER);
+  const { data, loading, error } = useQuery(AUTH_USER);
 
   const [currentUser, setCurrentUser] = useState(data?.authenticatedItem);
 
@@ -87,6 +89,8 @@ export default function App() {
     setCurrentUser(data?.authenticatedItem);
   }, [data]);
 
+  if (loading) return <div></div>
+  
   return (
     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
       {renderedContent}

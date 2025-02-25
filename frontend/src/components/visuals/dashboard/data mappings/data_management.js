@@ -7,6 +7,9 @@ import { DataManualSlider, DataAutoSlider } from "./sliders";
 import { ParameterDropDown } from "./dropdown_menu";
 import { selectDataMappings, getDataStreamKeys } from "../../utility/selectors";
 
+// Fix the problem where data doesn't get auto mapped when you enter
+// Change the buffer length in the auto slider
+
 function ParameterManager({ parameter, dataMappings }) {
   // Manages if parameters are managed manually or automatically
   const manual = dataMappings[parameter.name] === "Manual";

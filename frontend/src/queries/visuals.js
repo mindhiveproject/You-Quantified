@@ -21,6 +21,11 @@ export const MY_VISUALS = gql`
       docs
       docsVisible
       editable
+      extensions
+      likes {
+        id
+      }
+      privacy
     }
   }
 `;
@@ -31,7 +36,7 @@ export const CHANGE_VISUAL = gql`
     $data: VisualUpdateInput!
   ) {
     updateVisual(where: $where, data: $data) {
-      published
+      extensions
       code {
         url
       }
@@ -55,3 +60,24 @@ export const DELETE_VISUAL = gql`
     }
   }
 `;
+
+export const LIKE_VISUAL = gql`
+  mutation UpdateVisual($id: ID!, $userID: ID!) {
+    updateVisual(data: {likes: {connect: [ {
+      id: $userID
+    }]}}, where: {id: $id}) {
+      likesCount
+    }
+  }
+`
+
+export const UNLIKE_VISUAL = gql`
+  mutation UpdateVisual($id: ID!, $userID: ID!) {
+    updateVisual(data: {likes: {disconnect: [ {
+      id: $userID
+    }]}}, where: {id: $id}) {
+      likesCount
+    }
+  }
+`
+

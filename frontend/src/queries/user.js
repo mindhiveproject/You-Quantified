@@ -13,6 +13,18 @@ export const AUTH_USER = gql`
   }
 `;
 
+export const CHANGE_USERNAME = gql`
+mutation ChangeUsername($newName: String!, $userID: ID!) {
+  updateUser(where:  {
+     id: $userID
+  }, data:  {
+     name: $newName
+  }) {
+    id
+    name
+  }
+}`
+
 export const LOGIN_USER = gql`
   mutation UserLogin($email: String!, $password: String!) {
     authenticateUserWithPassword(email: $email, password: $password) {
@@ -21,6 +33,7 @@ export const LOGIN_USER = gql`
           id
           email
           name
+          isAdmin
         }
         sessionToken
       }

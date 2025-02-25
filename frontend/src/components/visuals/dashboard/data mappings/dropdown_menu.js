@@ -1,64 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 
-function NestedDropDown({
-  option,
-  dataStream,
-  parameter,
-  display,
-  selectNewSource,
-}) {
-  function checkDefault(data) {
-    return parameter?.suggested?.includes(data) || false;
-  }
-
-  const { hasDefault, notHasDefault } = dataStream.reduce(
-    (acc, element) => {
-      if (element === "timestamp") return acc;
-      const isDefault = checkDefault(element);
-      acc[isDefault ? "hasDefault" : "notHasDefault"].push(element);
-      return acc;
-    },
-    { hasDefault: [], notHasDefault: [] }
-  );
-
-  useEffect(() => {
-    if (hasDefault.length > 0) {
-      selectNewSource([option.device, hasDefault[0]]);
-    }
-  }, []);
-
-  return (
-    <ul className="submenu dropdown-menu" id="nested-dropdown">
-      {hasDefault.length > 0 && (
-        <small className="dropdown-item disabled">Suggested Mappings</small>
-      )}
-      {hasDefault.map((data) => (
-        <li key={data}>
-          <button
-            className={`dropdown-item ${data === display && "text-primary"}`}
-            onClick={() => selectNewSource([option.device, data])}
-          >
-            {data}
-          </button>
-        </li>
-      ))}
-      {hasDefault.length > 0 && (
-        <small className="dropdown-item disabled">All Streams</small>
-      )}
-      {notHasDefault.map((data) => (
-        <li key={data}>
-          <button
-            className={`dropdown-item ${data === display && "text-primary"}`}
-            onClick={() => selectNewSource([option.device, data])}
-          >
-            {data}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function ParameterDropDown({
   claves,
   parameter,
@@ -142,5 +83,64 @@ export function ParameterDropDown({
         })}
       </ul>
     </div>
+  );
+}
+
+function NestedDropDown({
+  option,
+  dataStream,
+  parameter,
+  display,
+  selectNewSource,
+}) {
+  function checkDefault(data) {
+    return parameter?.suggested?.includes(data) || false;
+  }
+
+  const { hasDefault, notHasDefault } = dataStream.reduce(
+    (acc, element) => {
+      if (element === "timestamp") return acc;
+      const isDefault = checkDefault(element);
+      acc[isDefault ? "hasDefault" : "notHasDefault"].push(element);
+      return acc;
+    },
+    { hasDefault: [], notHasDefault: [] }
+  );
+
+  useEffect(() => {
+    if (hasDefault.length > 0) {
+      selectNewSource([option.device, hasDefault[0]]);
+    }
+  }, []);
+
+  return (
+    <ul className="submenu dropdown-menu" id="nested-dropdown">
+      {hasDefault.length > 0 && (
+        <small className="dropdown-item disabled">Suggested Mappings</small>
+      )}
+      {hasDefault.map((data) => (
+        <li key={data}>
+          <button
+            className={`dropdown-item ${data === display && "text-primary"}`}
+            onClick={() => selectNewSource([option.device, data])}
+          >
+            {data}
+          </button>
+        </li>
+      ))}
+      {hasDefault.length > 0 && (
+        <small className="dropdown-item disabled">All Streams</small>
+      )}
+      {notHasDefault.map((data) => (
+        <li key={data}>
+          <button
+            className={`dropdown-item ${data === display && "text-primary"}`}
+            onClick={() => selectNewSource([option.device, data])}
+          >
+            {data}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }

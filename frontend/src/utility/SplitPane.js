@@ -73,14 +73,16 @@ export const SplitPaneLeft = (props) => {
             setClientWidth(topRef.current.clientWidth);
             return;
         }
-        if (clientWidth<window.innerWidth - 50) {
+        console.log(clientWidth);
+        if (clientWidth< window.innerWidth - 200 || clientWidth<200) {
             topRef.current.style.minWidth = clientWidth + "px";
             topRef.current.style.maxWidth = clientWidth + "px";
         }
 
     }, [clientWidth]);
 
-    return <div {...props} className="split-pane-left" ref={topRef} />;
+
+    return <div {...props} className={props.show?"split-pane-left":'d-none'} ref={topRef} />;
 };
 
 export const SplitPaneRight = (props) => {

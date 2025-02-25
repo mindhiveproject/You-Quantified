@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { EventMarkerStream } from "../../../devices/stream functions/event_markers";
 
-export function P5iFrame({ code, params, isExecuting }) {
+export function P5iFrame({ code, params, isExecuting, extensions }) {
   const iframeRef = useRef(null);
 
   const { visID } = useParams();
@@ -42,16 +42,16 @@ export function P5iFrame({ code, params, isExecuting }) {
     }
 
     // Sound library not working
-    let additionalPackages = [
-      "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.35/Tone.min.js"
-    ];
+    let additionalPackages = extensions || [];
 
+    // Previous version
+    // https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js
+    const scripts = additionalPackages.map((item) => `<script src=${item.url}></script>` ).join('\n');
     const source = /* html */ `
       <html>
       <head>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
-        ${additionalPackages.map((item) => `<script src=${item}></script>`)}
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+        ${scripts}
         <style>
           body {
             margin: 0px;
@@ -75,7 +75,7 @@ export function P5iFrame({ code, params, isExecuting }) {
       </html>
       `;
     iframeRef.current.srcdoc = source;
-  }, [code]);
+  }, [code, extensions]);
 
   useEffect(() => {
     if (iframeRef.current != null) {

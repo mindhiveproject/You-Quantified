@@ -64,10 +64,10 @@ const sessionDomain =
 const session = statelessSessions({
   maxAge: sessionMaxAge,
   secret: sessionSecret!,
-  path: "/",
-  domain: sessionDomain, // Change in production to youquantified.com
-  sameSite: "none",
-  secure: true,
+  // path: "/",
+  // domain: sessionDomain,
+  // sameSite: true,
+  // secure: true,
 });
 
 export { withAuth, session };

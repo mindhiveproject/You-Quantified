@@ -12,44 +12,60 @@ generator client {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String    @default("")
-  email     String    @unique @default("")
+  id        String       @id @default(cuid())
+  name      String       @unique @default("")
+  email     String       @unique @default("")
   password  String
-  visuals   Visual[]  @relation("Visual_author")
-  isAdmin   Boolean   @default(false)
-  createdAt DateTime? @default(now())
+  visuals   Visual[]     @relation("Visual_author")
+  isAdmin   Boolean      @default(false)
+  createdAt DateTime?    @default(now())
+  liked     Visual[]     @relation("User_liked")
+  following Friendship[] @relation("Friendship_requester")
+  followers Friendship[] @relation("Friendship_recipient")
 }
 
-model Tag {
-  id               String   @id @default(cuid())
-  label            String   @default("")
-  visuals          Visual[] @relation("Tag_visuals")
-  from_Visual_tags Visual[] @relation("Visual_tags")
+model Friendship {
+  id          String    @id @default(cuid())
+  requester   User?     @relation("Friendship_requester", fields: [requesterId], references: [id])
+  requesterId String?   @map("requester")
+  recipient   User?     @relation("Friendship_recipient", fields: [recipientId], references: [id])
+  recipientId String?   @map("recipient")
+  status      String?   @default("pending")
+  createdAt   DateTime? @default(now())
+
+  @@index([requesterId])
+  @@index([recipientId])
 }
 
 model Visual {
-  id               String    @id @default(cuid())
-  title            String    @default("")
-  cover_filesize   Int?
-  cover_extension  String?
-  cover_width      Int?
-  cover_height     Int?
-  cover_id         String?
-  code_filesize    Int?
-  code_filename    String?
-  description      String    @default("")
-  author           User?     @relation("Visual_author", fields: [authorId], references: [id])
-  authorId         String?   @map("author")
-  createdAt        DateTime? @default(now())
-  parameters       String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
-  extensions       String?   @default("{\"current\":[]}")
-  docs             String?
-  docsVisible      Boolean   @default(false)
-  published        Boolean   @default(false)
-  editable         Boolean   @default(false)
-  tags             Tag[]     @relation("Visual_tags")
-  from_Tag_visuals Tag[]     @relation("Tag_visuals")
+  id              String    @id @default(cuid())
+  title           String    @default("")
+  cover_filesize  Int?
+  cover_extension String?
+  cover_width     Int?
+  cover_height    Int?
+  cover_id        String?
+  code_filesize   Int?
+  code_filename   String?
+  description     String    @default("")
+  author          User?     @relation("Visual_author", fields: [authorId], references: [id])
+  authorId        String?   @map("author")
+  createdAt       DateTime? @default(now())
+  parameters      String?   @default("[{\"name\":\"Sample\",\"suggested\":[\"Alpha\"]}]")
+  likes           User[]    @relation("User_liked")
+  extensions      String?   @default("[]")
+  docs            String?
+  docsVisible     Boolean   @default(false)
+  published       Boolean   @default(false)
+  editable        Boolean   @default(false)
+  tags            Tag[]     @relation("Tag_visuals")
+  privacy         String?   @default("private")
 
   @@index([authorId])
+}
+
+model Tag {
+  id      String   @id @default(cuid())
+  label   String   @default("")
+  visuals Visual[] @relation("Tag_visuals")
 }

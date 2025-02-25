@@ -1,6 +1,6 @@
 import {Heartbeat} from './heartbeat.js';
 
-const OPENCV_URI = "https://docs.opencv.org/master/opencv.js";
+const OPENCV_URI = "https://docs.opencv.org/3.4/opencv.js";
 const HAARCASCADE_URI = "haarcascade_frontalface_alt.xml"
 
 // Load opencv when needed
@@ -12,6 +12,7 @@ async function loadOpenCv(uri) {
     tag.async = true;
     tag.type = 'text/javascript'
     tag.onload = () => {
+      console.log(cv);
       cv['onRuntimeInitialized'] = () => {
         console.log("opencv ready");
         resolve();
@@ -27,6 +28,8 @@ async function loadOpenCv(uri) {
 
 let demo = new Heartbeat("webcam", "canvas", HAARCASCADE_URI, 30, 6, 250);
 var ready = loadOpenCv(OPENCV_URI);
+
 ready.then(function() {
+  console.log("OpenCV Loaded")
   demo.init();
 });

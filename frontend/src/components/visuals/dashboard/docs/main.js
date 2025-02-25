@@ -241,8 +241,6 @@ export default function DocsWindow({
     _setIsDocsVisible(input);
   }
   
-  
-
   const [isAddingLink, setIsAddingLink] = useState(false);
   const linkPopupRef = React.useRef(null);
   useOutsideAlerter(linkPopupRef, setIsAddingLink);
@@ -255,21 +253,21 @@ export default function DocsWindow({
           <button
             className={`btn ${
               _isDocsVisible
-                ? "btn-light btn-outline-primary"
-                : "btn-light btn-outline-dark"
+                ? "btn-light btn-outline-primary publish-button"
+                : "btn-light btn-outline-dark publish-button"
             }  btn-docs-vis`}
             onClick={() => setIsDocsVisible(!_isDocsVisible)}
           >
             <div className="d-flex align-items-center">
               <span className="material-symbols-outlined inline-icon ms-n1 me-1">
-                {_isDocsVisible ? "public" : "public_off"}
+                {_isDocsVisible ? "visibility" : "visibility_off"}
               </span>
-              {_isDocsVisible ? "Published" : "Hidden"}
+              {_isDocsVisible ? "Visible" : "Hidden"}
             </div>
           </button>
         </div>
       )}
-      <div className="scrollable">
+      <div className="scrollable-editor">
         <EditorContent editor={editor}></EditorContent>
       </div>
       {isAddingLink && (

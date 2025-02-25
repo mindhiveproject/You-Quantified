@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import React, { useEffect, useRef, useState } from "react";
 import { selectParamValues } from "../../utility/selectors";
 import { useSearchParams } from "react-router-dom";
-import { useFullScreenHandle } from "react-full-screen";
 
 export function VisualsWindow({
   visMetadata,
@@ -14,6 +13,7 @@ export function VisualsWindow({
   fullScreenHandle,
   popupVisuals,
   setPopupVisuals,
+  extensions
 }) {
   // Window with the visuals. It loads and manages the React components that enter
   const params = useSelector(selectParamValues);
@@ -50,7 +50,7 @@ export function VisualsWindow({
         <div className="w-100 h-100">
           {params && visMetadata?.editable ? (
             <FullScreen handle={fullScreenHandle} className="w-100 h-100">
-              <P5iFrame code={code} params={params} isExecuting={isExecuting} />
+              <P5iFrame code={code} params={params} isExecuting={isExecuting} extensions={extensions}/>
             </FullScreen>
           ) : (
             component
@@ -68,6 +68,7 @@ export function VisualsWindow({
             initialCode={code}
             initialParams={params}
             isExecuting={isExecuting}
+            extensions={extensions}
           />
         </PopupComponent>
       )}

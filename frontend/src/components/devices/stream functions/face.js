@@ -2,7 +2,14 @@ import Face from "../../../utility/face";
 import store from "../../../store/store";
 
 export function connectFace(changeConnectionStatus) {
-  window.open("/audiovideo/face/index.html", "_blank", "popup");
+  var popup = window.open("/audiovideo/face/index.html", "_blank", "popup");
+
+  window.onbeforeunload = function() {
+    if (popup && !popup.closed) {
+        popup.close();
+    }
+  };
+
   const bc = new BroadcastChannel("face-landmarks");
   const face = new Face(bc);
   face.initialize();

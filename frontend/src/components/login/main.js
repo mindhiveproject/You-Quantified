@@ -26,10 +26,11 @@ export default function Login() {
     );
   }
 
-  return <LoginScreen />;
+  return <LoginScreen setCurrentUser={setCurrentUser} />;
 }
 
 export function LoggedInScreen({ currentUser, setCurrentUser }) {
+
   const [endSession, { data, loading }] = useMutation(END_SESSION, {
     update() {
       setCurrentUser(undefined);
@@ -38,9 +39,14 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const redirectVisual = searchParams.get("visual");
+  const redirectUser = searchParams.get("user");
+
 
   if (redirectVisual) {
     return <Navigate to={`/visuals/${redirectVisual}`} />;
+  }
+  if (redirectUser) {
+    return <Navigate to={`/user/${redirectUser}`} />
   }
 
   return (
@@ -54,34 +60,28 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
         Sign out
       </button>
       {redirectVisual && <p>Redirecting you to the last visual...</p>}
+      {redirectUser && <p>Redirecting you to the user's profile...</p>}
     </div>
   );
 }
 
-function LoginScreen() {
+function LoginScreen({ setCurrentUser }) {
   const [authSuccess, setAuthSuccess] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
     update(cache, { data }) {
-      console.log("data");
-      console.log(data);
-      console.log("error");
-      console.log(error);
       if (data?.authenticateUserWithPassword?.item) {
         setAuthSuccess(true);
         setCurrentUser(data?.authenticateUserWithPassword?.item);
       } else if (data?.authenticateUserWithPassword?.message) {
         setErrorMessage(data?.authenticateUserWithPassword?.message);
-
         setAuthSuccess(false);
       } else {
         setAuthSuccess(null);
       }
     },
   });
-
-  const { setCurrentUser } = useContext(UserContext);
 
   let userInput;
   let passwordInput;
@@ -130,7 +130,7 @@ function LoginScreen() {
             ></input>
           </div>
           {errorMessage && <p className="text-danger">{errorMessage}</p>}
-          <p className="text-primary">Forgot your password?</p>
+          {/*<p className="text-primary">Forgot your password?</p>*/}
           <button
             type="submit"
             className={`btn btn-primary ${loading && "disabled"}`}

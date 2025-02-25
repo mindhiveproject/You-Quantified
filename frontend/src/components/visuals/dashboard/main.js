@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useFullScreenHandle } from "react-full-screen";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import CodePane from "./code/code_editor";
 import DataManagementWindow from "./data mappings/main";
 import { VisualsWindow } from "./p5window/p5window";
@@ -26,16 +26,21 @@ export function VisualScreen({
   currentScreen,
   docsContent,
   setters,
-  isEditable
+  isEditable,
 }) {
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
 
   const isDocsVisible = visMetadata?.docsVisible;
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get("dashboard");
+  console.log(viewParam);
+  const showDashboard = viewParam === "true" || viewParam === null;
+
   return (
     <SplitPane className="split-pane-row">
-      <SplitPaneLeft>
+      <SplitPaneLeft show={showDashboard}>
         {currentScreen.left == "code" && (
           <CodePane
             visName={visName}
@@ -43,7 +48,7 @@ export function VisualScreen({
             code={code}
             isEditable={isEditable}
             extensions={visMetadata?.extensions}
-            setVisExtensions={setters.setExtensions}
+            setExtensions={setters.setExtensions}
           />
         )}
         {currentScreen.left == "docs" && (
@@ -59,6 +64,7 @@ export function VisualScreen({
           visInfo={visMetadata}
           custom={isEditable}
           setVisInfo={setters.setVisMetadata}
+          showDashboard={showDashboard}
         />
       </SplitPaneLeft>
       <Divider />
@@ -69,6 +75,7 @@ export function VisualScreen({
           fullScreenHandle={fullScreenHandle}
           popupVisuals={popupVisuals}
           setPopupVisuals={setters.setPopupVisuals}
+          extensions={visMetadata?.extensions}
         />
       </SplitPaneRight>
     </SplitPane>
@@ -84,13 +91,13 @@ function VisTopBar({
   fullScreenHandle,
   mutationData,
   changeVisMetadata,
-  isEditable
+  isEditable,
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const editPopupRef = useRef(null);
 
   useOutsideAlerter(editPopupRef, setShowEdit);
-  
+
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
 
   return (
@@ -156,19 +163,134 @@ function VisTopBar({
       <div className="d-flex justify-content-end align-items-center">
         <ShowUploadState mutationData={mutationData} />
         <button
-          className="btn btn-link "
+          className="btn btn-link"
           onClick={() => setPopupVisuals(!popupVisuals)}
         >
           <b>
             <i className="bi bi-window" alt="popup-window"></i>
           </b>
         </button>
-        <button className="btn btn-link " onClick={fullScreenHandle.enter}>
+        {isEditable && (
+          <PrivacyDropdown
+            visMetadata={visMetadata}
+            changeVisMetadata={changeVisMetadata}
+          />
+        )}
+        {/*<button className="btn btn-link " onClick={fullScreenHandle.enter}>
           <b>
             <i className="bi bi-arrows-fullscreen" alt="full-screen"></i>
           </b>
-        </button>
+        </button>*/}
       </div>
+    </div>
+  );
+}
+
+function PrivacyDropdown({ visMetadata, changeVisMetadata }) {
+  const [currentPrivacy, setCurrentPrivacy] = useState(visMetadata?.privacy);
+
+  const { currentUser } = useContext(UserContext);
+  function setPrivacy(input) {
+    setCurrentPrivacy(input);
+    changeVisMetadata({
+      variables: {
+        data: {
+          privacy: input,
+        },
+      },
+    });
+  }
+
+  console.log(visMetadata);
+
+  return (
+    <div className="dropdown me-1">
+      <button className="btn btn-outline-dark" data-bs-toggle="dropdown">
+        {currentPrivacy === "public" && (
+          <div>
+            <span className="material-symbols-outlined inline-icon me-2">
+              public
+            </span>
+            <span>Public</span>
+          </div>
+        )}
+        {currentPrivacy === "friends" && (
+          <div>
+            <span className="material-symbols-outlined inline-icon me-2">
+              group
+            </span>
+            <span>Friends</span>
+          </div>
+        )}
+        {currentPrivacy === "unlisted" && (
+          <div>
+            <span className="material-symbols-outlined inline-icon me-2">
+              link
+            </span>
+            <span>Unlisted</span>
+          </div>
+        )}
+        {currentPrivacy === "private" && (
+          <div>
+            <span className="material-symbols-outlined inline-icon me-2">
+              lock
+            </span>
+            <span>Private</span>
+          </div>
+        )}
+      </button>
+      <ul className="dropdown-menu">
+        {currentUser?.isAdmin && (
+          <li className="dropdown-item">
+            <button
+              className="btn btn-link text-decoration-none d-flex align-items-center p-0 text-start pt-1 pe-1 w-100"
+              onClick={() => setPrivacy("public")}
+            >
+              <span className="material-symbols-outlined me-3">public</span>
+              <div>
+                <h6 className="m-0">Public</h6>
+                <small>Feature the visual for every user.</small>
+              </div>
+            </button>
+          </li>
+        )}
+        <li className="dropdown-item">
+          <button
+            className="btn btn-link text-decoration-none d-flex align-items-center p-0 text-start pt-1 pe-1 w-100"
+            onClick={() => setPrivacy("friends")}
+          >
+            <span className="material-symbols-outlined me-3">group</span>
+            <div>
+              <h6 className="m-0">Friends</h6>
+              <small>Visible to my friends.</small>
+            </div>
+          </button>
+        </li>
+        <li className="dropdown-item">
+          <button
+            className="btn btn-link text-decoration-none d-flex align-items-center p-0 text-start pt-1 pe-1 w-100"
+            onClick={() => setPrivacy("unlisted")}
+          >
+            <span className="material-symbols-outlined me-3">link</span>
+            <div>
+              <h6 className="m-0">Unlisted</h6>
+              <small>Those with a link.</small>
+            </div>
+          </button>
+        </li>
+        <li className="dropdown-item">
+          <button
+            className="btn btn-link text-decoration-none d-flex align-items-center p-0 text-start pt-1 pe-1 w-100"
+            onClick={() => setPrivacy("private")}
+          >
+            <span className="material-symbols-outlined me-3">lock</span>
+            <div>
+              <h6 className="m-0">Private</h6>
+              <small>Only you can see it.</small>
+            </div>
+          </button>
+        </li>
+      </ul>
     </div>
   );
 }
@@ -178,19 +300,17 @@ function ShowUploadState({ mutationData }) {
 
   if (loading)
     return (
-      <span className="text-body-tertiary m-0 p-0 ms-2 pe-3">
+      <span className="text-body-tertiary m-0 p-0 ms-2 pe-2">
         Saving changes…
       </span>
     );
   if (error)
     return (
-      <span className="text-body-tertiary m-0 p-0 ms-2 pe-3">
-        Error saving
-      </span>
+      <span className="text-body-tertiary m-0 p-0 ms-2 pe-2">Error saving</span>
     );
 
   return (
-    <span className="text-body-tertiary m-0 p-0 ms-2 pe-4">
+    <span className="text-body-tertiary m-0 p-0 ms-2 pe-2">
       All changes saved
     </span>
   );
@@ -301,7 +421,11 @@ export function MainView({ visID, queryData }) {
   const fullScreenHandle = useFullScreenHandle();
 
   const { currentUser } = useContext(UserContext);
-  const isEditable = visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
+  console.log("currentUser", currentUser);
+  const isEditable =
+    visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
+  console.log("isEditable", isEditable);
+  console.log("visMetadata", visMetadata);
 
   function setExtensions(input) {
     // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview
@@ -393,6 +517,13 @@ export function MainView({ visID, queryData }) {
     }
   }, [visMetadata]);
 
+  if (!isEditable && visMetadata?.privacy === "private") {
+    return (
+      <div className="h-100 w-100 d-flex justify-content-center align-items-center">
+        This visual has been made private by the user.
+      </div>
+    );
+  }
 
   return (
     <div className="h-100">

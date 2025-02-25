@@ -3,7 +3,10 @@ import { useSelector, useDispatch } from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import { selectParamValues } from "../../utility/selectors";
-import { normalizeValue } from "../../../../store/utility_functions";
+
+function normalizeValue(value, min, max) {
+  return (value - min) / (max - min);
+}
 
 export function DataManualSlider({ parameter }) {
   // This function is the list item when it is connected not connected to a datastream
@@ -145,7 +148,7 @@ export function DataAutoSlider({ dataMappings, parameter }) {
 
   const [disabled, setDisabled] = useState(false); // Defines if items are disabled (ex, when autoranging)
   const [buffer, _setBuffer] = useState([false]); // Data buffer for autorange
-  const AUTO_SET_DELAY = 2000; // Delay for autoset in milliseconds
+  const AUTO_SET_DELAY = 3000; // Delay for autoset in milliseconds
 
   const bufferRef = useRef(buffer);
   function setBuffer(val) {

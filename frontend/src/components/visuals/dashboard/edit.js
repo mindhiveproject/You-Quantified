@@ -53,13 +53,16 @@ function CopyEditPopup({ visMetadata }) {
   const { currentUser } = useContext(UserContext);
 
   const [createNewVisual, { data, loading, error }] = useMutation(NEW_VISUAL, {
-    refetchQueries: MY_VISUALS,
+    refetchQueries: [MY_VISUALS, 'VisualsQuery'],
   });
 
   async function createVisualCopy() {
     const response = await fetch(visMetadata?.code?.url);
     const codeBlob = await response.blob();
 
+    // Could also copy the documentation
+    // Add copy to the regular dashboard
+    
     createNewVisual({
       variables: {
         data: {
@@ -75,6 +78,7 @@ function CopyEditPopup({ visMetadata }) {
           code: {
             upload: codeBlob,
           },
+          extensions: visMetadata?.extensions
         },
       },
     });

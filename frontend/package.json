@@ -4,7 +4,7 @@
   "version": "0.9",
   "private": true,
   "dependencies": {
-    "@2toad/profanity": "^3.0.1",
+    "@2toad/profanity": "^3.1.1",
     "@babel/parser": "^7.26.2",
     "@babel/traverse": "^7.25.9",
     "@codesandbox/sandpack-react": "^2.19.9",

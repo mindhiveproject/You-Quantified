@@ -83,7 +83,6 @@ export class MuseDevice {
       });
 
       const info = await this.muse.deviceInfo();
-      console.log(info);
     } catch (error) {}
   }
 
@@ -126,8 +125,6 @@ export class MuseDevice {
     this.muse.ppgReadings.subscribe((ppgReading) => {
       if (this.connected) {
         if (ppgReading.ppgChannel === 2) {
-          console.log("PPG Samples Length");
-          console.log(ppgReading.samples.length);
           this.ppgBuffer.splice(0, ppgReading.samples.length);
           this.ppgBuffer.push(...ppgReading.samples);
           for (let i = 0; i < ppgReading.samples.length; i++) {
@@ -156,7 +153,7 @@ export class MuseDevice {
       } else {
         clearInterval(this.eegMetricStream);
       }
-    }, 100);
+    }, 200);
     this.ppgMetricStream = setInterval(() => {
       if (this.connected) {
         calculate_ppg_metrics(this.ppgBuffer, this.id);
@@ -183,7 +180,7 @@ async function calculate_eeg_metrics(muse_eeg, deviceID) {
   for (let [channel, data] of Object.entries(muse_eeg)) {
     const data_mean = average(data);
     const centered_data = data.map((val) => val - data_mean);
-    const sample = applyHammingWindow(centered_data); // Hanning window on the data
+    const sample = applyHammingWindow(centered_data); // Hamming window on the data
     const N = sample.length;
 
     const raw_fft = math.fft(sample);
@@ -210,11 +207,13 @@ async function calculate_eeg_metrics(muse_eeg, deviceID) {
     avrg[col] = average(bandpowers_arr);
   }
 
+  
   store.dispatch({
     type: "devices/streamUpdate",
     payload: {
       id: deviceID,
       data: avrg,
+      // data: avrg_bandpowers["Alpha"]
     },
   });
 }

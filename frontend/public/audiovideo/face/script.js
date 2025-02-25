@@ -135,7 +135,7 @@ function drawBlendShapes(el, blendShapes) {
     if (!blendShapes.length) {
         return;
     }
-    console.log(blendShapes[0]);
+
     let htmlMaker = "";
     blendShapes[0].categories.map((shape) => {
         htmlMaker += `

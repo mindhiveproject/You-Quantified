@@ -11,6 +11,8 @@ import { Link, Navigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { profanity } from "@2toad/profanity";
+
 
 export default function SignUp() {
   const [currScreen, setCurrScreen] = useState("email-password");
@@ -95,9 +97,15 @@ function SignedUpScreen({
 
   const [searchParams, setSearchParams] = useSearchParams();
   const redirectVisual = searchParams.get("visual");
+  const redirectUser = searchParams.get("user");
 
-  if (redirectVisual && currentUser) {
-    return <Navigate to={`/visuals/${redirectVisual}`} />;
+  if (currentUser?.id) {
+    if (redirectVisual) {
+      return <Navigate to={`/visuals/${redirectVisual}`} />;
+    }
+    if (redirectUser) {
+      return <Navigate to={`/user/${redirectUser}`} />
+    }
   }
 
   return (
@@ -139,7 +147,7 @@ export function PasswordEmailInput({ setEmail, setPassword, setCurrScreen }) {
       validationSchema={SignupSchema}
       onSubmit={async (values, { setErrors, setSubmitting }) => {
         // Run the check for repeated user
-        const { data } = await checkRepeatedUser({
+        const { data, error } = await checkRepeatedUser({
           variables: { email: values.email },
         });
 
@@ -175,9 +183,8 @@ export function PasswordEmailInput({ setEmail, setPassword, setCurrScreen }) {
             ) : null}
             <button
               type="submit"
-              className={`btn btn-primary mt-3 ${
-                (errors?.password || errors?.email) && "disabled"
-              }`}
+              className={`btn btn-primary mt-3 ${(errors?.password || errors?.email) && "disabled"
+                }`}
             >
               Submit
             </button>
@@ -201,7 +208,7 @@ function UserSignUp({ email, password, setUser, setCurrScreen }) {
     if (input != "" && validateUsername(input)) {
       setError();
     } else {
-      setError("Username must not contain any spaces or special characters");
+      setError("Username is invalid");
     }
   }
 
@@ -249,13 +256,14 @@ function UserSignUp({ email, password, setUser, setCurrScreen }) {
   );
 }
 
-function validateUsername(username) {
+export function validateUsername(username) {
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
 
   if (
     username.length > 3 &&
     username.length < 18 &&
-    usernameRegex.test(username)
+    usernameRegex.test(username) &&
+    !profanity.exists(username)
   ) {
     return true;
   } else {
