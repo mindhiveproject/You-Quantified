@@ -114,7 +114,7 @@ function DataCard({
   );
 }
 
-export default function DataManagement({ setVisInfo, visInfo, custom }) {
+export default function DataManagement({ changeParameters, visInfo, custom }) {
   // Contains the entire accordion with all vis properties based on the current visInfo
 
   const [newParamName, setNewParamName] = useState("");
@@ -149,7 +149,7 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
       ({ name }) => name != paramName
     );
 
-    setVisInfo(newMeta.parameters);
+    changeParameters(newMeta.parameters);
   }
 
   function newParameter() {
@@ -162,7 +162,7 @@ export default function DataManagement({ setVisInfo, visInfo, custom }) {
       },
     });
 
-    setVisInfo([...visInfo.parameters, { name: newParamName, suggested: [] }]);
+    changeParameters([...visInfo.parameters, { name: newParamName, suggested: [] }]);
     setShow(false);
   }
 

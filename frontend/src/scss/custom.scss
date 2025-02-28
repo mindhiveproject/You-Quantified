@@ -875,6 +875,27 @@ canvas {
   color: #1a1a1a;
 }
 
+.vis-bar .btn-custom.primary {
+  background-color: white;
+  margin-left: 0px;
+}
+
+.vis-bar .btn-custom.primary:hover {
+  background-color: $primary;
+  color: $black;
+}
+
+.vis-bar .btn-custom.primary.active {
+  background-color: $primary;
+  color: $white;
+}
+
+.vis-bar .btn-custom.primary.active:hover {
+  background-color: $primary;
+  color: $black;
+}
+
+
 .vis-bar .btn-custom.code {
   background-color: white;
   color: #1a1a1a;

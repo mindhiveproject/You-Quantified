@@ -10,6 +10,7 @@ import { fetchCode } from "../utility/fetch_code";
 import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
 import { EditModalManager } from "./edit";
 import DocsWindow from "./docs/main";
+import { ShareMenu } from "../menu/share";
 
 import SplitPane, {
   SplitPaneLeft,
@@ -35,8 +36,12 @@ export function VisualScreen({
 
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("dashboard");
-  const showDashboard = viewParam === "true" || viewParam === null;
+  console.log(currentScreen.left !== "none");
+  const showDashboard =
+    currentScreen.left !== "none" &&
+    (viewParam === "true" || viewParam === null);
 
+  console.log(showDashboard);
   return (
     <SplitPane className="split-pane-row">
       <SplitPaneLeft show={showDashboard}>
@@ -59,12 +64,14 @@ export function VisualScreen({
             isDocsVisible={isDocsVisible}
           />
         )}
-        <DataManagementWindow
-          visInfo={visMetadata}
-          custom={isEditable}
-          setVisInfo={setters.setVisMetadata}
-          showDashboard={showDashboard}
-        />
+        {currentScreen.left == "dashboard" && (
+          <DataManagementWindow
+            visInfo={visMetadata}
+            custom={isEditable}
+            changeParameters={setters.changeParameters}
+            showDashboard={showDashboard}
+          />
+        )}
       </SplitPaneLeft>
       <Divider />
       <SplitPaneRight>
@@ -94,55 +101,77 @@ function VisTopBar({
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const editPopupRef = useRef(null);
+  const sharePopupRef = useRef(null);
+  const [showShare, setShowShare] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPrivacy, setCurrentPrivacy] = useState(visMetadata?.privacy);
+
+  const viewParam = searchParams.get("dashboard");
 
   useOutsideAlerter(editPopupRef, setShowEdit);
+  useOutsideAlerter(sharePopupRef, setShowShare);
 
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
+
+  function changeScreen(input) {
+    let newScreen = input;
+    if (input === currentScreen.left) {
+      newScreen = "none";
+    }
+    setCurrentScreen({
+      ...currentScreen,
+      left: newScreen,
+    });
+  }
 
   return (
     <div className="vis-bar">
       <div className="d-flex align-items-center">
-        <div>
-          {visMetadata?.editable && (
-            <div>
-              <button
-                className="btn-custom secondary"
-                onClick={() => setShowEdit(!showEdit)}
-              >
-                <i className="bi bi-pencil-fill"></i>
-              </button>
+        {(viewParam === "true" || viewParam === null) && (
+          <div className="d-flex align-items-center">
+            <button
+              className="btn-custom secondary"
+              onClick={() => setShowEdit(!showEdit)}
+            >
+              <span className="material-symbols-outlined inline-icon">
+                edit
+              </span>
+            </button>
+            <button
+              className={`btn-custom primary ${
+                currentScreen.left == "dashboard" ? "active" : ""
+              }`}
+              onClick={() => changeScreen("dashboard")}
+            >
+              <span className="material-symbols-outlined inline-icon">
+                space_dashboard
+              </span>
+            </button>
+            <button
+              className={`btn-custom code ${
+                currentScreen.left == "code" ? "active" : ""
+              }`}
+              onClick={() => changeScreen("code")}
+            >
+              <b>
+                <span className="material-symbols-outlined inline-icon">
+                  code
+                </span>
+              </b>
+            </button>
+            {isDocsVisible && (
               <button
                 className={`btn-custom code ${
-                  currentScreen.left == "code" ? "active" : ""
+                  currentScreen.left == "docs" ? "active" : ""
                 }`}
-                onClick={() =>
-                  setCurrentScreen({
-                    ...currentScreen,
-                    left: currentScreen.left == "code" ? "data" : "code",
-                  })
-                }
+                onClick={() => changeScreen("docs")}
               >
-                <b>
-                  <i className="bi bi-code-slash" alt="code"></i>
-                </b>
+                <span className="material-symbols-outlined inline-icon">
+                  docs
+                </span>
               </button>
-            </div>
-          )}
-        </div>
-        {isDocsVisible && (
-          <button
-            className={`btn-custom code ${
-              currentScreen.left == "docs" ? "active" : ""
-            }`}
-            onClick={() =>
-              setCurrentScreen({
-                ...currentScreen,
-                left: currentScreen.left == "docs" ? "data" : "docs",
-              })
-            }
-          >
-            <i className="bi bi-file-earmark-text"></i>
-          </button>
+            )}
+          </div>
         )}
         {showEdit && (
           <div className="edit-background">
@@ -160,7 +189,7 @@ function VisTopBar({
         </h5>
       </div>
       <div className="d-flex justify-content-end align-items-center">
-        <ShowUploadState mutationData={mutationData} />
+        {isEditable && <ShowUploadState mutationData={mutationData} />}
         <button
           className="btn btn-link"
           onClick={() => setPopupVisuals(!popupVisuals)}
@@ -171,22 +200,41 @@ function VisTopBar({
         </button>
         {isEditable && (
           <PrivacyDropdown
-            visMetadata={visMetadata}
+            currentPrivacy={currentPrivacy}
+            setCurrentPrivacy={setCurrentPrivacy}
             changeVisMetadata={changeVisMetadata}
           />
         )}
-        {/*<button className="btn btn-link " onClick={fullScreenHandle.enter}>
-          <b>
-            <i className="bi bi-arrows-fullscreen" alt="full-screen"></i>
-          </b>
-        </button>*/}
+        {currentPrivacy !== "private" && (
+          <button
+            className="btn btn-outline-dark me-1"
+            onClick={() => setShowShare(true)}
+          >
+            <div>
+              <span className="material-symbols-outlined inline-icon me-2 ms-n1">
+                ios_share
+              </span>
+              <span>Share</span>
+            </div>
+          </button>
+        )}
+        {showShare && (
+          <div className="edit-background">
+            <div className="edit-popup" ref={sharePopupRef}>
+              <ShareMenu
+                visURL={window.location.href}
+                setShowShare={setShowShare}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function PrivacyDropdown({ visMetadata, changeVisMetadata }) {
-  const [currentPrivacy, setCurrentPrivacy] = useState(visMetadata?.privacy);
+function PrivacyDropdown({ currentPrivacy, setCurrentPrivacy, changeVisMetadata }) {
+ 
 
   const { currentUser } = useContext(UserContext);
   function setPrivacy(input) {
@@ -205,7 +253,7 @@ function PrivacyDropdown({ visMetadata, changeVisMetadata }) {
       <button className="btn btn-outline-dark" data-bs-toggle="dropdown">
         {currentPrivacy === "public" && (
           <div>
-            <span className="material-symbols-outlined inline-icon me-2">
+            <span className="material-symbols-outlined inline-icon me-2 ms-n1">
               public
             </span>
             <span>Public</span>
@@ -403,7 +451,7 @@ export function MainView({ visID, queryData }) {
 
   const [visMetadata, _setVisMetadata] = useState(queryData);
   const [currentScreen, setCurrentScreen] = useState({
-    left: "data",
+    left: "dashboard",
   });
   const [code, _setCode] = useState("");
   const [docsContent, _setDocsContent] = useState();
@@ -420,7 +468,6 @@ export function MainView({ visID, queryData }) {
   const { currentUser } = useContext(UserContext);
   const isEditable =
     visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
-
 
   function setExtensions(input) {
     // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview
@@ -473,7 +520,7 @@ export function MainView({ visID, queryData }) {
     });
   }
 
-  function changeVisParameters(input) {
+  function changeParameters(input) {
     _setVisMetadata({
       ...visMetadata,
       parameters: input,
@@ -489,7 +536,7 @@ export function MainView({ visID, queryData }) {
 
   const setters = {
     setCode,
-    changeVisParameters,
+    changeParameters,
     setDocsVisibility,
     updateDocsData,
     setExtensions,

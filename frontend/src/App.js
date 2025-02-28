@@ -51,7 +51,11 @@ function DesktopApp() {
 
   return (
     <>
-      <NavBar setShowDevices={setShowDevices} recording={recording} setRecording={setRecording}/>
+      <NavBar
+        setShowDevices={setShowDevices}
+        recording={recording}
+        setRecording={setRecording}
+      />
       <div className="hv-100">
         {showDevices && (
           <DevicesManager
@@ -89,8 +93,8 @@ export default function App() {
     setCurrentUser(data?.authenticatedItem);
   }, [data]);
 
-  if (loading) return <div></div>
-  
+  if (loading) return <div></div>;
+
   return (
     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
       {renderedContent}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import DataManagement from "./data_management";
 import { useSelector, useDispatch } from "react-redux";
 
-export default function DataManagementWindow({ setVisInfo, visInfo, custom, showDashboard }) {
+export default function DataManagementWindow({ changeParameters, visInfo, custom }) {
   // The window with the data mappings
 
   const parameters = useSelector((state) => state.params);
@@ -20,7 +20,7 @@ export default function DataManagementWindow({ setVisInfo, visInfo, custom, show
       <DataManagement
         visInfo={visInfo}
         custom={custom}
-        setVisInfo={setVisInfo}
+        changeParameters={changeParameters}
       />
     </div>
   );

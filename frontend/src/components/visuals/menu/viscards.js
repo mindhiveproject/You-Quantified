@@ -139,7 +139,7 @@ function BottomBar({ visID, userID, likes }) {
       {showShare && (
         <div className="edit-background mt-0">
           <div className="edit-popup" ref={sharePopupRef}>
-            <ShareMenu />
+            <ShareMenu setShowShare={setShowShare}/>
           </div>
         </div>
       )}

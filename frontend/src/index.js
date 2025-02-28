@@ -24,10 +24,6 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-// import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-
-// import ErrorPage from "./error-page";
-
 import { Provider } from "react-redux";
 import store from "./store/store";
 import { BrowserRouter } from "react-router-dom";
