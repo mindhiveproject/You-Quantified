@@ -40,8 +40,8 @@ const MenuBar = ({ editor, setIsAddingLink }) => {
       </button>
       <div className="vertical-line" />
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        className={editor.isActive("heading", { level: 3 }) ? "is-active" : ""}
       >
         <span className="material-symbols-outlined inline-icon">format_h1</span>
       </button>

@@ -4,7 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { profanity } from "@2toad/profanity";
-import { MY_VISUALS, DELETE_VISUAL, NEW_VISUAL } from "../../../queries/visuals";
+import {
+  MY_VISUALS,
+  DELETE_VISUAL,
+  NEW_VISUAL,
+} from "../../../queries/visuals";
 
 export function EditModalManager({
   visMetadata,
@@ -12,20 +16,66 @@ export function EditModalManager({
   changeVisMetadata,
 }) {
   const { currentUser } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const [createNewVisual, {data: copyData, error}] = useMutation(NEW_VISUAL, {
+    refetchQueries: [MY_VISUALS, "VisualsQuery"],
+  });
+
+  async function createVisualCopy() {
+    const response = await fetch(visMetadata?.code?.url);
+    const codeBlob = await response.blob();
+
+    // Could also copy the documentation
+    // Add copy to the regular dashboard
+
+    
+
+    await createNewVisual({
+      variables: {
+        data: {
+          title: visMetadata?.title+" (copy)",
+          description: visMetadata?.description,
+          parameters: visMetadata?.parameters,
+          author: {
+            connect: {
+              id: currentUser?.id,
+            },
+          },
+          editable: true,
+          code: {
+            upload: codeBlob,
+          },
+          docs: visMetadata?.docs,
+          extensions: visMetadata?.extensions,
+        },
+      },
+    });
+
+  }
+
+  if (copyData) {
+    setTimeout(() => {
+      navigate(`/visuals/${copyData?.createVisual?.id}`);
+     }, 500)
+    return <p>Redirecting you to the copy...</p>;
+  }
 
   if (!currentUser?.id) {
     return <SignInEditPopup />;
   }
 
   if (currentUser.id !== visMetadata?.author?.id) {
-    return <CopyEditPopup visMetadata={visMetadata} />;
+    return <CopyEditPopup createVisualCopy={createVisualCopy}/>;
   }
+  
 
   return (
     <EditScreen
       visMetadata={visMetadata}
       setShowEdit={setShowEdit}
       changeVisMetadata={changeVisMetadata}
+      createVisualCopy={createVisualCopy}
     />
   );
 }
@@ -49,48 +99,7 @@ function SignInEditPopup() {
   );
 }
 
-function CopyEditPopup({ visMetadata }) {
-  const { currentUser } = useContext(UserContext);
-
-  const [createNewVisual, { data, loading, error }] = useMutation(NEW_VISUAL, {
-    refetchQueries: [MY_VISUALS, 'VisualsQuery'],
-  });
-
-  async function createVisualCopy() {
-    const response = await fetch(visMetadata?.code?.url);
-    const codeBlob = await response.blob();
-
-    // Could also copy the documentation
-    // Add copy to the regular dashboard
-    
-    createNewVisual({
-      variables: {
-        data: {
-          title: visMetadata?.title,
-          description: visMetadata?.description,
-          parameters: visMetadata?.parameters,
-          author: {
-            connect: {
-              id: currentUser?.id,
-            },
-          },
-          editable: true,
-          code: {
-            upload: codeBlob,
-          },
-          extensions: visMetadata?.extensions
-        },
-      },
-    });
-  }
-
-  const navigate = useNavigate();
-
-  if (data) {
-    setTimeout(() => {
-      navigate(`/visuals/${data?.createVisual?.id}`);
-    }, 30);
-  }
+function CopyEditPopup({ createVisualCopy }) {
 
   return (
     <div>
@@ -106,8 +115,9 @@ function CopyEditPopup({ visMetadata }) {
   );
 }
 
-function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
+function EditScreen({ visMetadata, setShowEdit, changeVisMetadata, createVisualCopy }) {
   const textbox = useRef(null);
+  const navigate = useNavigate();
   const [visName, setVisName] = useState(visMetadata?.title);
   const [visCover, setVisCover] = useState();
   const [errorMessage, setErrorMessage] = useState();
@@ -128,11 +138,9 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     );
     if (checkConfirmation) {
       deleteVisual();
-      navigate("/visuals")
+      navigate("/visuals");
     }
   }
-
-
 
   function validateName(input) {
     const regex = /^(?!.*[%$\-\/])[^\n\r]{1,50}$/;
@@ -180,13 +188,16 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
     setShowEdit(false);
   }
 
+  function handleEditClick(e) {
+    e.preventDefault();
+    createVisualCopy();
+  }
+
   useLayoutEffect(() => {
     textbox.current.style.height = "inherit";
     textbox.current.style.resize = "none";
     textbox.current.style.height = `${textbox.current.scrollHeight}px`;
   });
-
-  const navigate = useNavigate();
 
   if (visualDeleted) {
     navigate("/visuals");
@@ -249,14 +260,25 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata }) {
           >
             Delete visual
           </button>
-          <button
-            type="submit"
-            className={`btn btn-primary btn-outline-dark text-white ${
-              !isFormValid && "disabled"
-            }`}
-          >
-            <i className="bi bi-floppy2-fill"></i> Save changes
-          </button>
+          <div className="d-flex">
+            <button
+              className="btn btn-outline-dark me-2"
+              onClick={handleEditClick}
+            >
+              Copy visual
+            </button>
+            <button
+              type="submit"
+              className={`btn btn-secondary btn-outline-dark ${
+                !isFormValid && "disabled"
+              }`}
+            >
+              <span className="material-symbols-outlined inline-icon">
+                save
+              </span>
+              Save changes
+            </button>
+          </div>
         </div>
       </form>
     </div>

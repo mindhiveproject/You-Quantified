@@ -64,14 +64,11 @@ export function VisualScreen({
             isDocsVisible={isDocsVisible}
           />
         )}
-        {currentScreen.left == "dashboard" && (
-          <DataManagementWindow
-            visInfo={visMetadata}
-            custom={isEditable}
-            changeParameters={setters.changeParameters}
-            showDashboard={showDashboard}
-          />
-        )}
+        <DataManagementWindow
+          visInfo={visMetadata}
+          custom={isEditable}
+          changeParameters={setters.changeParameters}
+        />
       </SplitPaneLeft>
       <Divider />
       <SplitPaneRight>
@@ -233,9 +230,11 @@ function VisTopBar({
   );
 }
 
-function PrivacyDropdown({ currentPrivacy, setCurrentPrivacy, changeVisMetadata }) {
- 
-
+function PrivacyDropdown({
+  currentPrivacy,
+  setCurrentPrivacy,
+  changeVisMetadata,
+}) {
   const { currentUser } = useContext(UserContext);
   function setPrivacy(input) {
     setCurrentPrivacy(input);
