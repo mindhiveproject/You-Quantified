@@ -19,7 +19,10 @@ export function FriendPage({ friendData, currentUser, currentFriendship }) {
 
 function FriendUserPage({ userData, currentUser }) {
   const [currentSearch, setCurrentSearch] = useState("");
-  const [currentSort, setCurrentSort] = useState("");
+  const [currentSort, setCurrentSort] = useState({
+    type: "alphabetical",
+    isDescending: true,
+  });
 
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
@@ -47,7 +50,7 @@ function FriendUserPage({ userData, currentUser }) {
       </div>
       <VisualizationCards
         currentFilter={"all"}
-        currentSort={{ type: "alphabetical", isDescending: true }}
+        currentSort={currentSort}
         friendData={userData}
         currentUser={currentUser}
         currentSearch={currentSearch}

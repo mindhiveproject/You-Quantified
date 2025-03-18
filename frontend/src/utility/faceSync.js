@@ -13,7 +13,6 @@ class FaceSync {
         this.bc.onmessage = (eventMessage) => {
             console.log(eventMessage.data)
             this.receiveData(eventMessage.data)
-            
            }
 
     }

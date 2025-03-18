@@ -7,12 +7,27 @@ import { MyUserName } from "./username";
 
 export function MainMenu() {
   const { currentUser } = useContext(UserContext);
-  const [currentFilter, setCurrentFilter] = useState("featured");
   const [currentSearch, setCurrentSearch] = useState("");
-  const [currentSort, setCurrentSort] = useState({
-    type: "alphabetical",
-    isDescending: true,
-  });
+
+  const getStoredValue = (key, defaultValue) => {
+    const stored = sessionStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+  };
+
+  const [currentFilter, setCurrentFilter] = useState(() =>
+    getStoredValue("currentFilter", "featured")
+  );
+  const [currentSort, setCurrentSort] = useState(() =>
+    getStoredValue("currentSort", { type: "alphabetical", isDescending: true })
+  );
+
+  useEffect(() => {
+    sessionStorage.setItem("currentFilter", JSON.stringify(currentFilter));
+  }, [currentFilter]);
+
+  useEffect(() => {
+    sessionStorage.setItem("currentSort", JSON.stringify(currentSort));
+  }, [currentSort]);
 
   // Add a sort useState here
   return (

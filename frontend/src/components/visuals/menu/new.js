@@ -320,7 +320,7 @@ function ParamItem({
   );
 }
 
-function validateCommaSeparatedList(input) {
+export function validateCommaSeparatedList(input) {
   // Check if input is a string
 
   if (input === "") {

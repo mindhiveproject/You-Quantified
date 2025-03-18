@@ -9,6 +9,7 @@ import { connectAudioRMS } from "./rms";
 import { connectLSL } from "./lsl";
 import { connectFaceSync } from "./face_sync";
 import { connectVoiceEmotion} from "./voiceEmotion";
+import { connectVideoEmotion } from "./face-emotion";
 
 const connectionText = {
   disconnected: { text: "", type: "" },
@@ -36,4 +37,5 @@ export const deviceConnectionFunctions = {
   "Face Synchrony": connectFaceSync,
   "Pose Detection": connectPose,
   "Voice Emotion": connectVoiceEmotion,
+  "Video Emotion": connectVideoEmotion,
 };

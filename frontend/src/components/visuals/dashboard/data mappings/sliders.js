@@ -4,6 +4,10 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import { selectParamValues } from "../../utility/selectors";
 
+// Change the z-index of the dropdown
+// Change the name of the "Manual"/"Range" Slider
+
+
 function normalizeValue(value, min, max) {
   return (value - min) / (max - min);
 }
@@ -51,23 +55,12 @@ export function DataManualSlider({ parameter }) {
     e.target.value = formValue;
   };
 
-  return (
-    <div className="row justify-content-start">
-      <div className="col-xxl-5 col-xl-4 col-lg-5">
-        <div className="input-group">
-          <form className="form-floating" autoComplete="off">
-            <input
-              type="text"
-              className="form-control"
-              id="valorManualInput"
-              value={Math.round(valor * 1000) / 1000 || 0}
-              onChange={handleFormChange}
-            />
-            <label htmlFor="valorManualInput">Value</label>
-          </form>
-        </div>
-      </div>
-      <div className="col-xxl-7 col-xl-8 col-lg-7 align-self-center">
+  const sliderToolTip = (
+    <Popover id="popover-basic" className="rounded-0 w-25">
+      <Popover.Header as="h5" className="rounded-0">
+        Value
+      </Popover.Header>
+      <Popover.Body>
         <input
           type="range"
           className="form-range align-self-center"
@@ -79,6 +72,32 @@ export function DataManualSlider({ parameter }) {
           min={min}
           max={max}
         />
+      </Popover.Body>
+    </Popover>
+  );
+  return (
+    <div className="d-flex">
+      <div className="input-group me-1">
+        <form className="form-floating" autoComplete="off">
+          <input
+            type="text"
+            className="form-control w-75px"
+            id="valorManualInput"
+            value={Math.round(valor * 1000) / 1000 || 0}
+            onChange={handleFormChange}
+          />
+          <label htmlFor="valorManualInput">Value</label>
+        </form>
+      </div>
+      <div className="align-self-center">
+        <OverlayTrigger
+          trigger="click"
+          placement="right"
+          rootClose={true}
+          overlay={sliderToolTip}
+        >
+          <button className={"btn btn-outline-dark pt-3 pb-3"}>Slider</button>
+        </OverlayTrigger>
       </div>
     </div>
   );
@@ -155,7 +174,7 @@ export function DataAutoSlider({ dataMappings, parameter }) {
     bufferRef.current = val;
     _setBuffer(val);
   }
-  
+
   // Gets called once autorange starts
   async function handleAutoSet() {
     setBuffer([]);
@@ -201,8 +220,10 @@ export function DataAutoSlider({ dataMappings, parameter }) {
   }, []);
 
   const rangeToolTip = (
-    <Popover id="popover-basic">
-      <Popover.Header as="h5">Range</Popover.Header>
+    <Popover id="popover-basic" className="rounded-0">
+      <Popover.Header as="h5" className="rounded-0">
+        Range
+      </Popover.Header>
       <Popover.Body>
         <div className="input-group">
           <div className="form-floating">
@@ -247,29 +268,27 @@ export function DataAutoSlider({ dataMappings, parameter }) {
   );
 
   return (
-    <div className="row justify-content-start">
-      <div className="col-4">
-        <div className="input-group">
-          <form className="form-floating" autoComplete="off">
-            <input
-              type="text"
-              className="form-control"
-              id="valueAutoInput"
-              value={Math.round(source * 1000) / 1000}
-              disabled
-            ></input>
-            <label htmlFor="valueAutoInput">Value</label>
-          </form>
-        </div>
+    <div className="d-flex">
+      <div className="input-group me-1">
+        <form className="form-floating" autoComplete="off">
+          <input
+            type="text"
+            className="form-control w-75px"
+            id="valueAutoInput"
+            value={Math.round(source * 1000) / 1000}
+            disabled
+          ></input>
+          <label htmlFor="valueAutoInput">Value</label>
+        </form>
       </div>
-      <div className="col-6 align-self-center">
+      <div className="align-self-center">
         <OverlayTrigger
           trigger="click"
           placement="right"
           rootClose={true}
           overlay={rangeToolTip}
         >
-          <button className={"btn btn-sm btn-primary"}>Range</button>
+          <button className={"btn btn-outline-dark pt-3 pb-3"}>Range</button>
         </OverlayTrigger>
       </div>
     </div>

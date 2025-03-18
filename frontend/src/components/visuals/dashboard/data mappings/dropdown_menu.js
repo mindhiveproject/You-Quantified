@@ -39,13 +39,14 @@ export function ParameterDropDown({
     <div>
       <button
         type="button"
-        className={dispColor}
+        className={`${dispColor} pt-1 pb-2 text-start`}
         data-bs-toggle="dropdown"
         data-bs-auto-close="true"
         aria-expanded="false"
         onMouseEnter={() => setShow(true)}
       >
-        Mapping - {display}
+        <small className="m-0 p-0 opacity-50">Mapping</small>
+        <p className="m-0 mt-n1 p-0">{display}</p>
       </button>
       <ul className={`dropdown-menu ${show ? "visible" : "hidden"}`}>
         <li>
@@ -113,6 +114,7 @@ function NestedDropDown({
     }
   }, []);
 
+  // submenu-right
   return (
     <ul className="submenu dropdown-menu" id="nested-dropdown">
       {hasDefault.length > 0 && (

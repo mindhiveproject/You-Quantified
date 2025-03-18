@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { DataManualSlider, DataAutoSlider } from "./sliders";
 import { ParameterDropDown } from "./dropdown_menu";
 import { selectDataMappings, getDataStreamKeys } from "../../utility/selectors";
+import { validateCommaSeparatedList } from "../../menu/new";
 
 // Fix the problem where data doesn't get auto mapped when you enter
 // Change the buffer length in the auto slider
@@ -15,7 +16,7 @@ function ParameterManager({ parameter, dataMappings }) {
   const manual = dataMappings[parameter.name] === "Manual";
 
   return (
-    <li className="list-group-item mb-2 container" key={parameter.name}>
+    <div key={parameter.name}>
       {manual ? (
         <DataManualSlider parameter={parameter.name} />
       ) : (
@@ -24,7 +25,7 @@ function ParameterManager({ parameter, dataMappings }) {
           dataMappings={dataMappings}
         />
       )}
-    </li>
+    </div>
   );
 }
 
@@ -34,11 +35,10 @@ function DataCard({
   custom,
   deleteParameter,
   visInfo,
-  indx,
   claves,
+  updateParameter,
 }) {
   // Represents an individual parameter
-  const [expanded, setExpanded] = useState(false); // Used for styling, checks to see if accordion is collapsed or not
 
   const dispatch = useDispatch();
 
@@ -52,64 +52,144 @@ function DataCard({
     });
   }
 
-  // Rewrite the delte parameter logic to avoid deletion when only one is left
+  const editToolTip = (
+    <Popover id="popover-basic" className="rounded-0 custom-popover-width w-25">
+      <Popover.Header as="h5" className="rounded-0">
+        Edit parameter
+      </Popover.Header>
+      <Popover.Body>
+        <EditParameterModal
+          oldInfo={visParameter}
+          visInfo={visInfo}
+          updateParameter={updateParameter}
+          deleteParameter={deleteParameter}
+        />
+      </Popover.Body>
+    </Popover>
+  );
 
   return (
     <div className="list-group-item" key={visParameter.name}>
-      <div
-        className="d-flex align-items-center pt-1 pb-1"
-        key={visParameter.name}
-      >
-        {custom && visInfo?.parameters?.length > 1 && (
-          <button
-            className="btn btn-link text-center p-0 me-2 ms-n1 delete-btn"
-            onClick={() => {
-              deleteParameter(visParameter.name);
-            }}
-          >
-            <i className="h5 p-0 bi bi-dash text-danger"></i>
-          </button>
-        )}
-        <div>{visParameter.name}</div>
-        <div className="btn-map-transition closed col align-items-right">
-          <div className="d-flex justify-content-end align-items-center text-center flex-wrap">
-            <div className="mt-1 mb-1">
-              <ParameterDropDown
-                claves={claves}
-                changeSource={changeSource}
-                parameter={visParameter}
-                dataMappings={dataMappings}
-              />
-            </div>
-          </div>
+      <div className="d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center">
+          {custom && (
+            <OverlayTrigger
+              trigger="click"
+              placement="right"
+              rootClose={true}
+              overlay={editToolTip}
+            >
+              <button className="btn btn-outline-dark m-0 ps-2">
+                <span className="material-symbols-outlined inline-icon me-1">
+                  edit
+                </span>
+                <span>{visParameter.name}</span>
+              </button>
+            </OverlayTrigger>
+          )}
         </div>
-        <button
-          className={
-            expanded
-              ? "btn btn-link fa-arrow-down open"
-              : "btn btn-link fa-arrow-down close"
-          }
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target={"#" + indx}
-          aria-expanded="false"
-          aria-controls="collapseTwo"
-          onClick={() => setExpanded(!expanded)}
-        >
-          <i className="bi bi-three-dots-vertical"></i>
-        </button>
-      </div>
-      <div id={indx} className="collapse">
-        <div>
-          <ul className="list-group list-group-flush">
-            <ParameterManager
+        <div className="d-flex align-items-center me-n2">
+          <div className="me-1">
+            <ParameterDropDown
               claves={claves}
+              changeSource={changeSource}
               parameter={visParameter}
               dataMappings={dataMappings}
             />
-          </ul>
+          </div>
+          <ParameterManager
+            claves={claves}
+            parameter={visParameter}
+            dataMappings={dataMappings}
+          />
         </div>
       </div>
+    </div>
+  );
+}
+
+function EditParameterModal({
+  oldInfo,
+  visInfo,
+  updateParameter,
+  deleteParameter,
+}) {
+  console.log(oldInfo)
+  const [newName, setNewName] = useState(oldInfo.name);
+  const [newNameError, setNewNameError] = useState(false);
+  const [newSuggested, setNewSuggested] = useState((oldInfo?.suggested || [] ).join(","));
+  const [newSuggestedError, setNewSuggestedError] = useState(false);
+
+  const isDeletable = visInfo.parameters.length > 1;
+
+  function validateNewName(e) {
+    const val = e.target.value;
+    const isValid = checkNameValidity(visInfo, val);
+    if (isValid) {
+      setNewName(e.target.value);
+      setNewNameError("");
+    } else {
+      setNewNameError("Invalid length!");
+    }
+  }
+
+  function validateSuggested(e) {
+    const isValid = validateCommaSeparatedList(e.target.value);
+    if (isValid) {
+      setNewSuggested(e.target.value);
+      setNewSuggestedError("");
+    } else {
+      setNewSuggestedError("Invalid list!");
+    }
+  }
+
+  function submitChanges(e) {
+    e.preventDefault();
+    if (newNameError || newSuggestedError) return;
+    updateParameter(oldInfo, { name: newName, suggested: newSuggested });
+  }
+
+  return (
+    <div>
+      <form onSubmit={submitChanges}>
+        <div className="mb-3">
+          <label htmlFor="name">Name</label>
+          <input
+            className={`form-control ${newNameError ? "is-invalid" : ""}`}
+            type="text"
+            autoComplete="off"
+            placeholder="Name"
+            id="name"
+            defaultValue={oldInfo.name}
+            onChange={validateNewName}
+          ></input>
+        </div>
+        <div className="mb-4">
+          <label htmlFor="suggested">Suggested mappings</label>
+          <input
+            className={`form-control ${newSuggestedError ? "is-invalid" : ""}`}
+            type="text"
+            autoComplete="off"
+            placeholder="i.e. Alpha, Beta, eye_blink_left, ..."
+            id="suggested"
+            defaultValue={(oldInfo?.suggested || [] ).join(",")}
+            onChange={validateSuggested}
+          ></input>
+        </div>
+        <div className="d-flex justify-content-between">
+          <button
+            className="btn btn-outline-danger"
+            disabled={!isDeletable}
+            onClick={() => deleteParameter(oldInfo.name)}
+            type="button"
+          >
+            Delete
+          </button>
+          <button className="btn btn-primary" type="submit">
+            Save
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -126,16 +206,16 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
   const dataMappings = useSelector(selectDataMappings);
   const claves = useSelector(getDataStreamKeys);
 
-  const dataCards = visInfo?.parameters?.map((parameter, indx) => (
+  const dataCards = visInfo?.parameters?.map((parameter) => (
     <DataCard
       visParameter={parameter}
       key={parameter.name}
       dataMappings={dataMappings}
       deleteParameter={deleteParameter}
-      indx={indx}
       visInfo={visInfo}
       custom={custom}
       claves={claves}
+      updateParameter={updateParameter}
     />
   ));
 
@@ -152,8 +232,23 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
     changeParameters(newMeta.parameters);
   }
 
+  function updateParameter(oldInfo, newInfo) {
+    const newMeta = JSON.parse(JSON.stringify(visInfo));
+    const oldParam = newMeta.parameters.find(
+      ({ name }) => name === oldInfo.name
+    );
+    const updatedParam = { ...oldParam, ...newInfo };
+    newMeta.parameters = newMeta.parameters.map((param) =>
+      param.name === oldInfo.name ? updatedParam : param
+    );
+    changeParameters(newMeta.parameters);
+  }
+
   function newParameter() {
-    if (!checkValidity()) return;
+    const isParamValid = checkNameValidity(visInfo, newParamName);
+
+    setValid(isParamValid);
+    if (!isParamValid) return;
 
     dispatch({
       type: "params/create",
@@ -162,32 +257,11 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
       },
     });
 
-    changeParameters([...visInfo.parameters, { name: newParamName, suggested: [] }]);
+    changeParameters([
+      ...visInfo.parameters,
+      { name: newParamName, suggested: [] },
+    ]);
     setShow(false);
-  }
-
-  function checkValidity() {
-    const blacklistedCharacters = ["-", "#", "/", "(", ")", "="];
-    const currentProperties = visInfo.parameters.map(({ name }) => name);
-
-    if (currentProperties.includes(newParamName)) {
-      setValid(false);
-      return false;
-    } else if (newParamName == "") {
-      setValid(false);
-      return false;
-    } else if (
-      blacklistedCharacters.some((char) => newParamName.includes(char))
-    ) {
-      setValid(false);
-      return false;
-    } else if (newParamName.length > 20) {
-      setValid(false);
-      return false;
-    } else {
-      setValid(true);
-      return true;
-    }
   }
 
   useOutsideAlerter(overlayRef, setShow);
@@ -195,21 +269,23 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
   if (Object.keys(dataMappings).length === 0) return <div>Loading...</div>;
 
   const newParamToolTip = (
-    <Popover id="popover-basic">
-      <Popover.Header as="h5">Create a new parameter</Popover.Header>
+    <Popover id="popover-basic" className="rounded-0">
+      <Popover.Header as="h5" className="rounded-0">
+        Create a new parameter
+      </Popover.Header>
       <Popover.Body>
         <div className="input-group" ref={overlayRef}>
-          <form className="form-floating" autoComplete={false}>
+          <form className="form-floating" autoComplete="off">
             <input
               type="text"
               className={`form-control ${valid ? "" : "is-invalid"}`}
-              autoComplete={false}
+              autoComplete="off"
               id="max"
               value={newParamName}
               onChange={(e) => {
                 e.preventDefault();
                 setNewParamName(e.target.value);
-                checkValidity(e.target.value);
+                setValid(checkNameValidity(visInfo, e.target.value));
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -257,4 +333,23 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
       ) : null}
     </div>
   );
+}
+
+function checkNameValidity(visInfo, newParamName) {
+  const blacklistedCharacters = ["-", "#", "/", "(", ")", "="];
+  const currentProperties = visInfo.parameters.map(({ name }) => name);
+
+  if (currentProperties.includes(newParamName)) {
+    return false;
+  } else if (newParamName == "") {
+    return false;
+  } else if (
+    blacklistedCharacters.some((char) => newParamName.includes(char))
+  ) {
+    return false;
+  } else if (newParamName.length > 20) {
+    return false;
+  } else {
+    return true;
+  }
 }

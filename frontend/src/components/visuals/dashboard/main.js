@@ -36,12 +36,11 @@ export function VisualScreen({
 
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("dashboard");
-  console.log(currentScreen.left !== "none");
+
   const showDashboard =
     currentScreen.left !== "none" &&
     (viewParam === "true" || viewParam === null);
 
-  console.log(showDashboard);
   return (
     <SplitPane className="split-pane-row">
       <SplitPaneLeft show={showDashboard}>
@@ -127,21 +126,13 @@ function VisTopBar({
         {(viewParam === "true" || viewParam === null) && (
           <div className="d-flex align-items-center">
             <button
-              className="btn-custom secondary"
-              onClick={() => setShowEdit(!showEdit)}
-            >
-              <span className="material-symbols-outlined inline-icon">
-                edit
-              </span>
-            </button>
-            <button
               className={`btn-custom primary ${
                 currentScreen.left == "dashboard" ? "active" : ""
               }`}
               onClick={() => changeScreen("dashboard")}
             >
               <span className="material-symbols-outlined inline-icon">
-                space_dashboard
+                tune
               </span>
             </button>
             <button
@@ -204,7 +195,7 @@ function VisTopBar({
         )}
         {currentPrivacy !== "private" && (
           <button
-            className="btn btn-outline-dark me-1"
+            className="btn btn-outline-dark me-1 overflow-x-hidden text-nowrap"
             onClick={() => setShowShare(true)}
           >
             <div>
@@ -215,6 +206,17 @@ function VisTopBar({
             </div>
           </button>
         )}
+        <button
+          className="btn btn-outline-dark btn-secondary me-1 overflow-x-hidden ps-3 text-nowrap" // Change styling to make smaller
+          onClick={() => setShowEdit(!showEdit)}
+        >
+          <div>
+            <span className="material-symbols-outlined inline-icon me-2 ms-n1">
+              edit
+            </span>
+            <span>Edit</span>
+          </div>
+        </button>
         {showShare && (
           <div className="edit-background">
             <div className="edit-popup" ref={sharePopupRef}>
@@ -249,7 +251,10 @@ function PrivacyDropdown({
 
   return (
     <div className="dropdown me-1">
-      <button className="btn btn-outline-dark" data-bs-toggle="dropdown">
+      <button
+        className="btn btn-outline-dark ps-3 overflow-x-hidden text-nowrap"
+        data-bs-toggle="dropdown"
+      >
         {currentPrivacy === "public" && (
           <div>
             <span className="material-symbols-outlined inline-icon me-2 ms-n1">
@@ -450,7 +455,7 @@ export function MainView({ visID, queryData }) {
 
   const [visMetadata, _setVisMetadata] = useState(queryData);
   const [currentScreen, setCurrentScreen] = useState({
-    left: "dashboard",
+    left: visMetadata?.docsVisible ? "docs" : "dashboard",
   });
   const [code, _setCode] = useState("");
   const [docsContent, _setDocsContent] = useState();

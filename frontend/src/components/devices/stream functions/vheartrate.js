@@ -1,8 +1,12 @@
-import VHeartRate from '../../../utility/vheartrate';
-import store from '../../../store/store';
+import VHeartRate from "../../../utility/vheartrate";
+import store from "../../../store/store";
 
 export function connectVHeartRate(changeConnectionStatus) {
-  var popup = window.open("/audiovideo/heartrate/index.html", "_blank", "popup");
+  var popup = window.open(
+    "/audiovideo/heartrate/index.html",
+    "_blank",
+    "popup"
+  );
 
   var popupCheckInterval = setInterval(() => {
     if (popup.closed) {
@@ -18,13 +22,13 @@ export function connectVHeartRate(changeConnectionStatus) {
     }
   }, 1000); // Check every 1000ms
 
-  window.onbeforeunload = function() {
+  window.onbeforeunload = function () {
     if (popup && !popup.closed) {
-        popup.close();
+      popup.close();
     }
   };
 
-  const bc = new BroadcastChannel('video-heart-rate');
+  const bc = new BroadcastChannel("video-heart-rate");
   const vhr = new VHeartRate(bc);
   vhr.initialize();
 
