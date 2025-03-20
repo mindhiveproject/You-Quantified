@@ -2,6 +2,8 @@ import { useState, useRef, useContext } from "react";
 import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
 import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../../../App";
+import { EditModalManager } from "./edit";
+import { ShareMenu } from "../menu/share";
 
 export function VisTopBar({
   visMetadata,

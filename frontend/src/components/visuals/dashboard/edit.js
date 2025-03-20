@@ -257,6 +257,7 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata, createVisualC
           <button
             className="btn btn-outline-danger"
             onClick={deleteButtonCallback}
+            type="button"
           >
             Delete visual
           </button>
@@ -264,6 +265,7 @@ function EditScreen({ visMetadata, setShowEdit, changeVisMetadata, createVisualC
             <button
               className="btn btn-outline-dark me-2"
               onClick={handleEditClick}
+              type="button"
             >
               Copy visual
             </button>

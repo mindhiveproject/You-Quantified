@@ -7,10 +7,7 @@ import { VisualsWindow } from "./p5window/p5window";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { fetchCode } from "../utility/fetch_code";
-import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
-import { EditModalManager } from "./edit";
 import DocsWindow from "./docs/main";
-import { ShareMenu } from "../menu/share";
 import { VisTopBar } from "./top_bar";
 
 // Fix names not appearing when in view mode
