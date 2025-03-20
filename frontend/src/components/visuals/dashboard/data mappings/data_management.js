@@ -42,6 +42,8 @@ function DataCard({
 
   const dispatch = useDispatch();
 
+  const [showEditOverlay, setShowEditOverlay] = useState(false);
+
   function changeSource(sourceName, paramName) {
     dispatch({
       type: "params/updateMappings",
@@ -63,6 +65,7 @@ function DataCard({
           visInfo={visInfo}
           updateParameter={updateParameter}
           deleteParameter={deleteParameter}
+          setShowEditOverlay={setShowEditOverlay}
         />
       </Popover.Body>
     </Popover>
@@ -72,12 +75,14 @@ function DataCard({
     <div className="list-group-item" key={visParameter.name}>
       <div className="d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
-          {custom && (
+          {custom ? (
             <OverlayTrigger
               trigger="click"
               placement="right"
               rootClose={true}
               overlay={editToolTip}
+              show={showEditOverlay}
+              onToggle={(nextShow) => setShowEditOverlay(nextShow)}
             >
               <button className="btn btn-outline-dark m-0 ps-2">
                 <span className="material-symbols-outlined inline-icon me-1">
@@ -86,6 +91,8 @@ function DataCard({
                 <span>{visParameter.name}</span>
               </button>
             </OverlayTrigger>
+          ):(
+            <span>{visParameter.name}</span>
           )}
         </div>
         <div className="d-flex align-items-center me-n2">
@@ -113,8 +120,9 @@ function EditParameterModal({
   visInfo,
   updateParameter,
   deleteParameter,
+  setShowEditOverlay,
 }) {
-  console.log(oldInfo)
+
   const [newName, setNewName] = useState(oldInfo.name);
   const [newNameError, setNewNameError] = useState(false);
   const [newSuggested, setNewSuggested] = useState((oldInfo?.suggested || [] ).join(","));
@@ -135,6 +143,7 @@ function EditParameterModal({
 
   function validateSuggested(e) {
     const isValid = validateCommaSeparatedList(e.target.value);
+    // Make suggested a list instead of just a string
     if (isValid) {
       setNewSuggested(e.target.value);
       setNewSuggestedError("");
@@ -146,9 +155,11 @@ function EditParameterModal({
   function submitChanges(e) {
     e.preventDefault();
     if (newNameError || newSuggestedError) return;
-    updateParameter(oldInfo, { name: newName, suggested: newSuggested });
+    updateParameter(oldInfo, { name: newName, suggested: newSuggested.split(/,\s*|,/) });
+    setShowEditOverlay(false);
   }
 
+  console.log(oldInfo);
   return (
     <div>
       <form onSubmit={submitChanges}>

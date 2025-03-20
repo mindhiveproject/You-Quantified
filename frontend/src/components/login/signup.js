@@ -13,7 +13,6 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { profanity } from "@2toad/profanity";
 
-
 export default function SignUp() {
   const [currScreen, setCurrScreen] = useState("email-password");
   const { currentUser, setCurrentUser } = useContext(UserContext);
@@ -104,16 +103,27 @@ function SignedUpScreen({
       return <Navigate to={`/visuals/${redirectVisual}`} />;
     }
     if (redirectUser) {
-      return <Navigate to={`/user/${redirectUser}`} />
+      return <Navigate to={`/user/${redirectUser}`} />;
     }
   }
+
+  // Determine the redirect message before rendering.
+  const redirectMessage = (() => {
+    if (redirectVisual) return "Redirecting you to the last visual...";
+    if (redirectUser) return "Redirecting you to the last user...";
+    return null;
+  })();
 
   return (
     <div className="align-text-center">
       <p>Successfully signed up as {user}</p>
-      <Link className="btn btn-link link-primary" to="/visuals">
-        Explore visuals
-      </Link>
+      {redirectMessage ? (
+        <p>{redirectMessage}</p>
+      ) : (
+        <Link className="btn btn-link link-primary" to="/visuals">
+          Explore visuals
+        </Link>
+      )}
     </div>
   );
 }
@@ -183,8 +193,9 @@ export function PasswordEmailInput({ setEmail, setPassword, setCurrScreen }) {
             ) : null}
             <button
               type="submit"
-              className={`btn btn-primary mt-3 ${(errors?.password || errors?.email) && "disabled"
-                }`}
+              className={`btn btn-primary mt-3 ${
+                (errors?.password || errors?.email) && "disabled"
+              }`}
             >
               Submit
             </button>
