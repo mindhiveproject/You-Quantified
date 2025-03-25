@@ -271,12 +271,58 @@
     "short_description": "Analyze the valence and arousal of emotions in your voice.",
     "description": "This tool uses Mel-Frequency Cepstral Coefficients (MFCCs) to analyze voice emotion by estimating valence (positivity or negativity) and arousal (energy level). It provides insights into emotional expression from audio input.",
     "type": "Audio",
+    "connections": "single",
     "sampling_rate": 15,
     "data": [
       {
         "name": "Voice Emotion",
         "description": "The valence and arousal of emotion in your voice",
         "type": "Audio Feature"
+      }
+    ]
+  },
+  {
+    "device": "Video Emotion",
+    "short_description": "Calculate the probability of different emotions from a live video feed.",
+    "description": "This device uses a pre-trained deep learning model to estimate the probability of different emotions (e.g., happy, sad, angry) from a live video feed. The model processes facial expressions to predict emotional states.",
+    "type": "Video",
+    "connections": "single",
+    "sampling_rate": 24,
+    "data": [
+      {
+        "name": "Anger",
+        "description": "Probability of anger in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Disgust",
+        "description": "Probability of disgust in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Fear",
+        "description": "Probability of fear in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Happy",
+        "description": "Probability of happiness in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Sad",
+        "description": "Probability of sadness in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Surprise",
+        "description": "Probability of surprise in the video",
+        "type": "Emotion Feature"
+      },
+      {
+        "name": "Neutral",
+        "description": "Probability of neutrality in the video",
+        "type": "Emotion Feature"
       }
     ]
   }
