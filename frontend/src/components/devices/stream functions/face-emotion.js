@@ -22,17 +22,19 @@ export function connectVideoEmotion(changeConnectionStatus) {
     },
   });
 
-  newWindow.onbeforeunload = () => {
-    changeConnectionStatus("disconnected");
-    store.dispatch({
-      type: "devices/updateMetadata",
-      payload: {
-        id: id,
-        field: "connected",
-        data: false,
-      },
-    });
-  };
+  var newWindowCheckInterval = setInterval(() => {
+    if (newWindow.closed) {
+      store.dispatch({
+        type: "devices/updateMetadata",
+        payload: {
+          id: id,
+          field: "connected",
+          data: false,
+        },
+      });
+      clearInterval(newWindowCheckInterval);
+    }
+  }, 1000);
 
   changeConnectionStatus("awaiting");
   const bc = new BroadcastChannel("face-emotion");

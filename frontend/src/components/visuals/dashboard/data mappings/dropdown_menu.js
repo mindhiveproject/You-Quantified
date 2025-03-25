@@ -35,6 +35,34 @@ export function ParameterDropDown({
     setShow(false);
   }
 
+  function checkDefault(data) {
+    return parameter?.suggested?.includes(data) || false;
+  }
+
+  const updatedClaves = useMemo(() => {
+    return claves.map((option) => {
+      const hasDefault = [];
+      const notHasDefault = [];
+
+      for (const data of option.data) {
+        if (data === "timestamp") continue;
+        const isDefault = checkDefault(data);
+        isDefault ? hasDefault.push(data) : notHasDefault.push(data);
+      }
+
+      return { ...option, hasDefault, notHasDefault };
+    });
+  }, [claves, parameter]);
+
+  useEffect(() => {
+    for (const option of updatedClaves) {
+      if (option.hasDefault.length > 0) {
+        selectNewSource([option.device, option.hasDefault[0]]);
+        break;
+      }
+    }
+  }, [updatedClaves]);
+
   return (
     <div>
       <button
@@ -59,7 +87,7 @@ export function ParameterDropDown({
             Manual
           </button>
         </li>
-        {claves.map((option) => {
+        {updatedClaves.map((option) => {
           if (option.device.includes("event_markers")) return;
           return (
             <li key={option.device}>
@@ -74,6 +102,8 @@ export function ParameterDropDown({
               </button>
               <NestedDropDown
                 option={option}
+                hasDefault={option.hasDefault}
+                notHasDefault={option.notHasDefault}
                 dataStream={option.data}
                 parameter={parameter}
                 display={display}
@@ -91,29 +121,11 @@ function NestedDropDown({
   option,
   dataStream,
   parameter,
+  hasDefault,
+  notHasDefault,
   display,
   selectNewSource,
 }) {
-  function checkDefault(data) {
-    return parameter?.suggested?.includes(data) || false;
-  }
-
-  const { hasDefault, notHasDefault } = dataStream.reduce(
-    (acc, element) => {
-      if (element === "timestamp") return acc;
-      const isDefault = checkDefault(element);
-      acc[isDefault ? "hasDefault" : "notHasDefault"].push(element);
-      return acc;
-    },
-    { hasDefault: [], notHasDefault: [] }
-  );
-
-  useEffect(() => {
-    if (hasDefault.length > 0) {
-      selectNewSource([option.device, hasDefault[0]]);
-    }
-  }, []);
-
   // submenu-right
   return (
     <ul className="submenu dropdown-menu" id="nested-dropdown">
