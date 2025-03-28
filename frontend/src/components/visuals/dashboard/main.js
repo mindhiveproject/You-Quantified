@@ -186,7 +186,7 @@ function MainView({ visID, queryData }) {
     left: visMetadata?.docsVisible ? "docs" : "dashboard",
   });
   const [code, _setCode] = useState("");
-  const [docsContent, _setDocsContent] = useState();
+  const [docsContent, _setDocsContent] = useState(visMetadata?.docs);
   const [popupVisuals, setPopupVisuals] = useState(false);
 
   const [changeVisMetadata, mutationData] = useMutation(CHANGE_VISUAL, {

@@ -16,6 +16,9 @@ import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 const lowlight = createLowlight();
 lowlight.register("js", javascript);
 
+// Content is not being presented on the first render when docs are visible.
+// Having graphs as one of the inputs
+
 // In case I want to add support for more languages:
 // https://tiptap.dev/docs/examples/advanced/syntax-highlighting
 
