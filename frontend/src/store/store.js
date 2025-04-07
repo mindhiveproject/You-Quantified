@@ -109,7 +109,6 @@ function rootReducer(state = initialState, action) {
         dataStream: {
           ...state.dataStream,
           [action.payload.id]: {
-            ...state.dataStream[action.payload.id],
             ...action.payload.data,
             "timestamp": Date.now(),
           },

@@ -30,7 +30,6 @@ export function EditModalManager({
     // Add copy to the regular dashboard
 
     
-
     await createNewVisual({
       variables: {
         data: {
