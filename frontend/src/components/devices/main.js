@@ -50,7 +50,7 @@ export function DevicesManager({
           </button>
         </div>
         <div className="text-end me-3 ms-3 p-0">
-          <h2 className="mb-2 fw-bold ms-5">Data Sources</h2>
+          <h2 className="mb-2  ms-5">Data Sources</h2>
           <p>
           Connect and manage devices seamlessly within this dashboard.
           </p>
@@ -133,7 +133,7 @@ function EventMarkerIndicator({ name, deviceMeta }) {
     <li className="list-group-item">
       <div className="d-flex justify-content-between">
         <span>{visName}</span>
-        <span className={`fw-bold ${connectionText.type}`}>
+        <span className={`${connectionText.type}`}>
           {connectionText.text}
         </span>
       </div>

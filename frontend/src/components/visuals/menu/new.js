@@ -124,7 +124,7 @@ export function NewVisual() {
           >
             <i className="bi bi-arrow-left-short"></i>Visuals
           </Link>
-          <h2 className="mt-0 mb-1 fw-bold">New visual</h2>
+          <h2 className="mt-0 mb-1 ">New visual</h2>
           <p>
             Create a new P5.js visual from scratch or upload your code<br></br>
           </p>

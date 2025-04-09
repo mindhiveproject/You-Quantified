@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;600;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@100;200;300;400;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300");
 @import url("highlight.js/styles/github-dark.css");
@@ -10,7 +10,16 @@ $secondary: #46eb9c;
 $danger: #ff4e64;
 
 $accent: #2bedc7;
-$headings-font-weight: 600;
+$headings-font-weight: 700;
+$h1-font-weight: 700;
+$h2-font-weight: 700;
+$h3-font-weight: 600;
+$h4-font-weight: 600;
+$h5-font-weight: 600;
+$h6-font-weight: 600;
+
+
+
 $enable-negative-margins: true;
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
   "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
@@ -65,6 +74,10 @@ $h6-font-size: $font-size-base;
 
 $enable-validation-icons: false;
 
+
+$font-family-sans-serif: Inter, "Inter", "Helvetica Neue", Arial, Helvetica, sans-serif;
+
+
 :root {
   --bs-border-radius: 0rem;
 }
@@ -87,6 +100,18 @@ html {
   overflow: hidden;
   position: relative;
   background-color: white;
+}
+
+h4 {
+  font-weight: 600 !important;
+}
+
+h5 {
+  font-weight: 600 !important;
+}
+
+h6 {
+  font-weight: 600 !important;
 }
 
 div.code-editor {
@@ -622,6 +647,7 @@ canvas {
   text-decoration: none;
   border: none;
   font-weight: 500;
+
   color: rgb(159, 159, 159);
 }
 
@@ -631,7 +657,7 @@ canvas {
 
 .filter-button.active {
   color: #1a1a1a;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .search-input {
@@ -1461,6 +1487,8 @@ $btn-link-color: black;
 $list-group-active-color: #1a1a1a;
 $list-group-active-border-color: #ffc107;
 $list-group-active-bg: #fff9e6;
+
+
 
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

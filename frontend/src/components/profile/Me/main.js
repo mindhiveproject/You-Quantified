@@ -47,7 +47,7 @@ export function MyUserPage({ userData, myFriends }) {
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start mb-3">
-        <h2 className="mt-5 mb-2 fw-bold">You</h2>
+        <h2 className="mt-5 mb-2 ">You</h2>
         <span>
           Manage your visuals, add new friends, and view your profile.
         </span>

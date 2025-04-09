@@ -90,7 +90,7 @@ function LoginScreen({ setCurrentUser }) {
     <div>
       <div className="login-div mt-5">
         <div className="d-flex mb-4 align-items-center justify-content-between">
-          <h5 className="fw-bold m-0 p-0">Log in</h5>
+          <h5 className="m-0 p-0">Log in</h5>
           <Link to="/signup" className="btn btn-dark fw-medium">
             Sign up instead
           </Link>

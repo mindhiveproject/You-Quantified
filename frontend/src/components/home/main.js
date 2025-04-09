@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react"
 
 export default function HomePage() {
   return (
@@ -11,7 +11,7 @@ export default function HomePage() {
             <h1 className="text-start fw-light mb-0">You:</h1>
           </Reveal>
           <Reveal>
-            <h1 className="text-start fw-bold">Quantified</h1>
+            <h1 className="text-start">Quantified</h1>
           </Reveal>
           <Reveal>
             <p>
@@ -21,11 +21,11 @@ export default function HomePage() {
         </div>
         <div className="col-6 text-start foreground">
           <div className="mb-0 ps-5">
-            <Link className="fw-bold btn btn-dark w-btn me-3" to="/visuals">
+            <Link className="btn btn-dark w-btn me-3" to="/visuals">
               Explore Visuals
             </Link>
             <a
-              className="fw-bold btn btn-outline-dark w-btn me-3"
+              className="btn btn-outline-dark w-btn me-3"
               href="https://docs.youquantified.com"
               target="_blank"
             >

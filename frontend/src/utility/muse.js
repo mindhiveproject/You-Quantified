@@ -3,7 +3,7 @@
 
 import { MuseClient } from "muse-js";
 import store from "../store/store";
-import * as math from "mathjs";
+import {fft} from "mathjs";
 import { PolynomialRegression } from "ml-regression-polynomial";
 
 export class MuseDevice {
@@ -183,9 +183,9 @@ async function calculate_eeg_metrics(muse_eeg, deviceID) {
     const sample = applyHammingWindow(centered_data); // Hamming window on the data
     const N = sample.length;
 
-    const raw_fft = math.fft(sample);
+    const raw_fft = fft(sample);
     let psd = raw_fft.map((elem) =>
-      math.sqrt(elem.re * elem.re + elem.im * elem.im)
+      Math.sqrt(elem.re * elem.re + elem.im * elem.im)
     ); // Get the magnitude
     psd = psd.slice(0, Math.floor(N / 2)); // Get first bins of Fourier Transform
     psd = psd.map((mag) => (2 * mag) / N); // Normalize FFT by sample length

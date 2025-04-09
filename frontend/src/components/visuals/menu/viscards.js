@@ -9,7 +9,6 @@ import {
   UNLIKE_VISUAL,
   MY_VISUALS,
 } from "../../../queries/visuals";
-import { equal } from "mathjs";
 
 export function ImageCard({
   parameters,
@@ -209,7 +208,7 @@ export function VisualizationCards({
         {
           following: {
             some: {
-              recipient: { id: { equals: currentUser.id } },
+              recipient: { id: { equals: currentUser?.id } },
               status: { equals: "accepted" },
             },
           },
@@ -217,7 +216,7 @@ export function VisualizationCards({
         {
           followers: {
             some: {
-              requester: { id: { equals: currentUser.id } },
+              requester: { id: { equals: currentUser?.id } },
               status: { equals: "accepted" },
             },
           },

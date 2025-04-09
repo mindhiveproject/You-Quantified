@@ -161,7 +161,7 @@ function ExtensionDisplayItem({ extensionInfo, deleteExtension }) {
   return (
     <li className="list-group-item d-flex justify-content-between w-100 bg-transparent border-0 text-light ps-1 pe-1">
       <div className="d-flex justify-content-start overflow-hidden h-100 w-100">
-        <span className="fw-bold me-2">{extensionInfo.name}</span>
+        <span className=" me-2">{extensionInfo.name}</span>
         <span className="pe-1 truncate-text align-self-start">
           {extensionInfo.extensionNames || extensionInfo.url}
         </span>

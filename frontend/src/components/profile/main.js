@@ -84,7 +84,7 @@ function UserAuthenticatedPage({ rawMyFriends }) {
   if (error || data?.users.length === 0) {
     return (
       <div className="d-flex h-100 align-items-center justify-content-center">
-        <span className="fw-bold me-1">Error 404!</span> User Not Found
+        <span className=" me-1">Error 404!</span> User Not Found
       </div>
     );
   }

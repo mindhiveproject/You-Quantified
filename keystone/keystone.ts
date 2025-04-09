@@ -44,7 +44,7 @@ export default withAuth(
     lists,
     session,
     server: {
-      port: 3000,
+      port: 3001,
       cors: {
         origin: [
           process.env.NODE_ENV === "development"

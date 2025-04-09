@@ -35,7 +35,6 @@ function DataCard({
   custom,
   deleteParameter,
   visInfo,
-  claves,
   updateParameter,
 }) {
   // Represents an individual parameter
@@ -98,14 +97,12 @@ function DataCard({
         <div className="d-flex align-items-center me-n2">
           <div className="me-1">
             <ParameterDropDown
-              claves={claves}
               changeSource={changeSource}
               parameter={visParameter}
               dataMappings={dataMappings}
             />
           </div>
           <ParameterManager
-            claves={claves}
             parameter={visParameter}
             dataMappings={dataMappings}
           />
@@ -159,7 +156,7 @@ function EditParameterModal({
     setShowEditOverlay(false);
   }
 
-  console.log(oldInfo);
+
   return (
     <div>
       <form onSubmit={submitChanges}>
@@ -215,7 +212,7 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
   const overlayRef = useRef(null);
 
   const dataMappings = useSelector(selectDataMappings);
-  const claves = useSelector(getDataStreamKeys);
+
 
   const dataCards = visInfo?.parameters?.map((parameter) => (
     <DataCard
@@ -225,7 +222,6 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
       deleteParameter={deleteParameter}
       visInfo={visInfo}
       custom={custom}
-      claves={claves}
       updateParameter={updateParameter}
     />
   ));

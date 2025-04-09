@@ -1,4 +1,3 @@
-import { add } from "mathjs";
 import { useState } from "react";
 
 export function ShareMenu({ visURL, setShowShare }) {

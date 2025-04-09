@@ -17,10 +17,7 @@ export const getDataStreamKeys = createSelector(
     for (const valor in dataStreamObject) {
       let newObj = {};
       newObj["device"] = valor;
-      newObj["data"] = [];
-      for (const datos in dataStreamObject[valor]) {
-        newObj["data"] = [...newObj["data"], datos];
-      }
+      newObj["data"] = Object.keys(dataStreamObject[valor]);
       returnItems.push(newObj);
     }
     return returnItems;

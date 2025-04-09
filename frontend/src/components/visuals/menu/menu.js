@@ -34,7 +34,7 @@ export function MainMenu() {
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start">
         {currentUser && <MyUserName currentUser={currentUser} />}
-        <h2 className="mt-5 mb-2 fw-bold">Visuals</h2>
+        <h2 className="mt-5 mb-2 ">Visuals</h2>
         <p>
           Explore and modify our curated{" "}
           <a

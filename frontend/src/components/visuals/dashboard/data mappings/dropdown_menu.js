@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
-
+import { getDataStreamKeys } from "../../utility/selectors";
+import { useSelector, shallowEqual } from "react-redux";
 export function ParameterDropDown({
-  claves,
   parameter,
   dataMappings,
   changeSource,
 }) {
   const [show, setShow] = useState(true);
 
+  
   // Display text on the card. Upon creation, it checks the status
   const [display, setDisplay] = useState(() => {
     let disp = dataMappings[parameter.name];
@@ -39,20 +40,25 @@ export function ParameterDropDown({
     return parameter?.suggested?.includes(data) || false;
   }
 
+  const deviceKeys = useSelector((state)=>Object.keys(state.dataStream), shallowEqual);
+  const dataStream = useSelector((state) => state.dataStream);
+
   const updatedClaves = useMemo(() => {
-    return claves.map((option) => {
+    console.log("Updating updatedClaves...");
+    return deviceKeys.map((option) => {
       const hasDefault = [];
       const notHasDefault = [];
+      const currData = Object.keys(dataStream[option]);
 
-      for (const data of option.data) {
+      for (const data of currData) {
         if (data === "timestamp") continue;
         const isDefault = checkDefault(data);
         isDefault ? hasDefault.push(data) : notHasDefault.push(data);
       }
 
-      return { ...option, hasDefault, notHasDefault };
+      return { device: option, data: currData, hasDefault, notHasDefault };
     });
-  }, [claves, parameter]);
+  }, [deviceKeys]);
 
   useEffect(() => {
     for (const option of updatedClaves) {
