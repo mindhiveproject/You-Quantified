@@ -114,6 +114,14 @@ h6 {
   font-weight: 600 !important;
 }
 
+blockquote {
+  border-left: 4px solid $gray-400; /* Gray line on the left */
+  padding-left: 1em;           /* Space between line and text */
+  margin-left: 0;
+  margin-right: 0;
+  color: $gray-700;                /* Slightly muted text color */
+}
+
 div.code-editor {
   position: fixed;
   height: 100%;

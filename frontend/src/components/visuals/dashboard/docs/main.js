@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import Blockquote from "@tiptap/extension-blockquote";
 import TextStyle from "@tiptap/extension-text-style";
+import { Extension } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import React, { useState, useCallback } from "react";
@@ -16,8 +17,28 @@ import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 const lowlight = createLowlight();
 lowlight.register("js", javascript);
 
-// Content is not being presented on the first render when docs are visible.
-// Having graphs as one of the inputs
+const TAB_CHAR = '\u0009';
+
+const TabHandler = Extension.create({
+  name: 'tabHandler',
+  addKeyboardShortcuts() {
+    return {
+      Tab: ({ editor }) => {
+        // Sinks a list item / inserts a tab character
+        editor
+          .chain()
+          .sinkListItem('listItem')
+          .command(({ tr }) => {
+            tr.insertText(TAB_CHAR);
+            return true;
+          })
+          .run();
+        // Prevent default behavior (losing focus)
+        return true;
+      },
+    };
+  },
+});
 
 // In case I want to add support for more languages:
 // https://tiptap.dev/docs/examples/advanced/syntax-highlighting
@@ -135,9 +156,12 @@ const MenuBar = ({ editor, setIsAddingLink }) => {
           format_list_numbered
         </span>
       </button>
-      <button onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+      <button
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        className={editor.isActive("blockquote") ? "is-active" : ""}
+      >
         <span className="material-symbols-outlined inline-icon">
-          horizontal_rule
+          format_quote
         </span>
       </button>
     </div>
@@ -159,6 +183,7 @@ const extensions = [
     },
   }),
   CodeBlockLowlight.configure({ lowlight }),
+  TabHandler,
   Underline,
   Blockquote,
 ];

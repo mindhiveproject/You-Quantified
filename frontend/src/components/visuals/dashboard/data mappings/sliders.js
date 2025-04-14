@@ -108,11 +108,22 @@ export function DataAutoSlider({ dataMappings, parameter }) {
   // It contains the logic to handle changing into manual mode, setting auto-range, and setting the value of the parameter, to the stream value.
 
   const stream = useSelector((state) => state.dataStream);
-  // Defines which dataSource is selected
   const select = dataMappings[parameter];
 
-  // Logic that fetches the data from the device stream based on your selection in the dropdown
-  const source = stream?.[select[0]]?.[select[1]] ?? 0;
+  const lastValidSource = useRef(undefined);
+
+
+  const currentSource = stream?.[select[0]]?.[select[1]];
+  
+
+  useEffect(() => {
+    if (currentSource !== undefined) {
+      lastValidSource.current = currentSource;
+    }
+  }, [currentSource]);
+  
+
+  const source = currentSource !== undefined ? currentSource : lastValidSource.current ?? 0;
 
   const range = useSelector((state) => state.params[parameter].range);
   const dispatch = useDispatch();

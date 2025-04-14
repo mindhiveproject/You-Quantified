@@ -67,6 +67,7 @@ export function VisualScreen({
           visInfo={visMetadata}
           custom={isEditable}
           changeParameters={setters.changeParameters}
+          showDashboard={showDashboard}
         />
       </SplitPaneLeft>
       <Divider />

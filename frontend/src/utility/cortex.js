@@ -1,4 +1,3 @@
-import React, { useEffect, useRef, useState } from "react";
 import Quaternion from "quaternion";
 import store from "../store/store";
 

@@ -1,14 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { getDataStreamKeys } from "../../utility/selectors";
 import { useSelector, shallowEqual } from "react-redux";
-export function ParameterDropDown({
-  parameter,
-  dataMappings,
-  changeSource,
-}) {
+
+const savedKeys = {};
+
+export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   const [show, setShow] = useState(true);
 
-  
   // Display text on the card. Upon creation, it checks the status
   const [display, setDisplay] = useState(() => {
     let disp = dataMappings[parameter.name];
@@ -36,30 +34,60 @@ export function ParameterDropDown({
     setShow(false);
   }
 
-  function checkDefault(data) {
-    return parameter?.suggested?.includes(data) || false;
-  }
+  const [savedKeys, setSavedKeys] = useState({});
 
-  const deviceKeys = useSelector((state)=>Object.keys(state.dataStream), shallowEqual);
+  const deviceKeys = useSelector(
+    (state) => Object.keys(state.dataStream),
+    shallowEqual
+  );
   const dataStream = useSelector((state) => state.dataStream);
+  
+  useEffect(() => {
+   
+      const updatedKeys = { ...savedKeys };
+  
+      for (const dev of deviceKeys) {
+        const currKeys = Object.keys(dataStream[dev] ?? {});
+  
+        if (updatedKeys[dev]) {
+          // Figure out what's new
+          const newVals = currKeys.filter((key) => !updatedKeys[dev].includes(key));
+          if (newVals.length > 0) {
+            updatedKeys[dev] = [...updatedKeys[dev], ...newVals];
+            setSavedKeys(updatedKeys);
+          }
+        } else {
+          updatedKeys[dev] = currKeys;
+          setSavedKeys(updatedKeys);
+        }
+      }
+  
 
+    
+  }, [dataStream, deviceKeys]);
+  
+  useEffect(() => {
+    console.log("Updating claves (useEffect) with savedKeys:");
+    console.log(savedKeys);
+  }, [savedKeys]);
+  
   const updatedClaves = useMemo(() => {
-    console.log("Updating updatedClaves...");
-    return deviceKeys.map((option) => {
+    console.log("Updating claves...");
+    return Object.keys(savedKeys).map((option) => {
       const hasDefault = [];
       const notHasDefault = [];
-      const currData = Object.keys(dataStream[option]);
-
+      const currData = savedKeys[option];
+  
       for (const data of currData) {
         if (data === "timestamp") continue;
-        const isDefault = checkDefault(data);
+        const isDefault = parameter?.suggested?.includes(data) || false;
         isDefault ? hasDefault.push(data) : notHasDefault.push(data);
       }
-
+      
       return { device: option, data: currData, hasDefault, notHasDefault };
     });
-  }, [deviceKeys]);
-
+  }, [savedKeys, parameter?.suggested]);
+  
   useEffect(() => {
     for (const option of updatedClaves) {
       if (option.hasDefault.length > 0) {
