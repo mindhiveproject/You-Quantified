@@ -62,14 +62,14 @@ function DataCards({ source, groupData }) {
 
   // Group data by type if it's defined
   if (groupData) {
-    console.log("Pre-grouped", dataArray);
+
     
     const groupedData = dataArray.reduce((acc, curr) => {
       (acc[curr["type"]] = acc[curr["type"]] || []).push(curr);
       return acc;
     }, {});
 
-    console.log("Grouped", groupedData);
+
 
     const groupDataCards = Object.keys(groupedData).map((group) => {
       return (

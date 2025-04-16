@@ -112,17 +112,14 @@ export function DataAutoSlider({ dataMappings, parameter }) {
 
   const lastValidSource = useRef(undefined);
 
-
   const currentSource = stream?.[select[0]]?.[select[1]];
   
-
   useEffect(() => {
     if (currentSource !== undefined) {
       lastValidSource.current = currentSource;
     }
   }, [currentSource]);
   
-
   const source = currentSource !== undefined ? currentSource : lastValidSource.current ?? 0;
 
   const range = useSelector((state) => state.params[parameter].range);

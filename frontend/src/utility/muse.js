@@ -153,7 +153,7 @@ export class MuseDevice {
       } else {
         clearInterval(this.eegMetricStream);
       }
-    }, 200);
+    }, 100);
     this.ppgMetricStream = setInterval(() => {
       if (this.connected) {
         calculate_ppg_metrics(this.ppgBuffer, this.id);

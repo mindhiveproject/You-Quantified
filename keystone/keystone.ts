@@ -52,6 +52,7 @@ export default withAuth(
             : process.env.FRONTEND_URL,
         ],
         credentials: true,
+        hostname: '127.0.0.1' // May secure server? Check alongside nginx request proxy
       },
     },
     storage: {

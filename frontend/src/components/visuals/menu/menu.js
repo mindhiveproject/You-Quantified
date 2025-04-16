@@ -18,7 +18,7 @@ export function MainMenu() {
     getStoredValue("currentFilter", "featured")
   );
   const [currentSort, setCurrentSort] = useState(() =>
-    getStoredValue("currentSort", { type: "alphabetical", isDescending: true })
+    getStoredValue("currentSort", { type: "alphabetical", isDescending: false })
   );
 
   useEffect(() => {
