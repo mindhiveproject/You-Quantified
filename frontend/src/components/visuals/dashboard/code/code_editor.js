@@ -2,7 +2,6 @@ import Editor from "@monaco-editor/react";
 import downloadCode from "../../../../utility/code_download";
 import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 import { useState, useRef } from "react";
-import { file } from "jszip";
 
 // Code Editor Made Using monaco-editor/react
 // It has the advantage of using the same editor as VSCode
@@ -32,14 +31,21 @@ export function CodeEditor({ code, setCode, isEditable }) {
   );
 }
 
-export default function CodePane({ code, setCode, visName, isEditable, extensions, setExtensions }) {
+export default function CodePane({
+  code,
+  setCode,
+  visName,
+  isEditable,
+  extensions,
+  setExtensions,
+}) {
   // This is the component that contains the code pane
   const [showExtensions, setShowExtensions] = useState(false);
   const extensionsRef = useRef(null);
   useOutsideAlerter(extensionsRef, setShowExtensions);
 
   return (
-    <div className="h-100">
+    <div className="h-100 d-flex flex-column">
       <div className="menu-bar-code d-flex justify-content-between">
         <h6 className="ms-2 p-2 pt-3 align-self-center">script.js</h6>
         <div className="d-flex align-self-center position-relative">
@@ -57,12 +63,18 @@ export default function CodePane({ code, setCode, visName, isEditable, extension
           </button>
           {showExtensions && (
             <div ref={extensionsRef} className="extensions-popup">
-              <ExtensionsModal extensions={extensions} setExtensions={setExtensions} setShowExtensions={setShowExtensions} />
+              <ExtensionsModal
+                extensions={extensions}
+                setExtensions={setExtensions}
+                setShowExtensions={setShowExtensions}
+              />
             </div>
           )}
         </div>
       </div>
-      <CodeEditor code={code} setCode={setCode} isEditable={isEditable} />
+      <div className="h-100">
+        <CodeEditor code={code} setCode={setCode} isEditable={isEditable} />
+      </div>
     </div>
   );
 }
@@ -72,21 +84,23 @@ function ExtensionsModal({ setShowExtensions, setExtensions, extensions }) {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    setNewExtensionStatus('loading');
+    setNewExtensionStatus("loading");
     const formData = new FormData(e.target);
-    const submittedExtension = formData.get('extension-input');
-    
-    if (extensions.some(extension => extension.url === submittedExtension)) {
-      setNewExtensionStatus('error');
+    const submittedExtension = formData.get("extension-input");
+
+    if (extensions.some((extension) => extension.url === submittedExtension)) {
+      setNewExtensionStatus("error");
       e.target.reset();
       return;
     }
 
-    const packageInfo = await checkCDNPackage(submittedExtension).catch((e) => console.log(e));
+    const packageInfo = await checkCDNPackage(submittedExtension).catch((e) =>
+      console.log(e)
+    );
     //const packageInfo = await simpleCheckPackage(submittedExtension)
 
     if (!packageInfo) {
-      setNewExtensionStatus('error');
+      setNewExtensionStatus("error");
     } else {
       setNewExtensionStatus();
       if (extensions) {
@@ -99,34 +113,43 @@ function ExtensionsModal({ setShowExtensions, setExtensions, extensions }) {
   }
 
   function deleteExtension(extension) {
-    const newExtensions = extensions.filter((item)=>item!==extension);
+    const newExtensions = extensions.filter((item) => item !== extension);
     setExtensions(newExtensions);
   }
 
   return (
     <div>
       <div className="d-flex justify-content-end mt-n3">
-        <button className="btn btn-link text-light p-0" onClick={() => setShowExtensions(false)} aria-label="Close modal">
+        <button
+          className="btn btn-link text-light p-0"
+          onClick={() => setShowExtensions(false)}
+          aria-label="Close modal"
+        >
           <i className="bi bi-x fs-5"></i>
         </button>
       </div>
       <h4>Extensions</h4>
-      <p>
-        Link any additional JavaScript or P5.js extensions
-      </p>
+      <p>Link any additional JavaScript or P5.js extensions</p>
       <div>
         <ul className="list-group">
-          {extensions?.map(extension => <ExtensionDisplayItem extensionInfo={extension} deleteExtension={deleteExtension}/>)}
-          {newExtensionStatus === 'loading' &&
+          {extensions?.map((extension) => (
+            <ExtensionDisplayItem
+              extensionInfo={extension}
+              deleteExtension={deleteExtension}
+            />
+          ))}
+          {newExtensionStatus === "loading" && (
             <li className="list-group-item d-flex justify-content-between w-100 bg-transparent border-0 text-light ps-1 pe-1">
               <div className="spinner-grow text-light" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
-            </li>}
-          {newExtensionStatus === 'error' &&
+            </li>
+          )}
+          {newExtensionStatus === "error" && (
             <li className="list-group-item d-flex justify-content-between w-100 bg-transparent border-0 text-light ps-1 pe-1">
               <span className="text-danger">Error adding the extension!</span>
-            </li>}
+            </li>
+          )}
         </ul>
         <form className="input-group mb-3" onSubmit={onFormSubmit}>
           <input
@@ -136,24 +159,25 @@ function ExtensionsModal({ setShowExtensions, setExtensions, extensions }) {
             placeholder="i.e. https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/p5.min.js"
             aria-label="Add new extensions"
           />
-          <button className="btn btn-secondary text-dark border-grey btn-outline-light" type="submit">
+          <button
+            className="btn btn-secondary text-dark border-grey btn-outline-light"
+            type="submit"
+          >
             +
           </button>
-
         </form>
       </div>
     </div>
   );
 }
 
-
-
 function ExtensionDisplayItem({ extensionInfo, deleteExtension }) {
   let displayImage;
-  if (extensionInfo?.origin === 'cdnjs') {
-    displayImage = 'https://avatars.githubusercontent.com/u/637362?s=280&v=4'
-  } else if (extensionInfo?.origin === 'jsdelivr') {
-    displayImage = 'https://pbs.twimg.com/profile_images/1285630920263966721/Uk6O1QGC_400x400.jpg'
+  if (extensionInfo?.origin === "cdnjs") {
+    displayImage = "https://avatars.githubusercontent.com/u/637362?s=280&v=4";
+  } else if (extensionInfo?.origin === "jsdelivr") {
+    displayImage =
+      "https://pbs.twimg.com/profile_images/1285630920263966721/Uk6O1QGC_400x400.jpg";
   }
 
   console.log(extensionInfo);
@@ -166,12 +190,16 @@ function ExtensionDisplayItem({ extensionInfo, deleteExtension }) {
           {extensionInfo.extensionNames || extensionInfo.url}
         </span>
       </div>
-      <button className="btn btn-link text-danger p-0" aria-label="Delete extension" onClick={()=>deleteExtension(extensionInfo)}>
+      <button
+        className="btn btn-link text-danger p-0"
+        aria-label="Delete extension"
+        onClick={() => deleteExtension(extensionInfo)}
+      >
         <i className="bi bi-x"></i>
       </button>
-    </li>)
+    </li>
+  );
 }
-
 
 // https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/p5.min.js
 //       "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.js",
@@ -183,65 +211,69 @@ async function checkCDNPackage(inputURL) {
   try {
     packageURL = new URL(inputURL);
   } catch {
-    throw new Error('Input is not a valid URL');
+    throw new Error("Input is not a valid URL");
   }
 
   const { hostname, pathname } = packageURL;
 
   // Step 2: Identify the CDN, parse name & version
-  let apiEndpoint = '';
-  let name = '';
+  let apiEndpoint = "";
+  let name = "";
   let origin;
-  let version = '';
+  let version = "";
   let matched = null;
-  let metaURL = '';
+  let metaURL = "";
 
-  if (hostname.includes('cdnjs')) {
-    origin = 'cdnjs'
-    apiEndpoint = 'https://api.cdnjs.com/libraries/';
+  if (hostname.includes("cdnjs")) {
+    origin = "cdnjs";
+    apiEndpoint = "https://api.cdnjs.com/libraries/";
     matched = pathname.match(/\/libs\/([^/]+)\/([\w.\-+]+)\//);
     if (!matched) {
-      throw new Error('Could not parse package name and version from cdnjs URL');
+      throw new Error(
+        "Could not parse package name and version from cdnjs URL"
+      );
     }
     [, name, version] = matched; // destructuring match groups
     metaURL = `${apiEndpoint}${name}/${version}`;
-
-  } else if (hostname.includes('jsdelivr') && pathname.includes('npm')) {
-    origin = 'jsdelivr';
-    apiEndpoint = 'https://data.jsdelivr.com/v1/packages/npm/';
+  } else if (hostname.includes("jsdelivr") && pathname.includes("npm")) {
+    origin = "jsdelivr";
+    apiEndpoint = "https://data.jsdelivr.com/v1/packages/npm/";
     matched = pathname.match(/\/npm\/([^@]+)@([\w.\-+]+)\//);
     if (!matched) {
-      throw new Error('Could not parse package name and version from jsDelivr URL');
+      throw new Error(
+        "Could not parse package name and version from jsDelivr URL"
+      );
     }
     [, name, version] = matched;
     metaURL = `${apiEndpoint}${name}@${version}`;
-
   } else {
-    throw new Error('Package not found in jsdelivr or cdnjs');
+    throw new Error("Package not found in jsdelivr or cdnjs");
   }
 
   // Step 3: Fetch metadata
   console.log("metaURL", metaURL);
   const packageMetadataRaw = await fetch(metaURL, {
-    method: 'GET'
+    method: "GET",
   });
 
   if (!packageMetadataRaw.ok) {
-    throw new Error(`Metadata request failed with status ${packageMetadataRaw.status}`);
+    throw new Error(
+      `Metadata request failed with status ${packageMetadataRaw.status}`
+    );
   }
 
   const packageMetadata = await packageMetadataRaw.json();
 
   if (packageMetadata?.status === 404) {
-    throw new Error('Endpoint not found');
+    throw new Error("Endpoint not found");
   }
 
   // Step 4: Extract filename from the path
-  const filename = pathname.split('/').pop();
+  const filename = pathname.split("/").pop();
 
   // Step 5: Identify the list of files
   let packageFiles;
-  if (hostname.includes('cdnjs')) {
+  if (hostname.includes("cdnjs")) {
     packageFiles = packageMetadata.files;
   } else {
     packageFiles = (packageMetadata.files || []).map(unpackageFileNames);
@@ -253,7 +285,7 @@ async function checkCDNPackage(inputURL) {
     version: packageMetadata.version,
     url: packageURL.href,
     origin,
-    extensionNames: undefined
+    extensionNames: undefined,
   };
 
   // Step 7: Check if the given filename is in the list
@@ -265,10 +297,9 @@ async function checkCDNPackage(inputURL) {
 }
 
 function unpackageFileNames(file) {
-  if (file.type === 'directory') {
-    return unpackageFileNames(file.files)
+  if (file.type === "directory") {
+    return unpackageFileNames(file.files);
   } else {
-    return file.name
+    return file.name;
   }
 }
-

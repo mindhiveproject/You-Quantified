@@ -85,7 +85,7 @@ export function MyUsernameButtonGroup({ userData }) {
               {hasCopiedUsername ? (
                 <motion.i
                   key="check"
-                  className="p-0 m-0 bi bi-check2 w-40"
+                  className="p-0 m-0 bi bi-check2 w-40px"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -94,12 +94,12 @@ export function MyUsernameButtonGroup({ userData }) {
               ) : (
                 <motion.i
                   key="copy"
-                  className="p-0 m-0 bi bi-copy w-40"
+                  className="p-0 m-0 bi bi-copy w-40px"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.2 }}
-                />
+              /> 
               )}
             </AnimatePresence>
           </button>

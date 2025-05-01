@@ -27,11 +27,55 @@ import {
 // the generated types from '.keystone/types'
 import type { Lists, UserWhereUniqueInput } from ".keystone/types";
 
+function getVisualFilterQuery(session: any) {
+  if (session?.data.isAdmin) return true;
+  return {
+    OR: [
+      // You're the author
+      { author: { id: { equals: session?.itemId } } },
+      // Public visuals
+      { privacy: { equals: "public" } },
+      // You have liked & they are unlisted or for friends
+      {
+        AND: [
+          { likes: { some: { id: { equals: session?.itemId } } } },
+          {
+            OR: [
+              { privacy: { equals: "unlisted" } },
+              { privacy: { equals: "friends" } },
+            ],
+          },
+        ],
+      },
+      // Made by a friend and with "friends" privacy
+      {
+        AND: [
+          {
+            OR: [
+              {
+                author: {
+                  followers: { some: { id: session?.itemId } },
+                },
+              },
+              {
+                author: {
+                  following: { some: { id: session?.itemId } },
+                },
+              },
+            ],
+          },
+          { privacy: { equals: "friends" } },
+        ],
+      },
+    ],
+  };
+}
+
 export const lists: Lists = {
   User: list({
     access: allowAll,
     fields: {
-      name: text({isIndexed: "unique"}),
+      name: text({ isIndexed: "unique" }),
       email: text({
         validation: { isRequired: true },
         isIndexed: "unique",
@@ -43,25 +87,25 @@ export const lists: Lists = {
         defaultValue: { kind: "now" },
       }),
       liked: relationship({ ref: "Visual.likes", many: true }),
-      following: relationship({ ref: 'Friendship.requester', many: true }),
-      followers: relationship({ ref: 'Friendship.recipient', many: true })
+      following: relationship({ ref: "Friendship.requester", many: true }),
+      followers: relationship({ ref: "Friendship.recipient", many: true }),
     },
   }),
   Friendship: list({
     access: allowAll,
     fields: {
-      requester: relationship({ ref: 'User.following', many: false }),
-      recipient: relationship({ ref: 'User.followers', many: false }),
+      requester: relationship({ ref: "User.following", many: false }),
+      recipient: relationship({ ref: "User.followers", many: false }),
       status: select({
         options: [
           { label: "Pending", value: "pending" },
           { label: "Accepted", value: "accepted" },
-          { label: "Rejected", value: "rejected" }
+          { label: "Rejected", value: "rejected" },
         ],
         defaultValue: "pending",
       }),
-      createdAt: timestamp({ defaultValue: { kind: "now" } })
-    }
+      createdAt: timestamp({ defaultValue: { kind: "now" } }),
+    },
   }),
   Visual: list({
     access: {
@@ -77,6 +121,9 @@ export const lists: Lists = {
         create: ({ session }) => !!session,
         delete: ({ session, item }) =>
           item.authorId === session?.itemId || session?.data.isAdmin,
+      },
+      filter: {
+        query: ({ session }) => getVisualFilterQuery(session),
       },
     },
 
@@ -113,7 +160,7 @@ export const lists: Lists = {
           { label: "Unlisted", value: "unlisted" },
         ],
         defaultValue: "private",
-      })
+      }),
     },
   }),
   Tag: list({

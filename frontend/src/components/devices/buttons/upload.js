@@ -1,33 +1,29 @@
-import React, { useState, useRef } from "react";
-import JSZip from "jszip";
-import Papa from "papaparse";
-import devicesRaw from "../../../metadata/devices.json";
-import store from "../../../store/store";
+import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-
-const connectionText = {
-  awaiting: { text: "Uploading", type: "text-success" },
-  connected: { text: "Uploaded", type: "text-success" },
-  failed: { text: "Failed", type: "text-danger" },
-};
+import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
+import { closestEdge } from "./generic";
+import {
+  preRecordedUpload,
+  formUploadFile,
+  dropZoneUpload,
+} from "../../../utility/uploadUtils";
+// Add a dropdown menu of sample files
+// Let the user select various modalities
+// Let the user download the data
 
 window.recordings = {};
 
 export function FileUploadButton({ setCurrentDevice }) {
   const [connText, setConnText] = useState({ text: "", type: "" });
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const uploadModalRef = useRef(null);
+
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const divRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   const uploadedStreams = Object.entries(deviceMeta).filter(([key, value]) =>
     value.hasOwnProperty("playing")
   );
-
-  const handleClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
 
   const handleMouseEnter = () => {
     setCurrentDevice({ device: "file", card_type: "upload" });
@@ -39,6 +35,8 @@ export function FileUploadButton({ setCurrentDevice }) {
     setCurrentDevice({ device: "none", card_type: "none" });
   };
 
+  useOutsideAlerter(uploadModalRef, setShowUploadModal);
+
   return (
     <div className="mb-3 d-flex flex-column">
       <div
@@ -47,19 +45,11 @@ export function FileUploadButton({ setCurrentDevice }) {
         onMouseLeave={handleMouseLeave}
         ref={divRef}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".zip,.7zip"
-          style={{ display: "none" }}
-          onChange={(e) => uploadFile(e, setConnText)}
-          disabled={connText.text === "Uploading"}
-        />
         <button
           className={`${
             connText.text === "Connecting" ? "btn-connect" : ""
           } card-body btn btn-link text-decoration-none text-start`}
-          onClick={handleClick}
+          onClick={() => setShowUploadModal(true)}
           disabled={connText.text === "Uploading"}
           key="UploadKey"
         >
@@ -81,6 +71,120 @@ export function FileUploadButton({ setCurrentDevice }) {
           ))}
         </ul>
       )}
+      {showUploadModal && (
+        <div className="blur-background-all">
+          <DeviceUploadExpanded
+            setShowUploadModal={setShowUploadModal}
+            setConnText={setConnText}
+            connText={connText}
+            uploadModalRef={uploadModalRef}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeviceUploadExpanded({
+  setShowUploadModal,
+  setConnText,
+  connText,
+  uploadModalRef,
+}) {
+  const defaultSelection = "upload";
+
+  const preRecordedFileOptions = [{ name: "emotiv", display: "EMOTIV Sample File", filename: "emotiv-example.zip"}];
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedUpload, setSelectedUpload] = useState(defaultSelection);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    console.log("Drag Event", isDragging);
+  }, [isDragging]);
+
+  async function handleButtonClick() {
+    if (selectedUpload === "upload" && fileInputRef.current) {
+      fileInputRef.current.click();
+    } else if (selectedUpload) {
+      const fileName = preRecordedFileOptions.find(({name})=> name===selectedUpload)?.filename
+      if (!fileName) {
+        return;
+      }
+      const fileURL = `/sample_data/${fileName}`;
+      await preRecordedUpload(fileURL, setConnText);
+      setShowUploadModal(false);
+    }
+  }
+
+  return (
+    <div
+      className="edit-popup"
+      ref={uploadModalRef}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        setIsDragging(false);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDrop={async (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        await dropZoneUpload(e, setConnText);
+        setShowUploadModal(false);
+      }}
+      id="modal-upload"
+    >
+      {isDragging && (
+        <div className="position-absolute w-100 h-100 d-flex justify-content-center align-items-center top-0 start-0 blur-bg">
+          Drop your file to upload
+        </div>
+      )}
+      <div className="d-flex row">
+        <button
+          className="devices-close-btn h4 text-end"
+          onClick={() => setShowUploadModal(false)}
+        >
+          <i className="bi bi-x"></i>
+        </button>
+        <div>
+          <h3>Use a pre-recorded file</h3>
+          <p>Use sample data, drag & drop, or browse for your file.</p>
+        </div>
+        <div className="d-flex justify-content-between">
+          <select
+            defaultValue={defaultSelection}
+            onChange={(e) => setSelectedUpload(e.target.value)}
+            className="form-select r-0"
+          >
+            <option value="upload">Upload your own file</option>
+            {preRecordedFileOptions.map((option) => (
+              <option value={option.name} key={option.name}>
+                {option.display}
+              </option>
+            ))}
+          </select>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip,.7zip"
+            style={{ display: "none" }}
+            onChange={async (e) => {
+              await formUploadFile(e, setConnText);
+              setShowUploadModal(false);
+            }}
+            // disabled={connText.text === "Uploading"}
+          />
+          <button
+            className="btn btn-secondary btn-outline-dark ms-n1px"
+            onClick={handleButtonClick}
+          >
+            {selectedUpload === "upload" ? "Upload" : "Select"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -134,222 +238,4 @@ function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
       </div>
     </li>
   );
-}
-
-function closestEdge(mouse, elem) {
-  var elemBounding = elem.getBoundingClientRect();
-
-  var elementLeftEdge = elemBounding.left;
-  var elementTopEdge = elemBounding.top;
-  var elementRightEdge = elemBounding.right;
-  var elementBottomEdge = elemBounding.bottom;
-
-  var mouseX = mouse.pageX;
-  var mouseY = mouse.pageY;
-
-  var topEdgeDist = Math.abs(elementTopEdge - mouseY);
-  var bottomEdgeDist = Math.abs(elementBottomEdge - mouseY);
-  var leftEdgeDist = Math.abs(elementLeftEdge - mouseX);
-  var rightEdgeDist = Math.abs(elementRightEdge - mouseX);
-
-  var min = Math.min(topEdgeDist, bottomEdgeDist, leftEdgeDist, rightEdgeDist);
-
-  switch (min) {
-    case leftEdgeDist:
-      return "left";
-    case rightEdgeDist:
-      return "right";
-    case topEdgeDist:
-      return "top";
-    case bottomEdgeDist:
-      return "bottom";
-  }
-}
-
-Papa.parsePromise = function (file, config) {
-  return new Promise(function (complete, error) {
-    Papa.parse(file, { ...config, complete, error });
-  });
-};
-
-async function uploadFile(e, setConnText) {
-  setConnText("");
-  const form = e.currentTarget;
-  const [file] = await form.files;
-
-  console.log(file);
-
-  var zip = new JSZip();
-  const zipUpload = await zip.loadAsync(file);
-
-  let dataFilesList = Object.keys(zipUpload.files);
-
-  const dataInSubFolder =
-    dataFilesList[0].endsWith("/") &&
-    dataFilesList.includes(dataFilesList[0] + "metadata.csv");
-
-  if (!dataFilesList.includes("metadata.csv") && !dataInSubFolder) {
-    console.log("error, data files incomplete");
-    setConnText(connectionText["failed"]);
-    return;
-  }
-
-  const metadataFileDirectory = dataInSubFolder ? dataFilesList[0] + "metadata.csv" : "metadata.csv";
-
-  const metaDataFile = await zipUpload.files?.[metadataFileDirectory].async(
-    "blob"
-  );
-
-  const metadataRaw = await Papa.parsePromise(metaDataFile, {
-    header: true,
-    error: (error) => {
-      setConnText(connectionText["failed"]);
-      console.log(error);
-    },
-  });
-
-  console.log(metadataRaw);
-
-  const devicesMetadata = metadataRaw.data.reduce((acc, obj) => {
-    acc[obj["file name"]] = { ...obj };
-    return acc;
-  }, {});
-
-  console.log(devicesMetadata);
-
-  if (dataInSubFolder) {
-    dataFilesList = dataFilesList.filter(
-      (dataFile) => dataFile.replace(/[^\/]/g, "").length === 1
-    );
-  }
-
-  dataFilesList = dataFilesList.filter((dataFile) => {
-    return metadataRaw.data.some((val) => dataFile.includes(val["file name"]));
-  });
-
-  console.log(dataFilesList);
-
-  for (const fileName of dataFilesList) {
-    if (fileName.split(".").pop() === "csv") {
-      const fileContent = await zipUpload.files[fileName].async("blob");
-      Papa.parse(fileContent, {
-        header: true,
-        complete: (results) => {
-          const fileDirectory = dataInSubFolder ? fileName.split('/')[1] : fileName;
-          const currentDeviceMeta = devicesMetadata[fileDirectory];
-          console.log(fileDirectory);
-          console.log(currentDeviceMeta);
-
-          // results.data - contains the uploaded file output
-          let id = currentDeviceMeta["recording id"] + " Recording";
-          window.recordings[id] = new UploadedFile(
-            results.data,
-            currentDeviceMeta["device name"],
-            id,
-            currentDeviceMeta["sampling rate"]
-          );
-          setConnText(connectionText["connected"]);
-        },
-        error: (error) => {
-          setConnText(connectionText["failed"]);
-          console.log(error);
-        },
-      });
-    }
-  }
-}
-
-class UploadedFile {
-  buffer_num = 0;
-  looping = false;
-  playing = false;
-
-  constructor(file, device, id, sampling_rate) {
-    this.file = file;
-    this.device = device;
-    this.id = id;
-    this.sampling_rate =
-      devicesRaw.find(({ heading }) => heading === device)?.sampling_rate ||
-      sampling_rate;
-
-    store.dispatch({
-      type: "devices/create",
-      payload: {
-        id: this.id,
-        metadata: {
-          device: this.device,
-          id: this.id,
-          "sampling rate": this.sampling_rate,
-          connected: true,
-          playing: false,
-          looping: false,
-        },
-      },
-    });
-  }
-
-  startPlayback() {
-    this.playing = true;
-    store.dispatch({
-      type: "devices/updateMetadata",
-      payload: {
-        id: this.id,
-        field: "playing",
-        data: this.playing,
-      },
-    });
-
-    this.streamRecorder = setInterval(() => {
-      store.dispatch({
-        type: "devices/streamUpdate",
-        payload: {
-          id: this.id,
-          data: this.file[this.buffer_num],
-        },
-      });
-
-      this.buffer_num++;
-
-      if (this.buffer_num > this.file.length - 1) {
-        if (!this.looping) {
-          this.pausePlayback();
-        }
-        this.buffer_num = 0;
-      }
-    }, 1000 / this.sampling_rate);
-  }
-
-  pausePlayback() {
-    if (this.playing) {
-      clearInterval(this.streamRecorder);
-      this.playing = false;
-      store.dispatch({
-        type: "devices/updateMetadata",
-        payload: {
-          id: this.id,
-          field: "playing",
-          data: this.playing,
-        },
-      });
-    }
-  }
-
-  loopPlayback() {
-    this.looping = !this.looping;
-    store.dispatch({
-      type: "devices/updateMetadata",
-      payload: {
-        id: this.id,
-        field: "looping",
-        data: this.looping,
-      },
-    });
-  }
-
-  restartPlayback() {
-    this.buffer_num = 0;
-    if (this.playing) {
-      this.pausePlayback();
-    }
-  }
 }

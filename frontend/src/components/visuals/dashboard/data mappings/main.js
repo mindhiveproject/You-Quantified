@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DataManagement from "./data_management";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function DataManagementWindow({ showDashbord, changeParameters, visInfo, custom }) {
   // The window with the data mappings
+
+
 
   const parameters = useSelector((state) => state.params);
   const selectorKeys = Object.keys(parameters);
@@ -12,6 +14,9 @@ export default function DataManagementWindow({ showDashbord, changeParameters, v
   if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
     return <div>Loading...</div>;
 
+
+  console.log("visInfo")
+  console.log(visInfo)
 
   return (
     <div className={`h-100 ms-5 me-5 overflow-auto disable-scrollbar ${showDashbord ? "d-none":''}`}>

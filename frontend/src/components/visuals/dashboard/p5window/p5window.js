@@ -3,9 +3,10 @@ import { P5PopupVisuals } from "./p5popup";
 import { P5iFrame } from "./p5iframe";
 import { FullScreen } from "react-full-screen";
 import { useSelector } from "react-redux";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { selectParamValues } from "../../utility/selectors";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
+import { EventMarkerStream } from "../../../devices/stream functions/event_markers";
 
 export function VisualsWindow({
   visMetadata,
@@ -13,7 +14,7 @@ export function VisualsWindow({
   fullScreenHandle,
   popupVisuals,
   setPopupVisuals,
-  extensions
+  extensions,
 }) {
   // Window with the visuals. It loads and manages the React components that enter
   const params = useSelector(selectParamValues);
@@ -21,25 +22,43 @@ export function VisualsWindow({
   const paramsRef = useRef(params);
   paramsRef.current = params;
 
-  const [component, setComponent] = useState(null);
+  const errorScript = `
+    window.addEventListener("error", ({ error }) => {
+      console.log(error);
+      var display = document.getElementById("error-display");
+      display.innerText = error.message;
+    });
+    `;
 
-  /*
-  useEffect(() => {
-    // The following function imports components that are not P5.js visuals by using the default export
-    // Checks engine to see if it should handle it as a P5.js visualization
-    if (!visMetadata?.editable) {
-      importComponent();
-    }
+  const receiveValues = `
+    var data = ${JSON.stringify(params)};
+    window.addEventListener("message", (event)=>{
+      if (event.origin === "${window.location.origin}") {
+        data = JSON.parse(event.data);
+      }
+    })
+    `;
 
-    async function importComponent() {
-      // All components are placed in this path
-      const module = await import(
-        `../../../assets/visuals/${visMetadata.path}`
-      );
-      const CustomComponent = module.default;
-      setComponent(<CustomComponent value={paramsRef} />);
+  const sendEvents = `
+    function sendEvent(message) {
+      if (typeof message === 'object') {
+        window.parent.postMessage(JSON.stringify(message));
+      }
     }
-  }, [code]);*/
+  `;
+
+  const { visID } = useParams();
+  const eventStream = new EventMarkerStream(visID);
+
+  function handleWindowMessage(message) {
+    eventStream.streamEventMarkers(message);
+  }
+
+  function handleWindowDismount() {
+    eventStream.unmountEventMarkers();
+  }
+
+  const additionalScripts = [errorScript, receiveValues, sendEvents].join("\n");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const isExecuting = searchParams.get("execute");
@@ -48,13 +67,17 @@ export function VisualsWindow({
     <div className={`${popupVisuals ? "d-none" : "h-100 w-100"}`}>
       {!popupVisuals && (
         <div className="w-100 h-100">
-          {params && visMetadata?.editable ? (
-            <FullScreen handle={fullScreenHandle} className="w-100 h-100">
-              <P5iFrame code={code} params={params} isExecuting={isExecuting} extensions={extensions}/>
-            </FullScreen>
-          ) : (
-            component
-          )}
+          <FullScreen handle={fullScreenHandle} className="w-100 h-100">
+            <P5iFrame
+              code={code}
+              params={params}
+              isExecuting={isExecuting}
+              extensions={extensions}
+              additionalScripts={additionalScripts}
+              handleWindowMessage={handleWindowMessage}
+              handleWindowDismount={handleWindowDismount}
+            />
+          </FullScreen>
         </div>
       )}
       {popupVisuals && (
@@ -69,6 +92,9 @@ export function VisualsWindow({
             initialParams={params}
             isExecuting={isExecuting}
             extensions={extensions}
+            additionalScripts={additionalScripts}
+            handleWindowMessage={handleWindowMessage}
+            handleWindowDismount={handleWindowDismount}
           />
         </PopupComponent>
       )}

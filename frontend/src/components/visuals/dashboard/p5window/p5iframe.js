@@ -2,42 +2,24 @@ import React, { useRef, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { EventMarkerStream } from "../../../devices/stream functions/event_markers";
 
-export function P5iFrame({ code, params, isExecuting, extensions }) {
+export function P5iFrame({
+  code,
+  params,
+  isExecuting = true,
+  extensions,
+  additionalScripts,
+  handleWindowMessage,
+  handleWindowDismount = () => {},
+  postRunScripts,
+}) {
   const iframeRef = useRef(null);
 
-  const { visID } = useParams();
   const paramsRef = useRef(params);
 
-  const eventStream = new EventMarkerStream(visID);
   paramsRef.current = params;
 
-  const errorScript = `
-    window.addEventListener("error", ({ error }) => {
-      console.log(error);
-      var display = document.getElementById("error-display");
-      display.innerText = error.message;
-    });
-    `;
-
-  const receiveValues = `
-    var data = ${JSON.stringify(params)};
-    window.addEventListener("message", (event)=>{
-      if (event.origin === "${window.location.origin}") {
-        data = JSON.parse(event.data);
-      }
-    })
-    `;
-
-  const sendEvents = `
-    function sendEvent(message) {
-      if (typeof message === 'object') {
-        window.parent.postMessage(JSON.stringify(message));
-      }
-    }
-  `;
-
   useEffect(() => {
-    if (isExecuting === "false") {
+    if (isExecuting === "false" || isExecuting === false) {
       return;
     }
 
@@ -46,7 +28,9 @@ export function P5iFrame({ code, params, isExecuting, extensions }) {
 
     // Previous version
     // https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js
-    const scripts = additionalPackages.map((item) => `<script src=${item.url}></script>` ).join('\n');
+    const scripts = additionalPackages
+      .map((item) => `<script src=${item.url}></script>`)
+      .join("\n");
     const source = /* html */ `
       <html>
       <head>
@@ -67,10 +51,9 @@ export function P5iFrame({ code, params, isExecuting, extensions }) {
       <body>
         <div id="app"></div>
         <span id="error-display"></span>
-        <script>${receiveValues}</script>
-        <script>${sendEvents}</script>
-        <script>${errorScript}</script>
+        <script>${additionalScripts}</script>
         <script>${code}</script>
+        <script>${postRunScripts}</script>
       </body>
       </html>
       `;
@@ -85,16 +68,16 @@ export function P5iFrame({ code, params, isExecuting, extensions }) {
     }
   }, [params]);
 
-  function handleWindowMessage(message) {
+  function getWindowMessage(message) {
     if (message.source != iframeRef.current?.contentWindow) return;
-    eventStream.streamEventMarkers(message);
+    handleWindowMessage(message);
   }
 
   useEffect(() => {
-    window.addEventListener("message", handleWindowMessage);
+    window.addEventListener("message", getWindowMessage);
     return () => {
-      window.removeEventListener("message", handleWindowMessage);
-      eventStream.unmountEventMarkers();
+      window.removeEventListener("message", getWindowMessage);
+      handleWindowDismount();
     };
   }, []);
 

@@ -138,7 +138,7 @@ function BottomBar({ visID, userID, likes }) {
       {showShare && (
         <div className="edit-background mt-0">
           <div className="edit-popup" ref={sharePopupRef}>
-            <ShareMenu setShowShare={setShowShare}/>
+            <ShareMenu setShowShare={setShowShare} />
           </div>
         </div>
       )}
@@ -167,13 +167,14 @@ function BottomBar({ visID, userID, likes }) {
 
 export function VisualizationCards({
   currentFilter,
+  currentTags,
   currentSearch,
   currentUser,
   currentSort,
   friendData,
   showAuthor = true,
   showDescription = true,
-  showParameters = true,
+  showParameters = false,
   showImage = true,
 }) {
   let whereValue = {};
@@ -196,6 +197,26 @@ export function VisualizationCards({
         privacy: { equals: "public" },
       },
     ];
+  }
+
+  const tagLabels = (currentTags || [])
+    .filter(({ selected }) => selected)
+    .map(({ label }) => label);
+
+  console.log("Current Tags", currentTags);
+
+  console.log("Selected Tag Labels", tagLabels);
+
+  if (tagLabels) {
+    if (tagLabels.length !== 0) {
+      whereValue["tags"] = {
+        some: {
+          label: {
+            in: tagLabels,
+          },
+        },
+      };
+    }
   }
 
   if (friendData) {

@@ -1,24 +1,49 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { UserContext } from "../../../App";
-import { useMutation } from "@apollo/client";
-import { END_SESSION } from "../../../queries/user";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import clsx from "clsx";
+
 export function MyUserName() {
   const { currentUser, setCurrentUser } = useContext(UserContext);
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  const [endSession, { data, loading }] = useMutation(END_SESSION, {
-    update() {
-      setCurrentUser(undefined);
-    },
-  });
-
-  if (loading) return <div>Logging out...</div>;
+  if (!currentUser?.id) {
+    return (
+      <div className="d-flex justify-content-end">
+        <Link
+          className={clsx(
+            "btn ps-3 pe-3 me-1 btn-outline-dark",
+            currentPath === "/signup" && "active"
+          )}
+          to="/signup"
+        >
+          Sign Up
+        </Link>
+        <Link
+          className={clsx(
+            "btn ps-3 pe-3",
+            currentPath === "/login" ? "btn-outline-dark active" : "btn-outline-primary"
+          )}
+          to="/login"
+        >
+          Log In
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <Link className="username btn btn-outline-primary text-start" to={`/user/${currentUser.id}`} disabled>
+    <Link
+      className={clsx(
+        "btn text-start ps-3 pe-3",
+        currentPath === `/user/${currentUser?.id}` ? "btn-outline-dark active" : "btn-outline-primary"
+      )}
+      to={`/user/${currentUser?.id}`}
+      disabled
+    >
       <div>
-        <p className="">Profile</p>
-        <p className="fw-medium">{currentUser?.name}</p>
+        <p className="fw-medium m-0">{currentUser?.name}</p>
       </div>
     </Link>
   );

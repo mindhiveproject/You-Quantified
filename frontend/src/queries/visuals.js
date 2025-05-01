@@ -26,6 +26,33 @@ export const MY_VISUALS = gql`
         id
       }
       privacy
+      tags {
+        id
+        label
+      }
+    }
+  }
+`;
+
+export const SEARCH_VISUALS = gql`
+  query GetOtherVisual($visID: ID!, $title: String) {
+    visuals(
+      where: {
+        OR: [{ id: { equals: $visID } }, { title: { contains: $title } }]
+      }
+    ) {
+      title
+      code {
+        url
+      }
+      cover {
+        url
+      }
+      id
+      author {
+        name
+      }
+      createdAt
     }
   }
 `;
@@ -53,6 +80,14 @@ export const NEW_VISUAL = gql`
   }
 `;
 
+export const GET_ALL_TAGS = gql`
+  query AllTags {
+    tags {
+      label
+    }
+  }
+`;
+
 export const DELETE_VISUAL = gql`
   mutation DeleteVisual($id: ID!) {
     deleteVisual(where: { id: $id }) {
@@ -63,21 +98,22 @@ export const DELETE_VISUAL = gql`
 
 export const LIKE_VISUAL = gql`
   mutation UpdateVisual($id: ID!, $userID: ID!) {
-    updateVisual(data: {likes: {connect: [ {
-      id: $userID
-    }]}}, where: {id: $id}) {
+    updateVisual(
+      data: { likes: { connect: [{ id: $userID }] } }
+      where: { id: $id }
+    ) {
       likesCount
     }
   }
-`
+`;
 
 export const UNLIKE_VISUAL = gql`
   mutation UpdateVisual($id: ID!, $userID: ID!) {
-    updateVisual(data: {likes: {disconnect: [ {
-      id: $userID
-    }]}}, where: {id: $id}) {
+    updateVisual(
+      data: { likes: { disconnect: [{ id: $userID }] } }
+      where: { id: $id }
+    ) {
       likesCount
     }
   }
-`
-
+`;

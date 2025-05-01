@@ -4,10 +4,15 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../../../App";
 import { MyUserName } from "./username";
-
+import { useQuery } from "@apollo/client";
+import { GET_ALL_TAGS } from "../../../queries/visuals";
 export function MainMenu() {
   const { currentUser } = useContext(UserContext);
+
+  const { data: tagData, loading, error } = useQuery(GET_ALL_TAGS);
+
   const [currentSearch, setCurrentSearch] = useState("");
+  const [currentTags, setCurrentTags] = useState([]);
 
   const getStoredValue = (key, defaultValue) => {
     const stored = sessionStorage.getItem(key);
@@ -29,11 +34,17 @@ export function MainMenu() {
     sessionStorage.setItem("currentSort", JSON.stringify(currentSort));
   }, [currentSort]);
 
+  useEffect(() => {
+    const newTags = tagData?.tags?.map(({ label }) => {
+      return { label, selected: false };
+    });
+    setCurrentTags(newTags);
+  }, [tagData]);
+
   // Add a sort useState here
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start">
-        {currentUser && <MyUserName currentUser={currentUser} />}
         <h2 className="mt-5 mb-2 ">Visuals</h2>
         <p>
           Explore and modify our curated{" "}
@@ -55,6 +66,11 @@ export function MainMenu() {
           >
             <i className="bi bi-plus m-0 p-0 me-1"></i>New Visual
           </Link>
+          {currentUser?.isAdmin && (
+            <Link to="/visuals-new-ai" className="btn btn-dark fw-medium me-3">
+              ✨ Generate with AI
+            </Link>
+          )}
         </div>
       ) : (
         <div className="d-flex mb-2">
@@ -69,60 +85,28 @@ export function MainMenu() {
           </Link>
         </div>
       )}
-      <div className="pt-4 sticky-top bg-white z-1 pb-2">
-        <input
-          type="text"
-          className="form-control mb-3"
-          placeholder="Search"
-          aria-label="search"
-          autoComplete="off"
-          onChange={(e) => setCurrentSearch(e.target.value)}
-        ></input>
-        <div className="d-flex justify-content-between">
-          <div>
-            <button
-              onClick={() => setCurrentFilter("featured")}
-              className={`filter-button pe-3 ${
-                currentFilter === "featured" ? "active" : ""
-              }`}
-            >
-              Featured
-            </button>
-            {currentUser?.id && (
-              <button
-                onClick={() => setCurrentFilter("my")}
-                className={`filter-button pe-3 ${
-                  currentFilter === "my" ? "active" : ""
-                }`}
-              >
-                Yours
-              </button>
-            )}
-            {currentUser?.id && (
-              <button
-                onClick={() => setCurrentFilter("favorites")}
-                className={`filter-button pe-3 ${
-                  currentFilter === "favorites" ? "active" : ""
-                }`}
-              >
-                Liked
-              </button>
-            )}
-
-            {currentUser?.id && (
-              <button
-                onClick={() => setCurrentFilter("friends")}
-                className={`filter-button pe-3 ${
-                  currentFilter === "friends" ? "active" : ""
-                }`}
-              >
-                Friends
-              </button>
-            )}
-          </div>
+      <div className="pt-4 sticky-top bg-white z-1">
+        <div className="d-flex align-items-center mb-3">
+          <input
+            type="text"
+            className="form-control me-1"
+            placeholder="Search"
+            aria-label="search"
+            autoComplete="off"
+            onChange={(e) => setCurrentSearch(e.target.value)}
+          ></input>
           <VisualSortMenu
             currentSort={currentSort}
             setCurrentSort={setCurrentSort}
+          />
+        </div>
+        <div className="d-flex justify-content-between w-100">
+          <VisualTagMenu
+            currentTags={currentTags}
+            setCurrentTags={setCurrentTags}
+            setCurrentFilter={setCurrentFilter}
+            currentFilter={currentFilter}
+            isLoggedIn={currentUser?.id}
           />
         </div>
       </div>
@@ -130,6 +114,7 @@ export function MainMenu() {
         <VisualizationCards
           currentFilter={currentFilter}
           currentSearch={currentSearch}
+          currentTags={currentTags}
           currentUser={currentUser}
           currentSort={currentSort}
           showAuthor={currentFilter !== "my"}
@@ -139,12 +124,97 @@ export function MainMenu() {
   );
 }
 
+function VisualTagMenu({
+  currentTags,
+  setCurrentTags,
+  isLoggedIn,
+  setCurrentFilter,
+  currentFilter,
+}) {
+  console.log(currentTags);
+
+  function selectTag(tagLabel) {
+    const newTags = (currentTags || []).map((tag) => {
+      if (tag.label === tagLabel) {
+        return { ...tag, selected: !tag.selected };
+      } else {
+        return tag;
+      }
+    });
+    setCurrentTags(newTags);
+  }
+
+  const renderTags = (currentTags || []).map((tag) => {
+    return (
+      <button
+        className={`btn btn-outline-dark me-1 d-flex pe-3 ps-3 ${
+          tag?.selected ? "active" : ""
+        }`}
+        onClick={() => selectTag(tag?.label)}
+        key={tag?.label}
+      >
+        {tag?.label}
+        {tag?.selected && (
+          <span className="material-symbols-outlined ms-1 me-n1">
+            close_small
+          </span>
+        )}
+      </button>
+    );
+  });
+
+  return (
+    <div className="d-flex w-100 overflow-x-scroll pb-3">
+      <div className="d-flex me-2">
+        <button
+          onClick={() => setCurrentFilter("featured")}
+          className={`btn btn-outline-dark me-n0-1 ${
+            currentFilter === "featured" ? "active" : ""
+          }`}
+        >
+          Featured
+        </button>
+        {isLoggedIn && (
+          <div className="d-flex">
+            <button
+              onClick={() => setCurrentFilter("my")}
+              className={`btn btn-outline-dark me-n0-1 ${
+                currentFilter === "my" ? "active" : ""
+              }`}
+            >
+              Yours
+            </button>
+            <button
+              onClick={() => setCurrentFilter("favorites")}
+              className={`btn btn-outline-dark me-n0-1 ${
+                currentFilter === "favorites" ? "active" : ""
+              }`}
+            >
+              Liked
+            </button>
+            <button
+              onClick={() => setCurrentFilter("friends")}
+              className={`btn btn-outline-dark ${
+                currentFilter === "friends" ? "active" : ""
+              }`}
+            >
+              Friends
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="vr me-2"></div>
+      <div className="d-flex">{renderTags}</div>
+    </div>
+  );
+}
+
 export function VisualSortMenu({ currentSort, setCurrentSort }) {
   return (
     <div className="d-flex align-items-center p-0">
       <div className="dropdown p-0">
         <button
-          className="filter-button d-flex align-items-center"
+          className="btn btn-outline-dark d-flex align-items-center me-n0-1"
           type="button"
           data-bs-toggle="dropdown"
           aria-expanded="false"
@@ -191,7 +261,7 @@ export function VisualSortMenu({ currentSort, setCurrentSort }) {
         </ul>
       </div>
       <button
-        className="filter-button text-decoration-none d-flex p-0"
+        className="btn btn-outline-dark text-decoration-none d-flex ps-2 pe-2"
         onClick={() =>
           setCurrentSort({
             ...currentSort,
@@ -208,3 +278,5 @@ export function VisualSortMenu({ currentSort, setCurrentSort }) {
     </div>
   );
 }
+
+function FilterByTags() {}

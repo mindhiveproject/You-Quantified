@@ -18,8 +18,6 @@ $h4-font-weight: 600;
 $h5-font-weight: 600;
 $h6-font-weight: 600;
 
-
-
 $enable-negative-margins: true;
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
   "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
@@ -29,12 +27,12 @@ $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
 $white: #fff;
 $gray-100: #f8f9fa;
 $gray-200: #e9ecef;
-$gray-300: #dee2e6;
+$gray-300: #e0e3e5;
 $gray-400: #ced4da;
 $gray-500: #adb5bd;
 $gray-600: #6c757d;
 $gray-700: #495057;
-$gray-800: #343a40;
+$gray-800: #333333;
 $gray-900: #212529;
 $black: #1a1a1a;
 
@@ -74,9 +72,8 @@ $h6-font-size: $font-size-base;
 
 $enable-validation-icons: false;
 
-
-$font-family-sans-serif: Inter, "Inter", "Helvetica Neue", Arial, Helvetica, sans-serif;
-
+$font-family-sans-serif: Inter, "Inter", "Helvetica Neue", Arial, Helvetica,
+  sans-serif;
 
 :root {
   --bs-border-radius: 0rem;
@@ -116,10 +113,10 @@ h6 {
 
 blockquote {
   border-left: 4px solid $gray-400; /* Gray line on the left */
-  padding-left: 1em;           /* Space between line and text */
+  padding-left: 1em; /* Space between line and text */
   margin-left: 0;
   margin-right: 0;
-  color: $gray-700;                /* Slightly muted text color */
+  color: $gray-700; /* Slightly muted text color */
 }
 
 div.code-editor {
@@ -137,20 +134,18 @@ div.code-editor {
   color: $black !important;
 }
 
-.btn-outline-dark.bg-light:hover{
+.btn-outline-dark.bg-light:hover {
   color: $primary;
   border-color: $primary;
 }
 
 .hover-primary:hover {
-  color: $primary !important
+  color: $primary !important;
 }
 
 .hover-black:hover {
-  color: $black !important
+  color: $black !important;
 }
-
-
 
 .btn-gray {
   background-color: $gray-300 !important;
@@ -170,7 +165,7 @@ div.foreground {
   z-index: 100;
 }
 
-div.w-100 {
+div.w-10px {
   width: 10px;
   height: 10px;
 }
@@ -252,40 +247,50 @@ div.w-100 {
   z-index: 102;
 }
 
+
+
 $popover-bg: rgba(255, 255, 255);
 $popover-header-bg: rgba(255, 255, 255);
 $popover-border-color: $gray-200;
 
-.edit-background {
+@mixin blur-background($top, $height) {
   background-color: rgba(255, 255, 255, 0.95);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  height: calc(100vh - 120px);
+  height: $height;
   width: 100vw;
   position: fixed;
-  top: 120px;
+  top: $top;
   z-index: 102;
   right: 0;
+}
+
+.edit-background {
+  @include blur-background(120px, calc(100vh - 120px));
+}
+
+.blur-background-navbar {
+  @include blur-background(60px, calc(100vh - 60px));
+}
+
+.blur-background-all {
+  @include blur-background(0px, 100vh);
+}
+
+.blur-background-navbar-dark {
+  @include blur-background(60px, calc(100vh - 60px));
+  background-color: rgba(12, 12, 12, 0.15);
+}
+
+.blur-bg {
+  background-color: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .custom-popover-width {
   max-width: 100vw !important;
 }
-
-.blur-background-navbar {
-  background-color: rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  height: calc(100vh - 60px);
-  width: 100vw;
-  position: fixed;
-  top: 60px;
-  z-index: 102;
-  right: 0;
-}
-
-
-
 
 .form-control:focus {
   border-color: $primary !important;
@@ -592,6 +597,16 @@ canvas {
   /* IE 10+ */
 }
 
+.black-scrollbar {
+  scrollbar-color: $gray-600 $black;
+  scrollbar-width: thin;
+}
+
+.black-scrollbar::-webkit-scrollbar {
+  scrollbar-color: $gray-600 $black;
+  scrollbar-width: thin;
+}
+
 .mt-n0-1 {
   margin-top: -1px !important;
 }
@@ -786,7 +801,7 @@ canvas {
   height: 3.75rem;
 }
 
-.styled-navbar .btn {
+.styled-navbar .data-btn {
   outline: 1px solid #1a1a1a !important;
   border-radius: 0;
   border: 0;
@@ -800,7 +815,7 @@ canvas {
   padding-right: 2.5rem;
 }
 
-.styled-navbar .btn-link {
+.styled-navbar .data-btn-link {
   background-color: white;
   border-radius: 0;
   border: 0;
@@ -815,29 +830,29 @@ canvas {
   text-decoration: none;
 }
 
-.styled-navbar .btn.active:active {
+.styled-navbar .data-btn.active:active {
   background: #7849f8dd;
   color: #ffffff;
   box-shadow: inset 0px -8px 0px 0px #7749f8;
 }
 
-.styled-navbar .btn.active {
+.styled-navbar .data-btn.active {
   background: #7849f8dd;
   box-shadow: inset 0px -8px 0px 0px #7749f8;
   font-weight: 600;
 }
 
-.styled-navbar .btn:hover {
+.styled-navbar .data-btn:hover {
   background: #7749f8;
   color: #ffffff;
 }
 
-.styled-navbar .btn:hover:active {
+.styled-navbar .data-btn:hover:active {
   background: #7849f8dd;
   color: #ffffff;
 }
 
-.styled-navbar .btn-smaller {
+.styled-navbar .data-btn-smaller {
   margin-left: 1rem;
   margin-right: 1rem;
   color: #1a1a1a;
@@ -849,7 +864,7 @@ canvas {
   transition: all 0.5s;
 }
 
-.styled-navbar .btn-smaller:hover {
+.styled-navbar .data-btn-smaller:hover {
   background-color: #7749f8;
   color: #ffffff;
 }
@@ -944,7 +959,6 @@ canvas {
   background-color: $primary;
   color: $black;
 }
-
 
 .vis-bar .btn-custom.code {
   background-color: white;
@@ -1107,6 +1121,15 @@ canvas {
   position: absolute;
   top: 0;
   z-index: 150;
+  right: 0;
+}
+
+.ai-overlay {
+  background-color: $black;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
   right: 0;
 }
 
@@ -1354,7 +1377,6 @@ input.vis-name-input::placeholder {
   border: solid 1px #1a1a1a;
   color: #f8f9fa;
   height: 40px;
-  margin-top: -1px;
 }
 
 .small-bar-button-dark {
@@ -1385,7 +1407,15 @@ input.vis-name-input::placeholder {
   height: 40px !important;
 }
 
-.w-40 {
+.h-40px {
+  height: 40px !important;
+}
+
+.max-width-ai-references {
+  max-width: 48% !important;
+}
+
+.w-40px {
   width: 40px !important;
 }
 
@@ -1397,8 +1427,16 @@ input.vis-name-input::placeholder {
   width: 75px !important;
 }
 
+.w-70 {
+  width: 70% !important;
+}
+
 .m-n1px {
   margin: -1px;
+}
+
+.ms-n1px {
+  margin-left: -1px;
 }
 
 .border-primary-active:active,
@@ -1482,6 +1520,169 @@ input.vis-name-input::placeholder {
   transition: transform 0.3s linear;
 }
 
+// AI Specific styling
+.btn-ai-back {
+  color: white !important;
+  &:hover {
+    color: $primary !important;
+    background: none !important;
+  }
+}
+
+.h-48px {
+  height: 48px;
+}
+
+.input-btn-layout {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+.max-height-40vh {
+  max-height: 25vh;
+}
+
+.btn-hover-primary {
+  &:hover {
+    background-color: $black !important;
+    border-color: $primary !important;
+  }
+}
+
+.ai-input-textbox {
+  background: none !important;
+  color: $white !important;
+  border: none !important;
+
+  overflow: scroll;
+  resize: none !important;
+  padding: 0px;
+
+  max-height: 30vh !important;
+
+  &::placeholder {
+    color: $gray-600;
+  }
+  &:focus {
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+
+.ai-ref-input {
+  color: $white !important;
+
+  &::placeholder {
+    color: $gray-600 !important;
+  }
+}
+
+.text-gray-600 {
+  color: $gray-600 !important;
+}
+
+.w-300px {
+  width: 300px;
+}
+
+.popup-bottom {
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+}
+
+.popup-top {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0.25rem;
+}
+
+.popup-left {
+  top: 0;
+  right: 100%;
+  margin-right: 0.25rem;
+}
+
+.popup-right {
+  top: 0;
+  left: 100%;
+  margin-left: 0.25rem;
+}
+
+
+.h-75vh {
+  height: 75vh;
+}
+
+.h-0px {
+  height: 0px !important;
+}
+
+.inset-n1 {
+  inset: -1px;
+}
+
+.me-1px {
+  margin-right: 1px;
+}
+
+.gray-500 {
+  color: $gray-500;
+}
+
+.bg-gray-800 {
+  background-color: $gray-800 !important;
+}
+
+.bg-gray-500 {
+  background-color: $gray-200 !important;
+}
+
+.w-40 {
+  width: 40% !important;
+}
+
+.w-48px {
+  width: 48px !important;
+}
+
+.ai-input-wrapper {
+  border: $white solid 1px !important;
+  color: $white !important;
+  caret-color: $primary !important;
+}
+
+.square-ratio {
+  aspect-ratio: 1 /1 !important;
+}
+
+.ai-text-render {
+  h1 {
+    font-size: 5rem;
+  }
+  h2 {
+    font-size: 4.5rem;
+  }
+  h3 {
+    font-size: 4rem;
+  }
+  h4 {
+    font-size: 3.5rem;
+  }
+  h5 {
+    font-size: 3rem;
+  }
+  h6 {
+    font-size: 2.5rem;
+  }
+}
+
+// General variables
+
 .btn.btn-mapping {
   --bs-btn-color: #7749f8;
   --bs-btn-border-color: #7749f8;
@@ -1495,8 +1696,6 @@ $btn-link-color: black;
 $list-group-active-color: #1a1a1a;
 $list-group-active-border-color: #ffc107;
 $list-group-active-bg: #fff9e6;
-
-
 
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

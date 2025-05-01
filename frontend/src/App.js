@@ -12,9 +12,11 @@ import SignUp from "./components/login/signup";
 import { useQuery } from "@apollo/client";
 import { AUTH_USER } from "./queries/user";
 import { NewVisual } from "./components/visuals/menu/new";
+import { AINewVisual } from "./components/visuals/new-ai/main";
 import { useSelector } from "react-redux";
 import { stopRecording } from "./utility/recorder";
 import { User } from "./components/profile/main";
+import { MyUserName } from "./components/visuals/menu/username";
 
 function NavBar({ setShowDevices, recording, setRecording }) {
   const deviceMeta = useSelector((state) => state?.deviceMeta);
@@ -30,10 +32,13 @@ function NavBar({ setShowDevices, recording, setRecording }) {
         <span className="fw-normal">You:</span> Quantified
       </NavLink>
       <div className="h-100 m-0 g-0 d-flex align-items-center">
+        <div className="me-4">
+          <MyUserName />
+        </div>
         <NavLink className="nav-link" to="/visuals">
           Visuals
         </NavLink>
-        <button className="btn" onClick={() => setShowDevices(true)}>
+        <button className="data-btn" onClick={() => setShowDevices(true)}>
           Data
         </button>
         {recording && <div className="record-indicator" />}
@@ -68,6 +73,7 @@ function DesktopApp() {
         <Routes>
           <Route path="/visuals" element={<MainMenu />} />
           <Route path="/visuals-new" element={<NewVisual />} />
+          <Route path="/visuals-new-ai" element={<AINewVisual />} />
           <Route path="/visuals/:visID" element={<QueryMainView />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
