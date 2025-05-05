@@ -56,8 +56,10 @@ function QueryUserAuthenticatedPage({ currentUserID }) {
     pollInterval: 500,
   });
 
+  console.log(error);
+
   if (loading) return <div>Loading profile</div>;
-  if (error) return <div>Error! {error}</div>;
+  if (error) return <div>Error!</div>;
 
   return <UserAuthenticatedPage rawMyFriends={data.friendships} />;
 }

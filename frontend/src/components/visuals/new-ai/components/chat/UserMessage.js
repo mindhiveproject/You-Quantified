@@ -3,7 +3,7 @@ import { motion, useTime, useTransform } from "motion/react";
 
 /**
  * Component that renders a message from the user
- * 
+ *
  * @param {object} props
  * @param {string} props.message - The content of the user's message
  * @param {boolean} props.isLoading - Whether to show a loading animation
@@ -14,6 +14,7 @@ function UserMessage({ message, isLoading = false }) {
   const rotationBg = useTransform(rotate, (r) => {
     return `linear-gradient(${r}deg, #1BD29A 0%, #9747FF 100%)`;
   });
+  const addRefNumber = message?.additional_kwargs?.additional_references_len;
 
   return (
     <div className="w-100 d-flex justify-content-end mb-1">
@@ -23,7 +24,12 @@ function UserMessage({ message, isLoading = false }) {
             isLoading ? "border border-primary" : "border border-white"
           }`}
         >
-          {message}
+          <p className="p-0 m-0">{message}</p>
+          {addRefNumber > 0 && (
+            <p className="text-gray-600 m-0 mt-1">
+              (Used {addRefNumber} additional references)
+            </p>
+          )}
         </div>
         {isLoading && (
           <motion.div

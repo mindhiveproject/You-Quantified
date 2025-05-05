@@ -5,12 +5,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { UserContext } from "../../../App";
 
 // Import components from our reorganized structure
-import {
-  AIInputBox,
-  BackButton,
-  ChatBox,
-  RightPannel
-} from "./components";
+import { AIInputBox, BackButton, ChatBox, RightPannel } from "./components";
 
 /**
  * Main component for the AI visual generation interface
@@ -69,7 +64,17 @@ export function AINewVisual() {
       }
     }
 
-    const message = [new HumanMessage({ content: msgContent })];
+    const message = [
+      new HumanMessage({
+        content: msgContent,
+        additional_kwargs: {
+          additional_references_len: additionalReferences.length,
+        },
+      }),
+    ];
+    
+    setAdditionalReferences([]);
+
     if (contextMessageContent) {
       message.push(
         new HumanMessage({

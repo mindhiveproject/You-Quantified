@@ -148,7 +148,7 @@ function VisualTagMenu({
     return (
       <button
         className={`btn btn-outline-dark me-1 d-flex pe-3 ps-3 ${
-          tag?.selected ? "active" : ""
+          tag?.selected ? "btn-primary text-white" : ""
         }`}
         onClick={() => selectTag(tag?.label)}
         key={tag?.label}

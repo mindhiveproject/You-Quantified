@@ -5,18 +5,18 @@ import CodePane from "../../../dashboard/code/code_editor";
 import { P5AISandbox } from "../../p5ai";
 import AIDataManagementWindow from "./AIDataManagementWindow";
 import AIExpandButton from "../ui/AIExpandButton";
-
+import CreateButton from "./CreateButton";
 /**
  * Right panel component for the AI visual generation interface
  * Handles code editing, parameter management, and preview functionality
- * 
+ *
  * @param {object} props
  * @param {object} props.visualMetaAI - Visual metadata from AI
  * @param {boolean} props.isLoading - Whether the AI is currently generating
  * @param {boolean} props.isVerifying - Whether the code is being verified
  * @param {function} props.setError - Function to set error state
  */
-function RightPannel({ visualMetaAI, isLoading, isVerifying, setError}) {
+function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
   const [currentTab, setCurrentTab] = useState("code");
   const [code, setCode] = useState(visualMetaAI?.code || "");
   const [extensions, setExtensions] = useState([]);
@@ -122,27 +122,31 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError}) {
               visName={"AI-Generated Visual"}
               setCode={setCode}
               code={code}
-              isEditable={!isLoading || isVerifying}
+              isEditable={!isLoading || !isVerifying}
               extensions={extensions}
               setExtensions={setExtensions}
             />
           )}
           {currentTab === "preview" && (
-            <P5AISandbox setError={setError} code={code} isExecuting={!isLoading}/>
+            <P5AISandbox
+              setError={setError}
+              code={code}
+              isExecuting={!isLoading}
+            />
           )}
         </div>
       </div>
       <div className="w-100 d-flex justify-content-between pb-2">
-        <button className="btn btn-outline-warning h-48px d-flex align-items-center ps-3">
+        <button
+          className="btn btn-outline-warning h-48px d-flex align-items-center ps-3"
+          disabled={true}
+        >
           <span className="material-symbols-outlined m-0 me-1">
             prompt_suggestion
           </span>
           Review Changes
         </button>
-        <button className="btn btn-outline-secondary h-48px d-flex align-items-center ps-3">
-          <span className="material-symbols-outlined m-0 me-1">check</span>
-          Save & Create
-        </button>
+        <CreateButton isDisabled={isLoading || isVerifying} visualMetaAI={visualMetaAI} />
       </div>
     </div>
   );

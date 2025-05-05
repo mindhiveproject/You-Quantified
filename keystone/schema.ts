@@ -54,12 +54,22 @@ function getVisualFilterQuery(session: any) {
             OR: [
               {
                 author: {
-                  followers: { some: { id: session?.itemId } },
+                  followers: {
+                    some: {
+                      requester: { id: { equals: session?.itemId } },
+                      status: { equals: "accepted" },
+                    },
+                  },
                 },
               },
               {
                 author: {
-                  following: { some: { id: session?.itemId } },
+                  following: {
+                    some: {
+                      recipient: { id: { equals: session?.itemId } },
+                      status: { equals: "accepted" },
+                    },
+                  },
                 },
               },
             ],

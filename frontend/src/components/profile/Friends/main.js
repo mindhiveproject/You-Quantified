@@ -34,15 +34,16 @@ function FriendUserPage({ userData, currentUser }) {
         <h4 className="m-0">Visuals</h4>
         <p className="m-0 mb-2">Created and published by {userData.name}.</p>
       </div>
-      <input
-        type="text"
-        className="form-control mb-3"
-        placeholder="Search"
-        aria-label="search"
-        autoComplete="off"
-        onChange={(e) => setCurrentSearch(e.target.value)}
-      ></input>
-      <div className="d-flex justify-content-end">
+      <div className="d-flex align-items-center mb-3">
+        <input
+          type="text"
+          className="form-control me-1"
+          placeholder="Search"
+          aria-label="search"
+          autoComplete="off"
+          onChange={(e) => setCurrentSearch(e.target.value)}
+        ></input>
+
         <VisualSortMenu
           currentSort={currentSort}
           setCurrentSort={setCurrentSort}
