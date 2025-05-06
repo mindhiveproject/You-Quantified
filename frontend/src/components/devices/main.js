@@ -19,6 +19,10 @@ export const selectDevices = createSelector(
   }
 );
 
+
+// Add an outside click alerter
+// In the top bar add a recording indicator that has a hover action (to indicate which devices you are using)
+
 export function DevicesManager({
   setShowDevices,
   saveObject,

@@ -2,10 +2,15 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { HumanMessage } from "@langchain/core/messages";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { UserContext } from "../../../App";
 
 // Import components from our reorganized structure
-import { AIInputBox, BackButton, ChatBox, RightPannel } from "./components";
+import {
+  AIInputBox,
+  BackButton,
+  ChatBox,
+  RightPannel,
+  IntroSuggestions,
+} from "./components";
 
 /**
  * Main component for the AI visual generation interface
@@ -72,7 +77,7 @@ export function AINewVisual() {
         },
       }),
     ];
-    
+
     setAdditionalReferences([]);
 
     if (contextMessageContent) {
@@ -126,7 +131,7 @@ export function AINewVisual() {
   }, [codeError]);
 
   return (
-    <div className="vh-100 w-100 bg-black ai-overlay text-white">
+    <div className="vh-100 w-100 bg-black ai-overlay text-white overscroll-x-none">
       <div className="g-0 p-0 pb-1 pt-1 d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center justify-content-center">
           <BackButton />
@@ -169,12 +174,22 @@ export function AINewVisual() {
               <AIInputBox
                 inputValue={inputValue}
                 setInputValue={setInputValue}
-                inputDisabled={thread?.isLoading || isVerifying}
+                inputDisabled={(additionalReferences.length === 0 && inputValue === "") || thread?.isLoading || isVerifying}
                 onSubmit={submitMessage}
                 additionalReferences={additionalReferences}
                 setAdditionalReferences={setAdditionalReferences}
               />
             </div>
+            {currentScreen === "intro" && (
+              <div className="mt-4 mb-n5">
+                <p className="text-gray-600 m-0 p-0">or</p>
+                <p className="text-light mb-1">Browse the list of featured visuals and use them as a starting point.</p>
+                <IntroSuggestions
+                  additionalReferences={additionalReferences}
+                  setAdditionalReferences={setAdditionalReferences}
+                />
+              </div>
+            )}
           </div>
           {visualMetaAI && (
             <div className="col col-6">

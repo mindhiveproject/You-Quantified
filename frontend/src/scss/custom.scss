@@ -485,6 +485,11 @@ $popover-border-color: $gray-200;
   }
 }
 
+
+.width-256px {
+  width: 256px !important;
+}
+
 .accordion-custom {
   --bs-accordion-border-color: #ffc107;
   --bs-accordion-btn-color: #ffc107;
@@ -1133,6 +1138,10 @@ canvas {
   right: 0;
 }
 
+.overscroll-x-none {
+  overscroll-behavior-x: none !important;
+}
+
 .btn-connect {
   display: flex;
   align-content: center;
@@ -1175,6 +1184,8 @@ canvas {
     }
   }
 }
+
+
 
 .mt-n01 {
   margin-top: -1px;
@@ -1443,6 +1454,9 @@ input.vis-name-input::placeholder {
 .border-primary-active:focus {
   border-color: $primary !important;
 }
+.border-primary-hover:hover {
+  border-color: $primary !important;
+}
 
 // Menu bar for the docs
 .docs {
@@ -1552,6 +1566,8 @@ input.vis-name-input::placeholder {
   }
 }
 
+
+
 .ai-input-textbox {
   background: none !important;
   color: $white !important;
@@ -1640,6 +1656,10 @@ input.vis-name-input::placeholder {
 
 .bg-gray-500 {
   background-color: $gray-200 !important;
+}
+
+.bg-black {
+  background-color: $black;
 }
 
 .w-40 {

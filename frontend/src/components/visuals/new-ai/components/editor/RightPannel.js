@@ -6,6 +6,7 @@ import { P5AISandbox } from "../../p5ai";
 import AIDataManagementWindow from "./AIDataManagementWindow";
 import AIExpandButton from "../ui/AIExpandButton";
 import CreateButton from "./CreateButton";
+
 /**
  * Right panel component for the AI visual generation interface
  * Handles code editing, parameter management, and preview functionality
@@ -137,16 +138,21 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
         </div>
       </div>
       <div className="w-100 d-flex justify-content-between pb-2">
-        <button
-          className="btn btn-outline-warning h-48px d-flex align-items-center ps-3"
-          disabled={true}
-        >
-          <span className="material-symbols-outlined m-0 me-1">
-            prompt_suggestion
-          </span>
-          Review Changes
-        </button>
-        <CreateButton isDisabled={isLoading || isVerifying} visualMetaAI={visualMetaAI} />
+        {false && (
+          <button
+            className="btn btn-outline-warning h-48px d-flex align-items-center ps-3"
+            disabled={true}
+          >
+            <span className="material-symbols-outlined m-0 me-1">
+              prompt_suggestion
+            </span>
+            Review Changes
+          </button>
+        )}
+        <CreateButton
+          isDisabled={isLoading || isVerifying}
+          visualMetaAI={visualMetaAI}
+        />
       </div>
     </div>
   );
