@@ -90,6 +90,13 @@ function AIInputBox({ inputValue, setInputValue, inputDisabled, onSubmit, additi
             onFocus={() => setIsFocus(true)}
             onBlur={() => setIsFocus(false)}
             ref={textareaRef}
+            onKeyDown={(e) => {
+              // Submit when pressing Enter without Shift
+              if (e.key === "Enter" && !e.shiftKey && !inputDisabled) {
+                onSubmit(e);
+              }
+              // Shift+Enter adds a new line (default behavior)
+            }}
           />
           <motion.div
             layout="position"

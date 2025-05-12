@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import clsx from "clsx";
 import CodePane from "../../../dashboard/code/code_editor";
-import { P5AISandbox } from "../../p5ai";
+import { P5AISandbox } from "./P5AISandbox";
 import AIDataManagementWindow from "./AIDataManagementWindow";
 import AIExpandButton from "../ui/AIExpandButton";
 import CreateButton from "./CreateButton";
@@ -21,6 +21,14 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
   const [currentTab, setCurrentTab] = useState("code");
   const [code, setCode] = useState(visualMetaAI?.code || "");
   const [extensions, setExtensions] = useState([]);
+  const isVerifyingRef = useRef(isVerifying);
+
+  // Update ref when isVerifying changes
+  useEffect(() => {
+    isVerifyingRef.current = isVerifying;
+    console.log("Verification state updated:", isVerifying);
+  }, [isVerifying]);
+
   const [visInfo, setVisInfo] = useState({
     parameters: visualMetaAI?.parameters || [],
   });
@@ -133,6 +141,7 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
               setError={setError}
               code={code}
               isExecuting={!isLoading}
+              isVerifyingRef={isVerifyingRef}
             />
           )}
         </div>

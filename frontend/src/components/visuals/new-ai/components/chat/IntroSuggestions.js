@@ -32,8 +32,6 @@ function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
     return <div>Loading featured visuals...</div>;
   }
 
-  console.log("Featured visuals", allFeaturedVisuals);
-
   const renderVisuals = allFeaturedVisuals?.visuals.map((visMeta) => {
     const hasBeenAdded = additionalReferences.find(
       (object) => object?.id === visMeta?.id

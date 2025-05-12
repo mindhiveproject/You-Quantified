@@ -8,13 +8,13 @@ import { motion, useTime, useTransform } from "motion/react";
  * @param {string} props.message - The content of the user's message
  * @param {boolean} props.isLoading - Whether to show a loading animation
  */
-function UserMessage({ message, isLoading = false }) {
+function UserMessage({ message, isLoading = false, addRefNumber }) {
   const time = useTime();
   const rotate = useTransform(time, [0, 3000], [0, 360], { clamp: false });
   const rotationBg = useTransform(rotate, (r) => {
     return `linear-gradient(${r}deg, #1BD29A 0%, #9747FF 100%)`;
   });
-  const addRefNumber = message?.additional_kwargs?.additional_references_len;
+  
 
   return (
     <div className="w-100 d-flex justify-content-end mb-1">
@@ -27,7 +27,7 @@ function UserMessage({ message, isLoading = false }) {
           <p className="p-0 m-0">{message}</p>
           {addRefNumber > 0 && (
             <p className="text-gray-600 m-0 mt-1">
-              (Used {addRefNumber} additional references)
+              {`Used ${addRefNumber} additional reference${addRefNumber>1?"s":""}`}
             </p>
           )}
         </div>

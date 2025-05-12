@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 // Import components from our reorganized structure
@@ -19,11 +19,10 @@ import {
 export function AINewVisual() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [additionalReferences, setAdditionalReferences] = useState([]);
-  const [codeError, setCodeError] = useState();
+  const [codeError, setCodeError] = useState({});
   const [inputValue, setInputValue] = useState("");
   const chatDivRef = useRef(null);
   const navigate = useNavigate();
-
   const thread = useStream({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
@@ -33,10 +32,20 @@ export function AINewVisual() {
       setSearchParams((prev) => {
         prev.set("ai-thread", id);
         return prev;
-      }),
-    onUpdateEvent: (ev) => console.log(ev),
+      }
+    
+    ),
+    onUpdateEvent: (ev) => {
+      console.log("AI Event", ev);
+      if (Object.keys(ev)[0] === "summarize-modification" || Object.keys(ev)[0] === "summarize-initial") {
+        setIsAICoding(true);
+      } else {
+        setIsAICoding(false);
+      }
+    },
   });
 
+  const [isAICoding, setIsAICoding] = useState(false);
   const currentScreen = thread?.messages?.length > 0 ? "ask" : "intro";
   const visualMetaAI = thread?.values?.visual;
   const isVerifying = thread?.interrupt?.value === "verify";
@@ -44,12 +53,8 @@ export function AINewVisual() {
   async function submitMessage(e) {
     e.preventDefault();
 
-    setInputValue("");
-
-    // Add input validatino here to throw errors
     // Afterwards, proceed
     const msgContent = [{ type: "text", text: inputValue.toString() }];
-    const contextMessageContent = ``;
 
     for (const addReference in additionalReferences) {
       if (addReference?.type === "image") {
@@ -61,11 +66,12 @@ export function AINewVisual() {
       if (addReference?.type === "visual") {
         const response = await fetch(addReference?.codeURL);
         const codeString = await response.text();
-        contextMessageContent += `Use the code from the following visual called ${addReference?.name} as inspiration:
-        \`\`\`javascript
-        ${codeString}
-        \`\`\`
-        `;
+        msgContent.push({
+          type: "file",
+          source_type: "base64",
+          data: codeString,
+          mime_type: "text/plain",
+        });
       }
     }
 
@@ -80,25 +86,11 @@ export function AINewVisual() {
 
     setAdditionalReferences([]);
 
-    if (contextMessageContent) {
-      message.push(
-        new HumanMessage({
-          content: contextMessageContent,
-          additional_kwargs: { hide_in_thread: true },
-        })
-      );
-    }
-
-    console.log(message);
-
-    if (thread.interrupt?.value === "details") {
-      thread.submit(undefined, { command: { resume: message } });
-    } else if (thread?.isLoading) {
-      console.warn("Tried to submit while thread is loading");
-    } else if (isVerifying) {
-      console.warn("Tried to submit while AI verified its message");
+    if (thread?.isLoading || isVerifying) {
+      console.warn("Tried to submit while thread is busy");
     } else {
       thread.submit({ messages: message });
+      setInputValue("");
     }
   }
 
@@ -110,24 +102,30 @@ export function AINewVisual() {
 
   // Handle verification result
   useEffect(() => {
+    console.log("Code error has changed!");
     if (!isVerifying) return;
 
-    if (codeError) {
-      const message =
-        codeError === "success"
-          ? "The code ran successfully."
-          : `ERROR: ${codeError}`;
+    const lastMessage = thread?.messages[thread?.messages.length - 1];
+    const lastToolCall = lastMessage?.tool_calls?.[0]?.id;
+    
+    const message =
+      codeError?.state === "success"
+        ? "The code ran successfully."
+        : `ERROR: ${codeError?.message}`;
 
-      // Add metadata to mark this as a system message that shouldn't be displayed
-      thread.submit(undefined, {
-        command: {
-          resume: new HumanMessage({
-            content: message,
-            additional_kwargs: { hide_in_thread: true },
-          }),
-        },
-      });
-    }
+    console.log("Last Message", lastMessage);
+    console.log("All messages", thread?.messages);
+
+    if (!lastToolCall) return;
+
+    thread.submit(undefined, {
+      command: {
+        resume: new ToolMessage({
+          content: message,
+          tool_call_id: lastToolCall,
+        }),
+      },
+    });
   }, [codeError]);
 
   return (
@@ -139,8 +137,8 @@ export function AINewVisual() {
         <button
           className="btn btn-outline-light me-1 d-flex align-items-center"
           onClick={() => {
+            
             navigate("/visuals-new-ai");
-            location.reload();
           }}
         >
           New Conversation
@@ -166,7 +164,9 @@ export function AINewVisual() {
               >
                 <ChatBox
                   messages={thread?.messages}
-                  isLoading={thread?.isLoading || isVerifying}
+                  isCoding={isAICoding}
+                  isVerifying={isVerifying}
+                  isLoading={thread?.isLoading}
                 />
               </div>
             )}
@@ -174,7 +174,11 @@ export function AINewVisual() {
               <AIInputBox
                 inputValue={inputValue}
                 setInputValue={setInputValue}
-                inputDisabled={(additionalReferences.length === 0 && inputValue === "") || thread?.isLoading || isVerifying}
+                inputDisabled={
+                  (additionalReferences.length === 0 && inputValue === "") ||
+                  thread?.isLoading ||
+                  isVerifying || isAICoding
+                }
                 onSubmit={submitMessage}
                 additionalReferences={additionalReferences}
                 setAdditionalReferences={setAdditionalReferences}
@@ -183,7 +187,10 @@ export function AINewVisual() {
             {currentScreen === "intro" && (
               <div className="mt-4 mb-n5">
                 <p className="text-gray-600 m-0 p-0">or</p>
-                <p className="text-light mb-1">Browse the list of featured visuals and use them as a starting point.</p>
+                <p className="text-light mb-1">
+                  Browse the list of featured visuals and use them as a starting
+                  point.
+                </p>
                 <IntroSuggestions
                   additionalReferences={additionalReferences}
                   setAdditionalReferences={setAdditionalReferences}
