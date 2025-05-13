@@ -16,6 +16,8 @@ type User {
   followingCount(where: FriendshipWhereInput! = {}): Int
   followers(where: FriendshipWhereInput! = {}, orderBy: [FriendshipOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: FriendshipWhereUniqueInput): [Friendship!]
   followersCount(where: FriendshipWhereInput! = {}): Int
+  genAI(where: GenAIWhereInput! = {}, orderBy: [GenAIOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: GenAIWhereUniqueInput): [GenAI!]
+  genAICount(where: GenAIWhereInput! = {}): Int
 }
 
 type PasswordState {
@@ -43,6 +45,7 @@ input UserWhereInput {
   liked: VisualManyRelationFilter
   following: FriendshipManyRelationFilter
   followers: FriendshipManyRelationFilter
+  genAI: GenAIManyRelationFilter
 }
 
 input IDFilter {
@@ -112,6 +115,12 @@ input FriendshipManyRelationFilter {
   none: FriendshipWhereInput
 }
 
+input GenAIManyRelationFilter {
+  every: GenAIWhereInput
+  some: GenAIWhereInput
+  none: GenAIWhereInput
+}
+
 input UserOrderByInput {
   id: OrderDirection
   name: OrderDirection
@@ -135,6 +144,7 @@ input UserUpdateInput {
   liked: VisualRelateToManyForUpdateInput
   following: FriendshipRelateToManyForUpdateInput
   followers: FriendshipRelateToManyForUpdateInput
+  genAI: GenAIRelateToManyForUpdateInput
 }
 
 input VisualRelateToManyForUpdateInput {
@@ -149,6 +159,13 @@ input FriendshipRelateToManyForUpdateInput {
   set: [FriendshipWhereUniqueInput!]
   create: [FriendshipCreateInput!]
   connect: [FriendshipWhereUniqueInput!]
+}
+
+input GenAIRelateToManyForUpdateInput {
+  disconnect: [GenAIWhereUniqueInput!]
+  set: [GenAIWhereUniqueInput!]
+  create: [GenAICreateInput!]
+  connect: [GenAIWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -166,6 +183,7 @@ input UserCreateInput {
   liked: VisualRelateToManyForCreateInput
   following: FriendshipRelateToManyForCreateInput
   followers: FriendshipRelateToManyForCreateInput
+  genAI: GenAIRelateToManyForCreateInput
 }
 
 input VisualRelateToManyForCreateInput {
@@ -176,6 +194,82 @@ input VisualRelateToManyForCreateInput {
 input FriendshipRelateToManyForCreateInput {
   create: [FriendshipCreateInput!]
   connect: [FriendshipWhereUniqueInput!]
+}
+
+input GenAIRelateToManyForCreateInput {
+  create: [GenAICreateInput!]
+  connect: [GenAIWhereUniqueInput!]
+}
+
+type GenAI {
+  id: ID!
+  langGraphThread: String
+  author: User
+  visual: Visual
+  createdAt: DateTime
+}
+
+input GenAIWhereUniqueInput {
+  id: ID
+  langGraphThread: String
+}
+
+input GenAIWhereInput {
+  AND: [GenAIWhereInput!]
+  OR: [GenAIWhereInput!]
+  NOT: [GenAIWhereInput!]
+  id: IDFilter
+  langGraphThread: StringFilter
+  author: UserWhereInput
+  visual: VisualWhereInput
+  createdAt: DateTimeNullableFilter
+}
+
+input GenAIOrderByInput {
+  id: OrderDirection
+  langGraphThread: OrderDirection
+  createdAt: OrderDirection
+}
+
+input GenAIUpdateInput {
+  langGraphThread: String
+  author: UserRelateToOneForUpdateInput
+  visual: VisualRelateToOneForUpdateInput
+  createdAt: DateTime
+}
+
+input UserRelateToOneForUpdateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+}
+
+input VisualRelateToOneForUpdateInput {
+  create: VisualCreateInput
+  connect: VisualWhereUniqueInput
+  disconnect: Boolean
+}
+
+input GenAIUpdateArgs {
+  where: GenAIWhereUniqueInput!
+  data: GenAIUpdateInput!
+}
+
+input GenAICreateInput {
+  langGraphThread: String
+  author: UserRelateToOneForCreateInput
+  visual: VisualRelateToOneForCreateInput
+  createdAt: DateTime
+}
+
+input UserRelateToOneForCreateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+}
+
+input VisualRelateToOneForCreateInput {
+  create: VisualCreateInput
+  connect: VisualWhereUniqueInput
 }
 
 type Friendship {
@@ -228,12 +322,6 @@ input FriendshipUpdateInput {
   createdAt: DateTime
 }
 
-input UserRelateToOneForUpdateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-  disconnect: Boolean
-}
-
 input FriendshipUpdateArgs {
   where: FriendshipWhereUniqueInput!
   data: FriendshipUpdateInput!
@@ -244,11 +332,6 @@ input FriendshipCreateInput {
   recipient: UserRelateToOneForCreateInput
   status: String
   createdAt: DateTime
-}
-
-input UserRelateToOneForCreateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
 }
 
 type Visual {
@@ -270,6 +353,7 @@ type Visual {
   tags(where: TagWhereInput! = {}, orderBy: [TagOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TagWhereUniqueInput): [Tag!]
   tagsCount(where: TagWhereInput! = {}): Int
   privacy: String
+  genAI: GenAI
 }
 
 type ImageFieldOutput {
@@ -313,6 +397,7 @@ input VisualWhereInput {
   editable: BooleanFilter
   tags: TagManyRelationFilter
   privacy: StringNullableFilter
+  genAI: GenAIWhereInput
 }
 
 input UserManyRelationFilter {
@@ -354,6 +439,7 @@ input VisualUpdateInput {
   editable: Boolean
   tags: TagRelateToManyForUpdateInput
   privacy: String
+  genAI: GenAIRelateToOneForUpdateInput
 }
 
 input ImageFieldInput {
@@ -381,6 +467,12 @@ input TagRelateToManyForUpdateInput {
   connect: [TagWhereUniqueInput!]
 }
 
+input GenAIRelateToOneForUpdateInput {
+  create: GenAICreateInput
+  connect: GenAIWhereUniqueInput
+  disconnect: Boolean
+}
+
 input VisualUpdateArgs {
   where: VisualWhereUniqueInput!
   data: VisualUpdateInput!
@@ -402,6 +494,7 @@ input VisualCreateInput {
   editable: Boolean
   tags: TagRelateToManyForCreateInput
   privacy: String
+  genAI: GenAIRelateToOneForCreateInput
 }
 
 input UserRelateToManyForCreateInput {
@@ -412,6 +505,11 @@ input UserRelateToManyForCreateInput {
 input TagRelateToManyForCreateInput {
   create: [TagCreateInput!]
   connect: [TagWhereUniqueInput!]
+}
+
+input GenAIRelateToOneForCreateInput {
+  create: GenAICreateInput
+  connect: GenAIWhereUniqueInput
 }
 
 type Tag {
@@ -466,6 +564,12 @@ type Mutation {
   updateUsers(data: [UserUpdateArgs!]!): [User]
   deleteUser(where: UserWhereUniqueInput!): User
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
+  createGenAI(data: GenAICreateInput!): GenAI
+  createGenAIS(data: [GenAICreateInput!]!): [GenAI]
+  updateGenAI(where: GenAIWhereUniqueInput!, data: GenAIUpdateInput!): GenAI
+  updateGenAIS(data: [GenAIUpdateArgs!]!): [GenAI]
+  deleteGenAI(where: GenAIWhereUniqueInput!): GenAI
+  deleteGenAIS(where: [GenAIWhereUniqueInput!]!): [GenAI]
   createFriendship(data: FriendshipCreateInput!): Friendship
   createFriendships(data: [FriendshipCreateInput!]!): [Friendship]
   updateFriendship(where: FriendshipWhereUniqueInput!, data: FriendshipUpdateInput!): Friendship
@@ -510,6 +614,9 @@ type Query {
   users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   user(where: UserWhereUniqueInput!): User
   usersCount(where: UserWhereInput! = {}): Int
+  genAIS(where: GenAIWhereInput! = {}, orderBy: [GenAIOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: GenAIWhereUniqueInput): [GenAI!]
+  genAI(where: GenAIWhereUniqueInput!): GenAI
+  genAISCount(where: GenAIWhereInput! = {}): Int
   friendships(where: FriendshipWhereInput! = {}, orderBy: [FriendshipOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: FriendshipWhereUniqueInput): [Friendship!]
   friendship(where: FriendshipWhereUniqueInput!): Friendship
   friendshipsCount(where: FriendshipWhereInput! = {}): Int

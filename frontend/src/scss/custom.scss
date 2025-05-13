@@ -1559,6 +1559,13 @@ input.vis-name-input::placeholder {
   max-height: 25vh;
 }
 
+.max-height-70vh {
+  max-height: 70vh;
+}
+.z-10 {
+  z-index: 10 !important;
+}
+
 .btn-hover-primary {
   &:hover {
     background-color: $black !important;
@@ -1609,6 +1616,13 @@ input.vis-name-input::placeholder {
   top: 100%;
   left: 0;
   margin-top: 0.25rem;
+}
+
+.popup-bottom-left {
+  top: 100%;
+  right: 0%;
+  margin-top: 0.25rem;
+  margin-right: 0.25rem;
 }
 
 .popup-top {

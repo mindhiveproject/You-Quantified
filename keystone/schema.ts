@@ -99,6 +99,16 @@ export const lists: Lists = {
       liked: relationship({ ref: "Visual.likes", many: true }),
       following: relationship({ ref: "Friendship.requester", many: true }),
       followers: relationship({ ref: "Friendship.recipient", many: true }),
+      genAI: relationship({ ref: "GenAI.author", many: true }),
+    },
+  }),
+  GenAI: list({
+    access: allowAll,
+    fields: {
+      langGraphThread: text({ isIndexed: "unique" }),
+      author: relationship({ ref: "User.genAI", many: false }),
+      visual: relationship({ ref: "Visual.genAI", many: false }),
+      createdAt: timestamp({ defaultValue: { kind: "now" } }), // May 12, 2025
     },
   }),
   Friendship: list({
@@ -171,6 +181,7 @@ export const lists: Lists = {
         ],
         defaultValue: "private",
       }),
+      genAI: relationship({ ref: "GenAI.visual", many: false }),
     },
   }),
   Tag: list({

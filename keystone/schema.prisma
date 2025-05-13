@@ -22,6 +22,19 @@ model User {
   liked     Visual[]     @relation("User_liked")
   following Friendship[] @relation("Friendship_requester")
   followers Friendship[] @relation("Friendship_recipient")
+  genAI     GenAI[]      @relation("GenAI_author")
+}
+
+model GenAI {
+  id              String    @id @default(cuid())
+  langGraphThread String    @unique @default("")
+  author          User?     @relation("GenAI_author", fields: [authorId], references: [id])
+  authorId        String?   @map("author")
+  visual          Visual?   @relation("GenAI_visual", fields: [visualId], references: [id])
+  visualId        String?   @unique @map("visual")
+  createdAt       DateTime? @default(now())
+
+  @@index([authorId])
 }
 
 model Friendship {
@@ -60,6 +73,7 @@ model Visual {
   editable        Boolean   @default(false)
   tags            Tag[]     @relation("Tag_visuals")
   privacy         String?   @default("private")
+  genAI           GenAI?    @relation("GenAI_visual")
 
   @@index([authorId])
 }

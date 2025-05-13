@@ -4,6 +4,7 @@ import { NEW_VISUAL } from "../../../../../queries/visuals";
 import { UserContext } from "../../../../../App";
 import { useContext, useState } from "react";
 import clsx from "clsx";
+import { useSearchParams } from "react-router-dom";
 
 /**
  * Button to save & create a visual based on the AI's info
@@ -17,7 +18,7 @@ function CreateButton({ isDisabled, visualMetaAI }) {
   const { currentUser } = useContext(UserContext);
   const [createNewVisual] = useMutation(NEW_VISUAL);
   const [isError, setIsError] = useState(false);
-
+  const [searchParams, setSearchParams] = useSearchParams();
   async function submitVisualForCreation() {
     const codeFile = new Blob([visualMetaAI?.code], { type: "text/plain" });
 
@@ -34,6 +35,11 @@ function CreateButton({ isDisabled, visualMetaAI }) {
           id: currentUser?.id,
         },
       },
+      genAI: {
+        connect: {
+          langGraphThread: searchParams.get("ai-thread")
+        }
+      }
     };
 
     const { data } = await createNewVisual({

@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { CREATE_GEN_AI } from "../../../queries/genAI";
+import { useMutation } from "@apollo/client";
+import { UserContext } from "../../../App";
+import { Link } from "react-router-dom";
 
 // Import components from our reorganized structure
 import {
@@ -10,6 +14,7 @@ import {
   ChatBox,
   RightPannel,
   IntroSuggestions,
+  HistoryButton,
 } from "./components";
 
 /**
@@ -23,21 +28,30 @@ export function AINewVisual() {
   const [inputValue, setInputValue] = useState("");
   const chatDivRef = useRef(null);
   const navigate = useNavigate();
+  const { currentUser } = useContext(UserContext);
+
+  const [createGenAI] = useMutation(CREATE_GEN_AI, {
+    refetchQueries: ["GetAIVisuals"],
+  });
+
   const thread = useStream({
     apiUrl: "http://localhost:2024",
     assistantId: "agent",
     messagesKey: "messages",
     threadId: searchParams.get("ai-thread"),
-    onThreadId: (id) =>
+    onThreadId: (id) => {
       setSearchParams((prev) => {
         prev.set("ai-thread", id);
         return prev;
-      }
-    
-    ),
+      });
+      createGenAI({ variables: { thread: id, userID: currentUser?.id } });
+    },
     onUpdateEvent: (ev) => {
       console.log("AI Event", ev);
-      if (Object.keys(ev)[0] === "summarize-modification" || Object.keys(ev)[0] === "summarize-initial") {
+      if (
+        Object.keys(ev)[0] === "summarize-modification" ||
+        Object.keys(ev)[0] === "summarize-initial"
+      ) {
         setIsAICoding(true);
       } else {
         setIsAICoding(false);
@@ -107,14 +121,11 @@ export function AINewVisual() {
 
     const lastMessage = thread?.messages[thread?.messages.length - 1];
     const lastToolCall = lastMessage?.tool_calls?.[0]?.id;
-    
+
     const message =
       codeError?.state === "success"
         ? "The code ran successfully."
         : `ERROR: ${codeError?.message}`;
-
-    console.log("Last Message", lastMessage);
-    console.log("All messages", thread?.messages);
 
     if (!lastToolCall) return;
 
@@ -128,21 +139,36 @@ export function AINewVisual() {
     });
   }, [codeError]);
 
+  if (!currentUser?.id) {
+    return (
+      <div className="vh-100 w-100 bg-black ai-overlay text-white">
+        <div className="d-flex w-100 h-100 align-items-center justify-content-center">
+          <div className="d-flex row align-items-center text-center">
+            <p>You must be logged in to generate new visuals with AI</p>
+            <Link className="btn-link link-light" to="/visuals">{"Main Menu"}</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="vh-100 w-100 bg-black ai-overlay text-white overscroll-x-none">
       <div className="g-0 p-0 pb-1 pt-1 d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center justify-content-center">
           <BackButton />
         </div>
-        <button
-          className="btn btn-outline-light me-1 d-flex align-items-center"
-          onClick={() => {
-            
-            navigate("/visuals-new-ai");
-          }}
-        >
-          New Conversation
-        </button>
+        <div className="d-flex align-items-center me-1">
+          <HistoryButton userID={currentUser?.id} />
+          <button
+            className="btn btn-outline-light d-flex align-items-center"
+            onClick={() => {
+              navigate("/visuals-new-ai");
+            }}
+          >
+            New Conversation
+          </button>
+        </div>
       </div>
       <div className="container-fluid p-0 m-0 w-100 h-95 p-4">
         <div className="row h-100 justify-content-center">
@@ -177,7 +203,8 @@ export function AINewVisual() {
                 inputDisabled={
                   (additionalReferences.length === 0 && inputValue === "") ||
                   thread?.isLoading ||
-                  isVerifying || isAICoding
+                  isVerifying ||
+                  isAICoding
                 }
                 onSubmit={submitMessage}
                 additionalReferences={additionalReferences}
