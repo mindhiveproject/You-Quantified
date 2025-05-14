@@ -47,7 +47,6 @@ export function AINewVisual() {
       createGenAI({ variables: { thread: id, userID: currentUser?.id } });
     },
     onUpdateEvent: (ev) => {
-      console.log("AI Event", ev);
       if (
         Object.keys(ev)[0] === "summarize-modification" ||
         Object.keys(ev)[0] === "summarize-initial"
@@ -70,7 +69,8 @@ export function AINewVisual() {
     // Afterwards, proceed
     const msgContent = [{ type: "text", text: inputValue.toString() }];
 
-    for (const addReference in additionalReferences) {
+    for (const addReference of additionalReferences) {
+      console.log(addReference);
       if (addReference?.type === "image") {
         msgContent.push({
           type: "image_url",
@@ -78,16 +78,15 @@ export function AINewVisual() {
         });
       }
       if (addReference?.type === "visual") {
+        const HIDE_START = "\u001E";
+        const HIDE_END = "\u001F";
         const response = await fetch(addReference?.codeURL);
         const codeString = await response.text();
-        msgContent.push({
-          type: "file",
-          source_type: "base64",
-          data: codeString,
-          mime_type: "text/plain",
-        });
+        msgContent[0].text += ` ${HIDE_START} \n name="${addReference?.name}" code="${codeString}" parameters="${JSON.parse(addReference?.visParameters || [])}" ${HIDE_END}`;
       }
     }
+
+    console.log("Message Content", msgContent);
 
     const message = [
       new HumanMessage({
@@ -97,6 +96,8 @@ export function AINewVisual() {
         },
       }),
     ];
+
+    console.log("Submitted message", message);
 
     setAdditionalReferences([]);
 
@@ -145,7 +146,9 @@ export function AINewVisual() {
         <div className="d-flex w-100 h-100 align-items-center justify-content-center">
           <div className="d-flex row align-items-center text-center">
             <p>You must be logged in to generate new visuals with AI</p>
-            <Link className="btn-link link-light" to="/visuals">{"Main Menu"}</Link>
+            <Link className="btn-link link-light" to="/visuals">
+              {"Main Menu"}
+            </Link>
           </div>
         </div>
       </div>

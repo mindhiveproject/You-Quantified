@@ -53,6 +53,7 @@ export const SEARCH_VISUALS = gql`
         name
       }
       createdAt
+      parameters
     }
   }
 `;

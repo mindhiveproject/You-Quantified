@@ -105,7 +105,7 @@ export function P5AISandbox({
 
     const message = event.data;
     console.log("Window message", message);
-    console.log("Is Verifying", isVerifyingRef.current);
+    
     if (!isVerifyingRef.current) return;
 
     console.log("Submitting error message...")

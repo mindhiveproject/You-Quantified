@@ -75,7 +75,7 @@ async function checkDetailSufficiency(state: typeof StateAnnotation.State) {
     code: state.visual?.code || "",
   });
 
-  console.log("---DECIDING---")
+
   const response = await model.invoke(prompt.messages);
   const responseContent = response.content.toString().trim().toUpperCase();
 
@@ -135,7 +135,7 @@ async function summarizeInitialInput(state: typeof StateAnnotation.State) {
       
       
       This summary will be used as the basis for generating P5.js code.
-      You will NOT be generating any code
+      You will NOT be generating any code, but you may outline lines that you think might be important.
       `,
     ],
     ["placeholder", "{messages}"],
@@ -167,7 +167,7 @@ async function summarizeModification(state: typeof StateAnnotation.State) {
       3. Removed from the current implementation
       
       This summary will be used as the basis for modifying existing P5.js code.
-      You will not be providing any code.
+      You will not be providing any code, but you may outline lines that you think might need to be changed.
       `,
     ],
     ["placeholder", "{messages}"],

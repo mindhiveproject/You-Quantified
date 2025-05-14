@@ -17,12 +17,16 @@ function DisplayVisResult({
   hasBeenAdded,
   showImage,
 }) {
+  console.log(visInfo)
+
   function handleClick() {
+    
     addReference({
       name: visInfo?.title,
       id: visInfo?.id,
       type: "visual",
       codeURL: visInfo?.code?.url,
+      visParameters: visInfo?.parameters,
     });
 
     if (setShowModal) {

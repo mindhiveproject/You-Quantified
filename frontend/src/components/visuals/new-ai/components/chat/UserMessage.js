@@ -9,6 +9,11 @@ import { motion, useTime, useTransform } from "motion/react";
  * @param {boolean} props.isLoading - Whether to show a loading animation
  */
 function UserMessage({ message, isLoading = false, addRefNumber }) {
+
+  let displayMessage = typeof message === "string" ? message : "";
+  // Updated regex to use the global flag and properly handle multiline content
+  displayMessage = displayMessage.replace(/\u001E[\s\S]*?\u001F/g, '');
+
   const time = useTime();
   const rotate = useTransform(time, [0, 3000], [0, 360], { clamp: false });
   const rotationBg = useTransform(rotate, (r) => {
@@ -24,7 +29,7 @@ function UserMessage({ message, isLoading = false, addRefNumber }) {
             isLoading ? "border border-primary" : "border border-white"
           }`}
         >
-          <p className="p-0 m-0">{message}</p>
+          <p className="p-0 m-0">{displayMessage}</p>
           {addRefNumber > 0 && (
             <p className="text-gray-600 m-0 mt-1">
               {`Used ${addRefNumber} additional reference${addRefNumber>1?"s":""}`}

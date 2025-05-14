@@ -17,10 +17,10 @@ function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
     },
   });
 
-  function addReference({ name, id, type, codeURL }) {
+  function addReference({ name, id, type, codeURL, visParameters }) {
     setAdditionalReferences((prev) => {
       if (prev.find((obj) => id === obj.id)) return prev;
-      return [...prev, { name, id, type, codeURL }];
+      return [...prev, { name, id, type, codeURL, visParameters }];
     });
   }
 

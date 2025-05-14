@@ -32,7 +32,7 @@ function HistoryButton({userID}) {
     variables: { userID: userID },
   });
 
-  console.log("Chat histroy", completeHistory);
+
   useOutsideAlerter(historymodalRef, setShowModal);
 
   if (!completeHistory?.genAIS) return;
