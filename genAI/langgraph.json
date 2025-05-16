@@ -5,7 +5,10 @@
   },
   "env": ".env",
   "dependencies": ["."],
-  "cors": {
-    "origins": ["http://localhost:3000", "https://youquantified.com"]
+  "http": {
+    "cors": {
+      "allow_origins": ["http://localhost:3000", "https://youquantified.com", "https://api.smith.langchain.com"]
+    }
   }
+
 }
