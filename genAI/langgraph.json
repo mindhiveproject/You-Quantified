@@ -7,8 +7,25 @@
   "dependencies": ["."],
   "http": {
     "cors": {
-      "allow_origins": ["http://localhost:3000", "https://youquantified.com", "https://api.smith.langchain.com"]
+      "allow_origins": [
+        "http://localhost:3000",
+        "https://youquantified.com",
+        "https://api.smith.langchain.com"
+      ],
+      "allow_methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"
+      ],
+      "allow_headers": [
+        "Content-Type",
+        "Authorization"
+      ],
+      "allow_credentials": true,
+      "max_age": 600
     }
   }
-
 }
