@@ -4,5 +4,8 @@
     "agent": "./src/agent/graph.ts:graph"
   },
   "env": ".env",
-  "dependencies": ["."]
+  "dependencies": ["."],
+  "cors": {
+    "origins": ["http://localhost:3000", "https://youquantified.com"]
+  }
 }

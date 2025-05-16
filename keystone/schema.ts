@@ -89,8 +89,24 @@ export const lists: Lists = {
       email: text({
         validation: { isRequired: true },
         isIndexed: "unique",
+        access: {
+          read: ({ session, item }) =>
+            item?.id === session?.itemId || !!(session?.data.isAdmin),
+          create: () => true,
+          update: ({ session, item }) =>
+            item?.id === session?.itemId || !!(session?.data.isAdmin),
+        },
       }),
-      password: password({ validation: { isRequired: true } }),
+      password: password({
+        validation: { isRequired: true },
+        access: {
+          read: ({ session, item }) =>
+            item?.id === session?.itemId || !!(session?.data.isAdmin),
+          create: () => true,
+          update: ({ session, item }) =>
+            item?.id === session?.itemId || !!(session?.data.isAdmin),
+        },
+      }),
       visuals: relationship({ ref: "Visual.author", many: true }),
       isAdmin: checkbox(),
       createdAt: timestamp({

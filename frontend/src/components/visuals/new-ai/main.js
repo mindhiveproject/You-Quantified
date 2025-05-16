@@ -17,6 +17,11 @@ import {
   HistoryButton,
 } from "./components";
 
+const uriEndpoint =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_GEN_AI_ENDPOINT_DEV
+    : process.env.REACT_APP_GEN_AI_ENDPOINT
+
 /**
  * Main component for the AI visual generation interface
  * Handles the LangGraph communication, chat history, and visual generation
@@ -35,7 +40,7 @@ export function AINewVisual() {
   });
 
   const thread = useStream({
-    apiUrl: "http://localhost:2024",
+    apiUrl: uriEndpoint,
     assistantId: "agent",
     messagesKey: "messages",
     threadId: searchParams.get("ai-thread"),
