@@ -10,22 +10,10 @@
       "allow_origins": [
         "http://localhost:3000",
         "https://youquantified.com",
+        "https://backend.youquantified.com",
         "https://api.smith.langchain.com"
       ],
-      "allow_methods": [
-        "GET",
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-        "OPTIONS"
-      ],
-      "allow_headers": [
-        "Content-Type",
-        "Authorization"
-      ],
-      "allow_credentials": true,
-      "max_age": 600
+      "allow_headers": ["*"]
     }
   }
 }

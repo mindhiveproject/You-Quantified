@@ -199,8 +199,10 @@ async function createP5Code(state: typeof StateAnnotation.State) {
       
       Provide your response with:
       1. A description explaining how the code works
-      2. Parameters that could be customized, each with a name and possible default values
+      2. Parameters that could be customized, each with a name and possible default values.
       3. The P5.js code itself
+
+      You must ensure the parameters are reference with the EXACT same key in the code.
       
       You will use windowWidth and windowHeight for the canvas dimensions.`,
     ],
@@ -251,6 +253,8 @@ async function fixP5Code(state: typeof StateAnnotation.State) {
       \`\`\`javascript
       {code}
       \`\`\`
+
+      You must ensure the parameters are reference with the EXACT same key in the code.
       
       Here is the error report or the changes the user is requesting:`,
     ],
