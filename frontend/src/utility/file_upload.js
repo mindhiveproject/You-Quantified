@@ -21,7 +21,7 @@ export class UploadedFile {
           metadata: {
             device: this.device,
             id: this.id,
-            "sampling rate": this.sampling_rate,
+            "sampling_rate": this.sampling_rate,
             connected: true,
             playing: false,
             looping: false,

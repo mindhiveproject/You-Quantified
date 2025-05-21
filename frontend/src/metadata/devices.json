@@ -127,7 +127,11 @@
     "image": "/Muse2.webp",
     "type": "EEG & PPG",
     "connections": "multiple",
-    "sampling_rate": 256,
+    "sampling_rate": {
+      "EEG": 256,
+      "PPG": 64,
+      "Band Powers": 10
+    },
     "data": [
       {
         "name": "Theta",

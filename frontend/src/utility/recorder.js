@@ -2,8 +2,8 @@ import store from "../store/store";
 import Papa from "papaparse";
 import JSZip from "jszip";
 import devicesRaw from "../metadata/devices.json";
-import { Observable } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { Observable } from "rxjs";
+import { filter, map, tap } from "rxjs/operators";
 
 const buffers = new Map();
 
@@ -11,12 +11,12 @@ const buffers = new Map();
 /* 1️⃣  Turn a Redux store into a cold, well-behaved RxJS Observable   */
 /* ------------------------------------------------------------------ */
 function storeToObservable(store) {
-  return new Observable(subscriber => {
+  return new Observable((subscriber) => {
     subscriber.next(store.getState());
     const unsubscribe = store.subscribe(() =>
       subscriber.next(store.getState())
     );
-    return unsubscribe;  
+    return unsubscribe;
   });
 }
 
@@ -25,22 +25,20 @@ function getOrInitialize(map, key, init = () => []) {
   return map.get(key);
 }
 
-
 export function subToStore() {
   return storeToObservable(store)
     .pipe(
-      filter(s => s?.update?.type === 'stream'),
+      filter((s) => s?.update?.type === "stream"),
       map(({ update, dataStream }) => ({
-        key:   `${update.device} ${update.modality}`,
+        key: `${update.device}_${update.modality}`,
         chunk: dataStream?.[update.device],
       })),
       tap(({ key, chunk }) => {
         if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
-      }),
+      })
     )
     .subscribe();
 }
-
 
 export function beginStream(saveObject) {
   const currentStream = store.getState().dataStream;
@@ -50,7 +48,7 @@ export function beginStream(saveObject) {
   }
 }
 
-function autoCSVDownload(saveObject, deviceMeta) {
+function autoCSVDownload(saveObject, allDevicesMeta) {
   // CallBackFunction to download a CSV
   const a = document.createElement("a");
   document.body.appendChild(a);
@@ -66,7 +64,6 @@ function autoCSVDownload(saveObject, deviceMeta) {
   fileText += "This folder contains the following files: ";
   const metadataJSON = [];
 
-
   // Load each file into the zip
   for (const [key, value] of saveObject) {
     const json = JSON.stringify(value);
@@ -74,29 +71,50 @@ function autoCSVDownload(saveObject, deviceMeta) {
     const blob = new Blob([Papa.unparse(json)], { type: "text/csv" });
     const thisFileName = key.toLowerCase().replace(/ /g, "_") + ".csv";
 
+    const [device, modality] = key.split("_");
+    const deviceMeta = allDevicesMeta[device];
+    // Create basic metadata object
     const currentDeviceMeta = {
       "recording id": key,
       "file name": thisFileName,
-      "device name": deviceMeta[key]?.device,
+      "device name": deviceMeta?.device,
     };
 
+    // Find matching device from our devices list
     const deviceFromList = devicesRaw.find(
-      ({ heading }) => heading === deviceMeta[key]?.device
+      (entry) => entry.device === deviceMeta?.device
     );
 
-    // Check the JSON device list
-    if (deviceFromList) {
-      currentDeviceMeta["type"] = deviceFromList["type"];
-      currentDeviceMeta["sampling rate"] = deviceFromList["sampling_rate"];
+    // Determine device type
+    if (modality === "device") {
+      // For device modality, use deviceMeta type or fall back to deviceFromList
+      currentDeviceMeta["type"] = deviceMeta?.type || deviceFromList?.type;
+    } else {
+      // For other modalities, use the modality value directly
+      currentDeviceMeta["type"] = modality;
     }
 
-    // Check device meta to assign additional properties
-    if (deviceMeta[key]?.["sampling rate"]) {
-      currentDeviceMeta["sampling rate"] = deviceMeta[key]?.["sampling rate"];
+    // Determine sampling rate using clearer precedence order
+    let samplingRate = null;
+
+    // First check if deviceMeta has a modality-specific sampling rate
+    if (deviceMeta?.sampling_rate?.[modality]) {
+      samplingRate = deviceMeta.sampling_rate[modality];
     }
-    if (deviceMeta[key]?.["type"]) {
-      currentDeviceMeta["type"] = deviceMeta[key]?.["type"];
+    // Then check if deviceMeta has a numeric sampling rate
+    else if (typeof deviceMeta?.sampling_rate === "number") {
+      samplingRate = deviceMeta.sampling_rate;
     }
+    // Then check if deviceFromList has a modality-specific sampling rate
+    else if (deviceFromList?.sampling_rate?.[modality]) {
+      samplingRate = deviceFromList.sampling_rate[modality];
+    }
+    // Finally fall back to deviceFromList general sampling rate
+    else {
+      samplingRate = deviceFromList?.sampling_rate;
+    }
+
+    currentDeviceMeta["sampling_rate"] = samplingRate;
 
     metadataJSON.push(currentDeviceMeta);
     zip.file(thisFileName, blob);
@@ -121,9 +139,9 @@ function autoCSVDownload(saveObject, deviceMeta) {
   });
 }
 
-export function stopRecording(unsub) {
+export function stopRecording(unsub, deviceMeta) {
   unsub.unsubscribe();
-  autoCSVDownload(buffers, devicesRaw)
+  autoCSVDownload(buffers, deviceMeta);
   console.log(buffers);
 }
 

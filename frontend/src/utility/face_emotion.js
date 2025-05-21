@@ -33,7 +33,7 @@ export class FaceEmotionRecognition {
           connected: true,
           id: this.id,
           // Need to find the sampling rate. Is it the same as the video frame rate?
-          "sampling rate": 24,
+          "sampling_rate": 24,
           type: "default",
         },
       },

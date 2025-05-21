@@ -74,7 +74,7 @@ export async function uploadFile(file, setConnText) {
             results.data,
             currentDeviceMeta["device name"],
             id,
-            currentDeviceMeta["sampling rate"]
+            currentDeviceMeta["sampling_rate"]
           );
           setConnText(connectionText["connected"]);
         },

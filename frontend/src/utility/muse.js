@@ -3,7 +3,7 @@
 
 import { MuseClient } from "muse-js";
 import store from "../store/store";
-import {fft} from "mathjs";
+import { fft } from "mathjs";
 import { PolynomialRegression } from "ml-regression-polynomial";
 
 export class MuseDevice {
@@ -30,6 +30,8 @@ export class MuseDevice {
     this.connected = false;
     this.dataArray = [];
     this.WINDOW_SIZE = 2;
+    this.BAND_POWERS_SFREQ = 10; // Band power sfreq in Hz
+    this.HR_SFREQ = 1;
     this.sfreq = 256;
     this.muse = new MuseClient();
     this.muse.enablePpg = true; // Enable the PPG (please)
@@ -64,7 +66,12 @@ export class MuseDevice {
             device: "Muse",
             connected: true,
             id: this.id,
-            "sampling rate": this.sfreq,
+            sampling_rate: {
+              EEG: this.sfreq,
+              PPG: 64,
+              "Band Powers": this.BAND_POWERS_SFREQ,
+              HR: this.HR_SFREQ,
+            },
             type: "default",
           },
         },
@@ -112,7 +119,7 @@ export class MuseDevice {
               payload: {
                 id: this.id,
                 data: dispatchData,
-                modality: 'EEG'
+                modality: "EEG",
               },
             });
           }
@@ -136,7 +143,7 @@ export class MuseDevice {
                 data: {
                   PPG: ppgReading.samples[i],
                 },
-                modality: 'PPG'
+                modality: "PPG",
               },
             });
           }
@@ -155,7 +162,7 @@ export class MuseDevice {
       } else {
         clearInterval(this.eegMetricStream);
       }
-    }, 100);
+    }, (1 / this.BAND_POWERS_SFREQ) * 1000);
     this.ppgMetricStream = setInterval(() => {
       if (this.connected) {
         calculate_ppg_metrics(this.ppgBuffer, this.id);
@@ -163,7 +170,7 @@ export class MuseDevice {
       } else {
         clearInterval(this.ppgMetricStream);
       }
-    }, 1000);
+    }, (1 / this.HR_SFREQ) * 1000);
   }
 }
 
@@ -209,13 +216,12 @@ async function calculate_eeg_metrics(muse_eeg, deviceID) {
     avrg[col] = average(bandpowers_arr);
   }
 
-  
   store.dispatch({
     type: "devices/streamUpdate",
     payload: {
       id: deviceID,
       data: avrg,
-      modality: 'Band Powers'
+      modality: "Band Powers",
       // data: avrg_bandpowers["Alpha"]
     },
   });
@@ -252,6 +258,7 @@ async function calculate_ppg_metrics(muse_ppg, deviceID) {
     payload: {
       id: deviceID,
       data: { HR: hr },
+      modality: "HR",
     },
   });
 }

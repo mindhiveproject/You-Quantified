@@ -15,13 +15,13 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
   const recordingText = recording != false ? "Stop recording" : "Record data";
 
   const deviceMeta = useSelector((state) => state.deviceMeta);
-
+  
   const handleClick = () => {
     if (!recording) {
       // beginStream(saveObject);
       setRecording(subToStore());
     } else {
-      stopRecording(recording);
+      stopRecording(recording, deviceMeta);
       setRecording(false);
     }
   };
