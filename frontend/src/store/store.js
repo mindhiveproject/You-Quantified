@@ -4,6 +4,7 @@ const initialState = {
   params: {},
   dataStream: {},
   deviceMeta: {},
+  update: { type: "none" },
 };
 
 // React Redux Store to manage the data that moves throghout the entire app
@@ -106,11 +107,12 @@ function rootReducer(state = initialState, action) {
 
       return {
         ...state,
+        update: { type: "stream", device: action.payload.id, modality: action.payload?.modality || 'device' },
         dataStream: {
           ...state.dataStream,
           [action.payload.id]: {
             ...action.payload.data,
-            "timestamp": Date.now(),
+            timestamp: Date.now(),
           },
         },
       };

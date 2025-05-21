@@ -18,10 +18,10 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
 
   const handleClick = () => {
     if (!recording) {
-      beginStream(saveObject);
-      setRecording(subToStore(saveObject));
+      // beginStream(saveObject);
+      setRecording(subToStore());
     } else {
-      stopRecording(recording, saveObject, deviceMeta);
+      stopRecording(recording);
       setRecording(false);
     }
   };

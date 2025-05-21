@@ -2,44 +2,45 @@ import store from "../store/store";
 import Papa from "papaparse";
 import JSZip from "jszip";
 import devicesRaw from "../metadata/devices.json";
+import { Observable } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
 
-// Add timestamps in the store.dispatch method
-// Ignore timestamps in the parameter dropdown
+const buffers = new Map();
 
-// Changes to make to recording
-// - Don't add a new device while recording
-// - Better button
-
-function saveToObject(saveObject) {
-  // saveObject.push(store.getState().dataStream); - Push as one huge object
-  const currentStream = store.getState().dataStream;
-
-  for (const device in currentStream) {
-    const currentDeviceData = currentStream[device];
-    const deviceDataArray = saveObject[device];
-    if (deviceDataArray[deviceDataArray.length - 1] !== currentDeviceData) {
-      deviceDataArray.push(currentDeviceData);
-    }
-  }
-}
-
-function _toObservable(store) {
-  return {
-    subscribe({ onNext }) {
-      let dispose = store.subscribe(() => onNext(store.getState()));
-      onNext(store.getState());
-      return { dispose };
-    },
-  };
-}
-
-export function subToStore(saveObject) {
-  const obversable = _toObservable(store);
-  const unsub = obversable.subscribe({
-    onNext: () => saveToObject(saveObject),
+/* ------------------------------------------------------------------ */
+/* 1️⃣  Turn a Redux store into a cold, well-behaved RxJS Observable   */
+/* ------------------------------------------------------------------ */
+function storeToObservable(store) {
+  return new Observable(subscriber => {
+    subscriber.next(store.getState());
+    const unsubscribe = store.subscribe(() =>
+      subscriber.next(store.getState())
+    );
+    return unsubscribe;  
   });
-  return unsub;
 }
+
+function getOrInitialize(map, key, init = () => []) {
+  if (!map.has(key)) map.set(key, init());
+  return map.get(key);
+}
+
+
+export function subToStore() {
+  return storeToObservable(store)
+    .pipe(
+      filter(s => s?.update?.type === 'stream'),
+      map(({ update, dataStream }) => ({
+        key:   `${update.device} ${update.modality}`,
+        chunk: dataStream?.[update.device],
+      })),
+      tap(({ key, chunk }) => {
+        if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
+      }),
+    )
+    .subscribe();
+}
+
 
 export function beginStream(saveObject) {
   const currentStream = store.getState().dataStream;
@@ -55,7 +56,6 @@ function autoCSVDownload(saveObject, deviceMeta) {
   document.body.appendChild(a);
   a.style = "display: none";
 
-  const finalObject = {};
   const currentDate = new Date();
   const dateString = currentDate.fileName();
 
@@ -65,13 +65,12 @@ function autoCSVDownload(saveObject, deviceMeta) {
 
   fileText += "This folder contains the following files: ";
   const metadataJSON = [];
-  console.log("device metadata");
+
 
   // Load each file into the zip
-  for (const key in saveObject) {
-    const json = JSON.stringify(saveObject[key]);
-    console.log(json);
-    
+  for (const [key, value] of saveObject) {
+    const json = JSON.stringify(value);
+
     const blob = new Blob([Papa.unparse(json)], { type: "text/csv" });
     const thisFileName = key.toLowerCase().replace(/ /g, "_") + ".csv";
 
@@ -122,15 +121,10 @@ function autoCSVDownload(saveObject, deviceMeta) {
   });
 }
 
-export function stopRecording(unsub, saveObject, deviceMeta) {
-  unsub.dispose();
-  autoCSVDownload(saveObject, deviceMeta);
-
-  while (saveObject.length > 0) {
-    saveObject.pop();
-  }
-
-  // sessionStorage.removeItem("data");
+export function stopRecording(unsub) {
+  unsub.unsubscribe();
+  autoCSVDownload(buffers, devicesRaw)
+  console.log(buffers);
 }
 
 const txtContent = `

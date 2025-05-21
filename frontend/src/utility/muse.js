@@ -112,6 +112,7 @@ export class MuseDevice {
               payload: {
                 id: this.id,
                 data: dispatchData,
+                modality: 'EEG'
               },
             });
           }
@@ -135,6 +136,7 @@ export class MuseDevice {
                 data: {
                   PPG: ppgReading.samples[i],
                 },
+                modality: 'PPG'
               },
             });
           }
@@ -213,6 +215,7 @@ async function calculate_eeg_metrics(muse_eeg, deviceID) {
     payload: {
       id: deviceID,
       data: avrg,
+      modality: 'Band Powers'
       // data: avrg_bandpowers["Alpha"]
     },
   });

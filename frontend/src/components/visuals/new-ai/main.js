@@ -87,7 +87,13 @@ export function AINewVisual() {
         const HIDE_END = "\u001F";
         const response = await fetch(addReference?.codeURL);
         const codeString = await response.text();
-        msgContent[0].text += ` ${HIDE_START} \n name="${addReference?.name}" code="${codeString}" parameters="${JSON.parse(addReference?.visParameters || [])}" ${HIDE_END}`;
+        msgContent[0].text += ` 
+        ${HIDE_START}
+          Follow my instructions closely, but use the following visual as a reference.
+          name="${addReference?.name}" 
+          code="${codeString}" 
+          parameters="${JSON.parse(addReference?.visParameters || [])}" 
+        ${HIDE_END}`;
       }
     }
 

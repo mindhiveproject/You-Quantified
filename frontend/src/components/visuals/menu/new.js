@@ -117,7 +117,6 @@ export function NewVisual() {
     <div className="scrollable">
       <div className="h-100 center-margin overflow-scroll disable-scrollbar">
         <div className="align-items-start mb-5">
-          {currentUser && <MyUserName currentUser={currentUser} />}
           <Link
             className="btn btn-link text-decoration-none fw-medium mb-0 p-0 mt-5"
             to="/visuals"
