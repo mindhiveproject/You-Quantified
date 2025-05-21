@@ -7,9 +7,7 @@ import { filter, map, tap } from "rxjs/operators";
 
 const buffers = new Map();
 
-/* ------------------------------------------------------------------ */
-/* 1️⃣  Turn a Redux store into a cold, well-behaved RxJS Observable   */
-/* ------------------------------------------------------------------ */
+
 function storeToObservable(store) {
   return new Observable((subscriber) => {
     subscriber.next(store.getState());
