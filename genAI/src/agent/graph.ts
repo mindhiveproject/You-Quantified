@@ -13,6 +13,11 @@ const model = new ChatOpenAI({
   apiKey: process.env.OPEN_AI_API,
 });
 
+const advancedModel = new ChatOpenAI({
+  model: "o4-mini",
+  apiKey: process.env.OPEN_AI_API,
+})
+
 const codeFormatter = tool(async () => {}, {
   name: "code_formatter",
   schema: z.object({
@@ -214,7 +219,7 @@ async function createP5Code(state: typeof StateAnnotation.State) {
     context: `${contextCache.introDocs} \n\n ${contextCache.quickStartDocs}`,
   });
 
-  const structuredLLM = model.bindTools([codeFormatter]);
+  const structuredLLM = advancedModel.bindTools([codeFormatter]);
   const response = await structuredLLM.invoke(prompt.messages);
 
   // Extract data directly from the structured tool call
@@ -267,7 +272,7 @@ async function fixP5Code(state: typeof StateAnnotation.State) {
     code: state.visual?.code || "",
   });
 
-  const structuredLLM = model.bindTools([codeFormatter]);
+  const structuredLLM = advancedModel.bindTools([codeFormatter]);
   const response = await structuredLLM.invoke(prompt.messages);
 
   const code = response?.tool_calls?.[0]?.args?.code || "";

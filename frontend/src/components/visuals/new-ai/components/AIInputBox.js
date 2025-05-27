@@ -19,29 +19,9 @@ import AdditionalReference from "./references/AdditionalReference";
  * @param {Array} props.additionalReferences - Array of added references
  * @param {function} props.setAdditionalReferences - Function to update references
  */
-function AIInputBox({ inputValue, setInputValue, inputDisabled, onSubmit, additionalReferences, setAdditionalReferences }) {
+function AIInputBox({ inputValue, setInputValue, inputDisabled, onSubmit, additionalReferences, addReference, removeReference }) {
   const [isFocus, setIsFocus] = useState(false);
   const textareaRef = useRef(null);
-
-  function addReference(newReference) {
-    setAdditionalReferences((prev) =>
-      prev.includes(newReference) ? prev : [...prev, newReference]
-    );
-  }
-
-  function removeReference(object) {
-    setAdditionalReferences((prev) =>
-      prev.filter((val) => {
-        if (object?.id) {
-          return val?.id !== object?.id;
-        } else if (object?.imgSrc) {
-          return val?.imgSrc !== object?.imgSrc;
-        } else {
-          return true;
-        }
-      })
-    );
-  }
 
   const [ref, { height }] = useMeasure();
 

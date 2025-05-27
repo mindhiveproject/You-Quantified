@@ -90,7 +90,9 @@ export class MuseDevice {
       });
 
       const info = await this.muse.deviceInfo();
-    } catch (error) {}
+    } catch (error) {
+      throw new Error("Unable to connect to muse")
+    }
   }
 
   async stream() {

@@ -2,7 +2,7 @@ import devicesRaw from "../../../metadata/devices.json";
 import React from "react";
 import { ModalDataInformation } from "./data_sources_display";
 
-export function LeftInfoPane({ currentDevice }) {
+export function LeftInfoPane({ currentDevice, leftPaneInfoRef }) {
   /*
     if (currentDevice?.name === "Upload") {
       return <FileUploader />;
@@ -11,7 +11,7 @@ export function LeftInfoPane({ currentDevice }) {
   return (
     <div className="w-100 h-100 ms-3 pe-4-5 mb-5">
       {currentDevice?.card_type === "generic" && (
-        <div className="card rounded-0 text-start black-hover border-dark">
+        <div className="card rounded-0 text-start black-hover border-dark" ref={leftPaneInfoRef}>
           <GenericInfoPane currentDevice={currentDevice} />
         </div>
       )}

@@ -20,7 +20,7 @@ import {
 const uriEndpoint =
   process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_GEN_AI_ENDPOINT_DEV
-    : process.env.REACT_APP_GEN_AI_ENDPOINT
+    : process.env.REACT_APP_GEN_AI_ENDPOINT;
 
 /**
  * Main component for the AI visual generation interface
@@ -68,6 +68,26 @@ export function AINewVisual() {
   const visualMetaAI = thread?.values?.visual;
   const isVerifying = thread?.interrupt?.value === "verify";
 
+  function addReference(newReference) {
+    setAdditionalReferences((prev) =>
+      prev.includes(newReference) ? prev : [...prev, newReference]
+    );
+  }
+
+  function removeReference(object) {
+    setAdditionalReferences((prev) =>
+      prev.filter((val) => {
+        if (object?.id) {
+          return val?.id !== object?.id;
+        } else if (object?.imgSrc) {
+          return val?.imgSrc !== object?.imgSrc;
+        } else {
+          return true;
+        }
+      })
+    );
+  }
+
   async function submitMessage(e) {
     e.preventDefault();
 
@@ -82,17 +102,19 @@ export function AINewVisual() {
           image_url: { url: addReference?.imgSrc },
         });
       }
+      console.log("Add Ref", addReference);
       if (addReference?.type === "visual") {
         const HIDE_START = "\u001E";
         const HIDE_END = "\u001F";
         const response = await fetch(addReference?.codeURL);
         const codeString = await response.text();
+        console.log(JSON.stringify(addReference.visParameters));
         msgContent[0].text += ` 
         ${HIDE_START}
           Follow my instructions closely, but use the following visual as a reference.
           name="${addReference?.name}" 
           code="${codeString}" 
-          parameters="${JSON.parse(addReference?.visParameters || [])}" 
+          parameters="${JSON.stringify(addReference?.visParameters) || []}" 
         ${HIDE_END}`;
       }
     }
@@ -166,6 +188,21 @@ export function AINewVisual() {
     );
   }
 
+  if (!currentUser?.isAdmin) {
+    return (
+      <div className="vh-100 w-100 bg-black ai-overlay text-white">
+        <div className="d-flex w-100 h-100 align-items-center justify-content-center">
+          <div className="d-flex row align-items-center text-center">
+            <p>You must be a platform admin to create visuals with AI</p>
+            <Link className="btn-link link-light" to="/visuals">
+              {"Main Menu"}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="vh-100 w-100 bg-black ai-overlay text-white overscroll-x-none">
       <div className="g-0 p-0 pb-1 pt-1 d-flex justify-content-between align-items-center">
@@ -222,7 +259,8 @@ export function AINewVisual() {
                 }
                 onSubmit={submitMessage}
                 additionalReferences={additionalReferences}
-                setAdditionalReferences={setAdditionalReferences}
+                addReference={addReference}
+                removeReference={removeReference}
               />
             </div>
             {currentScreen === "intro" && (
@@ -234,7 +272,8 @@ export function AINewVisual() {
                 </p>
                 <IntroSuggestions
                   additionalReferences={additionalReferences}
-                  setAdditionalReferences={setAdditionalReferences}
+                  addReference={addReference}
+                  removeReference={removeReference}
                 />
               </div>
             )}

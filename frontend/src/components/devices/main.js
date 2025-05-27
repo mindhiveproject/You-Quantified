@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import { RecordComponent } from "./recording";
@@ -6,6 +6,7 @@ import { LeftInfoPane } from "./info panel/main";
 import { GenericDeviceButtonsList } from "./buttons/generic";
 import { FileUploadButton } from "./buttons/upload";
 import { LSLDeviceButton } from "./buttons/lsl";
+import { useOutsideAlerter } from "../../utility/outsideClickDetection";
 
 const selectData = (state) => state.dataStream;
 const selectDeviceMeta = (state) => state.deviceMeta;
@@ -19,7 +20,6 @@ export const selectDevices = createSelector(
   }
 );
 
-
 // Add an outside click alerter
 // In the top bar add a recording indicator that has a hover action (to indicate which devices you are using)
 
@@ -30,14 +30,22 @@ export function DevicesManager({
   setRecording,
 }) {
   const [currentDevice, setCurrentDevice] = useState();
+  const rightPanelRef = useRef(null);
+  const leftPaneInfoRef = useRef(null);
+  const recordButtonRef = useRef(null);
 
   function handleMouseLeave() {
     setCurrentDevice({ device: "none", card_type: "none" });
   }
 
+  useMultiOutsideAlerter(
+    [rightPanelRef, leftPaneInfoRef, recordButtonRef],
+    setShowDevices
+  );
+
   return (
     <div className="h-100 overflow-scroll disable-scrollbar devices-overlay">
-      <div className="record-button">
+      <div className="record-button" ref={recordButtonRef}>
         <RecordComponent
           saveObject={saveObject}
           recording={recording}
@@ -64,10 +72,18 @@ export function DevicesManager({
           onMouseLeave={handleMouseLeave}
         >
           <div className="h-100">
-            <LeftInfoPane currentDevice={currentDevice} />
+            <LeftInfoPane
+              currentDevice={currentDevice}
+              leftPaneInfoRef={leftPaneInfoRef}
+            />
           </div>
         </div>
-        <RightPane setCurrentDevice={setCurrentDevice} />
+        <div
+          className="sources-pane-right disable-scrollbar me-3"
+          ref={rightPanelRef}
+        >
+          <RightPane setCurrentDevice={setCurrentDevice} />
+        </div>
       </div>
     </div>
   );
@@ -75,12 +91,29 @@ export function DevicesManager({
 
 function RightPane({ setCurrentDevice }) {
   return (
-    <div className="sources-pane-right disable-scrollbar me-3">
+    <div>
       <FileUploadButton setCurrentDevice={setCurrentDevice} />
       <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
       <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
     </div>
   );
+}
+
+export function useMultiOutsideAlerter(refs, setShow) {
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const clickedInsideAny = refs.some(
+        (ref) => ref.current && ref.current.contains(event.target)
+      );
+      if (!clickedInsideAny) {
+        setShow(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [refs, setShow]);
 }
 
 // Event Marker Indicators

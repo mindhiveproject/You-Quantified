@@ -99,10 +99,6 @@ function DeviceUploadExpanded({
   const [selectedUpload, setSelectedUpload] = useState(defaultSelection);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    console.log("Drag Event", isDragging);
-  }, [isDragging]);
-
   async function handleButtonClick() {
     if (selectedUpload === "upload" && fileInputRef.current) {
       fileInputRef.current.click();

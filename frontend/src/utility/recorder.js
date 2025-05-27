@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import JSZip from "jszip";
 import devicesRaw from "../metadata/devices.json";
 import { Observable } from "rxjs";
-import { filter, map, tap } from "rxjs/operators";
+import { filter, tap } from "rxjs/operators";
 
 const buffers = new Map();
 
@@ -23,15 +23,26 @@ function getOrInitialize(map, key, init = () => []) {
   return map.get(key);
 }
 
+let lastMarker;
+
 export function subToStore() {
   return storeToObservable(store)
     .pipe(
       filter((s) => s?.update?.type === "stream"),
-      map(({ update, dataStream }) => ({
-        key: `${update.device}_${update.modality}`,
-        chunk: dataStream?.[update.device],
-      })),
-      tap(({ key, chunk }) => {
+      tap((state) => {
+        const key = `${state.update.device}_${state.update.modality}`;
+        const chunk = state.dataStream?.[state.update.device];
+        if (state.update.device?.includes("event_markers")) {
+          lastMarker = chunk;
+        }
+        if (lastMarker) {
+          console.log("Event marker!");
+          console.log(lastMarker);
+          const [key, val] = Object.entries(lastMarker)[0];
+          console.log(key,val);
+          chunk[key] = val;
+          console.log(chunk);
+        }
         if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
       })
     )

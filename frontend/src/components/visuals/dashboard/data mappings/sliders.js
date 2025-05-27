@@ -92,7 +92,7 @@ export function DataManualSlider({ parameter }) {
       <div className="align-self-center">
         <OverlayTrigger
           trigger="click"
-          placement="right"
+          placement="left"
           rootClose={true}
           overlay={sliderToolTip}
         >

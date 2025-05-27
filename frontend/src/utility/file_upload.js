@@ -11,9 +11,11 @@ export class UploadedFile {
       this.device = device;
       this.id = id;
       this.sampling_rate =
-        devicesRaw.find(({ heading }) => heading === device)?.sampling_rate ||
-        sampling_rate;
-  
+        sampling_rate || devicesRaw.find(({ heading }) => heading === device)?.sampling_rate;
+        
+      console.log("Device", this.device);
+      console.log("Sampling rate", this.sampling_rate);
+
       store.dispatch({
         type: "devices/create",
         payload: {

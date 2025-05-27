@@ -20,6 +20,10 @@ import CreateButton from "./CreateButton";
 function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
   const [currentTab, setCurrentTab] = useState("code");
   const [code, setCode] = useState(visualMetaAI?.code || "");
+    useEffect(()=>{
+    setCode(visualMetaAI?.code)
+  }, [visualMetaAI?.code]);
+
   const [extensions, setExtensions] = useState([]);
   const isVerifyingRef = useRef(isVerifying);
 
@@ -28,6 +32,8 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
     isVerifyingRef.current = isVerifying;
     console.log("Verification state updated:", isVerifying);
   }, [isVerifying]);
+
+
 
   const [visInfo, setVisInfo] = useState({
     parameters: visualMetaAI?.parameters || [],

@@ -102,8 +102,6 @@ export function QueryMainView() {
     return <NoVisualScreen />;
   }
 
-  console.log(data?.visuals[0]);
-
   return <MainView visID={visID} queryData={data?.visuals[0]} />;
 }
 

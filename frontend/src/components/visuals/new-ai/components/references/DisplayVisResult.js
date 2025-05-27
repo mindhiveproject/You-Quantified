@@ -17,7 +17,6 @@ function DisplayVisResult({
   hasBeenAdded,
   showImage,
 }) {
-  console.log(visInfo)
 
   function handleClick() {
     

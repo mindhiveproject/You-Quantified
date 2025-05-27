@@ -13,15 +13,6 @@ export function MyUserName() {
       <div className="d-flex justify-content-end">
         <Link
           className={clsx(
-            "btn ps-3 pe-3 me-1 btn-outline-dark",
-            currentPath === "/signup" && "active"
-          )}
-          to="/signup"
-        >
-          Sign Up
-        </Link>
-        <Link
-          className={clsx(
             "btn ps-3 pe-3",
             currentPath === "/login" ? "btn-outline-dark active" : "btn-outline-primary"
           )}

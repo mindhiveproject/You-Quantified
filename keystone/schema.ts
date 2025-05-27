@@ -87,7 +87,7 @@ export const lists: Lists = {
     fields: {
       name: text({ isIndexed: "unique" }),
       email: text({
-        validation: { isRequired: true },
+        validation: { isRequired: false },
         isIndexed: "unique",
         access: {
           read: ({ session, item }) =>

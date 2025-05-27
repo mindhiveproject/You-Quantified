@@ -203,10 +203,6 @@ export function VisualizationCards({
     .filter(({ selected }) => selected)
     .map(({ label }) => label);
 
-  console.log("Current Tags", currentTags);
-
-  console.log("Selected Tag Labels", tagLabels);
-
   if (tagLabels) {
     if (tagLabels.length !== 0) {
       whereValue["tags"] = {

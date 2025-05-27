@@ -104,7 +104,6 @@ export function P5AISandbox({
     if (!event || !event.data) return;
 
     const message = event.data;
-    console.log("Window message", message);
     
     if (!isVerifyingRef.current) return;
 

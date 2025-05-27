@@ -18,7 +18,7 @@ export function EditModalManager({
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const [createNewVisual, {data: copyData, error}] = useMutation(NEW_VISUAL, {
+  const [createNewVisual, { data: copyData, error }] = useMutation(NEW_VISUAL, {
     refetchQueries: [MY_VISUALS, "VisualsQuery"],
   });
 
@@ -29,34 +29,36 @@ export function EditModalManager({
     // Could also copy the documentation
     // Add copy to the regular dashboard
 
-    
-    await createNewVisual({
-      variables: {
-        data: {
-          title: visMetadata?.title+" (copy)",
-          description: visMetadata?.description,
-          parameters: visMetadata?.parameters,
-          author: {
-            connect: {
-              id: currentUser?.id,
-            },
-          },
-          editable: true,
-          code: {
-            upload: codeBlob,
-          },
-          docs: visMetadata?.docs,
-          extensions: visMetadata?.extensions,
+    const newData = {
+      title: visMetadata?.title + " (copy)",
+      description: visMetadata?.description,
+      parameters: visMetadata?.parameters,
+      author: {
+        connect: {
+          id: currentUser?.id,
         },
       },
-    });
+      editable: true,
+      code: {
+        upload: codeBlob,
+      },
+      // docs: visMetadata?.docs,
+      extensions: visMetadata?.extensions,
+    };
 
+    if (visMetadata?.docsVisible && visMetadata?.privacy === "pulic") {
+      newData[docs] === visMetadata?.docs;
+    }
+
+    await createNewVisual({
+      variables: { data: newData },
+    });
   }
 
   if (copyData) {
     setTimeout(() => {
       navigate(`/visuals/${copyData?.createVisual?.id}`);
-     }, 500)
+    }, 500);
     return <p>Redirecting you to the copy...</p>;
   }
 
@@ -65,9 +67,8 @@ export function EditModalManager({
   }
 
   if (currentUser.id !== visMetadata?.author?.id) {
-    return <CopyEditPopup createVisualCopy={createVisualCopy}/>;
+    return <CopyEditPopup createVisualCopy={createVisualCopy} />;
   }
-  
 
   return (
     <EditScreen
@@ -99,7 +100,6 @@ function SignInEditPopup() {
 }
 
 function CopyEditPopup({ createVisualCopy }) {
-
   return (
     <div>
       <p> You do not own this visualization.</p>
@@ -114,7 +114,12 @@ function CopyEditPopup({ createVisualCopy }) {
   );
 }
 
-function EditScreen({ visMetadata, setShowEdit, changeVisMetadata, createVisualCopy }) {
+function EditScreen({
+  visMetadata,
+  setShowEdit,
+  changeVisMetadata,
+  createVisualCopy,
+}) {
   const textbox = useRef(null);
   const navigate = useNavigate();
   const [visName, setVisName] = useState(visMetadata?.title);

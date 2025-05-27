@@ -14,10 +14,6 @@ export default function DataManagementWindow({ showDashbord, changeParameters, v
   if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
     return <div>Loading...</div>;
 
-
-  console.log("visInfo")
-  console.log(visInfo)
-
   return (
     <div className={`h-100 ms-5 me-5 overflow-auto disable-scrollbar ${showDashbord ? "d-none":''}`}>
       <h5 className="mt-5">Data Mappings</h5>

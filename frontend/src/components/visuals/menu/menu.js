@@ -131,7 +131,6 @@ function VisualTagMenu({
   setCurrentFilter,
   currentFilter,
 }) {
-  console.log(currentTags);
 
   function selectTag(tagLabel) {
     const newTags = (currentTags || []).map((tag) => {

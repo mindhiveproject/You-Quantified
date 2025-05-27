@@ -231,7 +231,6 @@ function LinkMenu({ editor, setIsAddingLink }) {
         onBlur={() => setIsAddingLink(false)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
-            console.log(event.target.value);
             setLink(event);
             setIsAddingLink(false);
           }

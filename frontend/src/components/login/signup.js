@@ -31,6 +31,21 @@ export default function SignUp() {
     );
   }
 
+  if (true) {
+    return (
+      <div className="d-flex w-100 h-100 align-items-center justify-content-center">
+        <div className="ms-5 me-5">
+          <p>
+            To create a new account, join{" "}
+            <a href="https://youquantified.app/">the waitlist</a> or reach out
+            to us at{" "}
+            <a href="mailto:youquantified@nyu.edu">youquantified@nyu.edu</a>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-div mt-5">
       <div className="d-flex mb-4 align-items-center justify-content-between">

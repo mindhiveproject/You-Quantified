@@ -4,7 +4,9 @@ import { MY_VISUALS } from "../../../../../queries/visuals";
 import { DisplayVisResult } from "../references";
 import { motion } from "motion/react";
 
-function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
+
+
+function IntroSuggestions({ additionalReferences, addReference, removeReference }) {
   const {
     data: allFeaturedVisuals,
     loading,
@@ -17,12 +19,6 @@ function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
     },
   });
 
-  function addReference({ name, id, type, codeURL, visParameters }) {
-    setAdditionalReferences((prev) => {
-      if (prev.find((obj) => id === obj.id)) return prev;
-      return [...prev, { name, id, type, codeURL, visParameters }];
-    });
-  }
 
   if (error) {
     return <div>Error loading featured visuals</div>;
@@ -42,6 +38,7 @@ function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
         className="col width-256px gx-2"
         layout="position"
         transition={{ duration: 0.15 }}
+        key={visMeta?.id}
       >
         <DisplayVisResult
           visInfo={visMeta}
@@ -53,7 +50,7 @@ function IntroSuggestions({ additionalReferences, setAdditionalReferences }) {
     );
   });
   return (
-    <div className="d-flex w-100 overflow-x-scroll black-scrollbar overscroll-x-none">
+    <div className="d-flex w-100 overflow-x-scroll black-scrollbar overscroll-x-none" >
       <div className="row flex-nowrap ms-n1">{renderVisuals}</div>
     </div>
   );

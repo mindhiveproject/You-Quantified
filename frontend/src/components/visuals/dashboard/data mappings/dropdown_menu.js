@@ -101,7 +101,7 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
         <small className="m-0 p-0 opacity-50">Mapping</small>
         <p className="m-0 mt-n1 p-0">{display}</p>
       </button>
-      <ul className={`dropdown-menu ${show ? "visible" : "hidden"}`}>
+      <ul className={`dropdown-menu z-3 ${show ? "visible" : "hidden"}`}>
         <li>
           <button
             className={`dropdown-item ${
