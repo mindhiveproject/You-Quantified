@@ -97,29 +97,31 @@ export async function preRecordedUpload(fileURL, setConnText) {
 
 export async function formUploadFile(e, setConnText) {
   setConnText(connectionText["awaiting"]);
-  const [file] = await e.currentTarget?.files;
-  if (!file) {
+  const files = await e.currentTarget?.files;
+  if (!files) {
     setConnText(connectionText["failed"]);
     return;
   }
-  await uploadFile(file, setConnText);
+  for (const file of files) {
+    await uploadFile(file, setConnText);
+  }
 }
 
 export async function dropZoneUpload(e, setConnText) {
-    console.log("uploading file...");
-    e.preventDefault();
-    e.stopPropagation();
-    setConnText(connectionText["awaiting"]);
-    const files = await e?.dataTransfer?.files;
-    if (!files || files.length !== 1) {
-      setConnText(connectionText["failed"]);
-      return;
-    }
-    const file = files[0];
+  console.log("uploading file...");
+  e.preventDefault();
+  e.stopPropagation();
+  setConnText(connectionText["awaiting"]);
+  const files = await e?.dataTransfer?.files;
+  if (!files || files.length !== 1) {
+    setConnText(connectionText["failed"]);
+    return;
+  }
+  for (const file of files) {
     if (!isZipFile(file)) {
       setConnText(connectionText["failed"]);
       return;
     }
     await uploadFile(file, setConnText);
   }
-  
+}

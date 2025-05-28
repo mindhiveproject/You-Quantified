@@ -64,6 +64,11 @@ export function FileUploadButton({ setCurrentDevice }) {
           </div>
         </button>
       </div>
+      {uploadedStreams.length > 1 && (
+        <div className="list-group list-group-flush">
+          <ManageMultiple />
+        </div>
+      )}
       {uploadedStreams.length > 0 && (
         <ul className="list-group list-group-flush">
           {uploadedStreams.map((obj) => (
@@ -85,6 +90,112 @@ export function FileUploadButton({ setCurrentDevice }) {
   );
 }
 
+function ManageMultiple() {
+  // grab entire deviceMeta in one hook
+  const deviceMeta = useSelector((state) => state.deviceMeta);
+  const deviceIDs = Object.keys(window.recordings);
+  const isAllPlaying = deviceIDs.every((id) => deviceMeta[id]?.playing);
+  const isAllLooping = deviceIDs.every((id) => deviceMeta[id]?.looping);
+
+  const toggleStreaming = () => {
+    deviceIDs.forEach((id) => {
+      const stream = window.recordings[id];
+      isAllPlaying
+        ? stream.pausePlayback()
+        : !stream.playing && stream.startPlayback();
+    });
+  };
+
+  const toggleLooping = () => {
+    deviceIDs.forEach((id) => window.recordings[id].loopPlayback());
+  };
+
+  return (
+    <li className="list-group-item border p-0 border-dark mt-n01">
+      <div className="d-flex justify-content-between">
+        <div className="d-flex align-items-center">
+          {false && (
+            <span className="material-symbols-outlined me-2 ps-3">
+              arrow_right
+            </span>
+          )}
+          <span className="ms-3 align-self-center fw-semibold">Global Controls</span>
+        </div>
+        <div>
+          <button className="btn btn-link">
+            <i className="bi bi-rewind" />
+          </button>
+          <button className="btn btn-link">
+            <i
+              className={`bi ${isAllPlaying ? "bi-pause" : "bi-play"}`}
+              onClick={toggleStreaming}
+            />
+          </button>
+          <button className="btn btn-link">
+            <i
+              className={`bi bi-arrow-repeat ${
+                isAllLooping ? "text-primary" : ""
+              }`}
+              onClick={toggleLooping}
+            />
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
+  const streamObject = window.recordings[deviceID];
+
+  const playing = useSelector((state) => state?.deviceMeta[deviceID]?.playing);
+  const looping = useSelector((state) => state?.deviceMeta[deviceID]?.looping);
+
+  function startStreaming() {
+    streamObject.startPlayback();
+  }
+
+  function pauseStreaming() {
+    streamObject.pausePlayback();
+  }
+
+  function loopStreaming() {
+    streamObject.loopPlayback();
+  }
+
+  function restartStreaming() {
+    streamObject.restartPlayback();
+  }
+
+  return (
+    <li className="list-group-item border p-0 border-dark mt-n01">
+      <div className="d-flex justify-content-between">
+        <span className="align-self-center ps-3 text-truncate">{deviceID}</span>
+        <div className="d-flex">
+          <button className="btn btn-link" onClick={restartStreaming}>
+            <i className="bi bi-rewind" />
+          </button>
+          {playing ? (
+            <button className="btn btn-link">
+              <i className="bi bi-pause" onClick={pauseStreaming} />
+            </button>
+          ) : (
+            <button className="btn btn-link">
+              <i className="bi bi-play" onClick={startStreaming} />
+            </button>
+          )}
+          <button className="btn btn-link">
+            <i
+              className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
+              onClick={loopStreaming}
+            />
+          </button>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 function DeviceUploadExpanded({
   setShowUploadModal,
   setConnText,
@@ -93,7 +204,13 @@ function DeviceUploadExpanded({
 }) {
   const defaultSelection = "upload";
 
-  const preRecordedFileOptions = [{ name: "emotiv", display: "EMOTIV Sample File", filename: "emotiv-example.zip"}];
+  const preRecordedFileOptions = [
+    {
+      name: "emotiv",
+      display: "EMOTIV Sample File",
+      filename: "emotiv-example.zip",
+    },
+  ];
 
   const [isDragging, setIsDragging] = useState(false);
   const [selectedUpload, setSelectedUpload] = useState(defaultSelection);
@@ -103,7 +220,9 @@ function DeviceUploadExpanded({
     if (selectedUpload === "upload" && fileInputRef.current) {
       fileInputRef.current.click();
     } else if (selectedUpload) {
-      const fileName = preRecordedFileOptions.find(({name})=> name===selectedUpload)?.filename
+      const fileName = preRecordedFileOptions.find(
+        ({ name }) => name === selectedUpload
+      )?.filename;
       if (!fileName) {
         return;
       }
@@ -182,56 +301,5 @@ function DeviceUploadExpanded({
         </div>
       </div>
     </div>
-  );
-}
-
-function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
-  const streamObject = window.recordings[deviceID];
-
-  const playing = useSelector((state) => state?.deviceMeta[deviceID]?.playing);
-  const looping = useSelector((state) => state?.deviceMeta[deviceID]?.looping);
-
-  function startStreaming() {
-    streamObject.startPlayback();
-  }
-
-  function pauseStreaming() {
-    streamObject.pausePlayback();
-  }
-
-  function loopStreaming() {
-    streamObject.loopPlayback();
-  }
-
-  function restartStreaming() {
-    streamObject.restartPlayback();
-  }
-
-  return (
-    <li className="list-group-item border p-0 border-dark mt-n01">
-      <div className="d-flex justify-content-between">
-        <span className="align-self-center ps-3">{deviceID}</span>
-        <div>
-          <button className="btn btn-link" onClick={restartStreaming}>
-            <i className="bi bi-rewind" />
-          </button>
-          {playing ? (
-            <button className="btn btn-link">
-              <i className="bi bi-pause" onClick={pauseStreaming} />
-            </button>
-          ) : (
-            <button className="btn btn-link">
-              <i className="bi bi-play" onClick={startStreaming} />
-            </button>
-          )}
-          <button className="btn btn-link">
-            <i
-              className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
-              onClick={loopStreaming}
-            />
-          </button>
-        </div>
-      </div>
-    </li>
   );
 }

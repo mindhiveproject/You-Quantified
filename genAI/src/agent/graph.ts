@@ -140,7 +140,8 @@ async function summarizeInitialInput(state: typeof StateAnnotation.State) {
       
       
       This summary will be used as the basis for generating P5.js code.
-      You will NOT be generating any code, but you may outline lines that you think might be important.
+      You may outline lines that are important, but you will NOT be generating any code. 
+      You will not code the whole sketch, only provide tips, guidelines, and ideas.
       `,
     ],
     ["placeholder", "{messages}"],

@@ -30,19 +30,8 @@ export function subToStore() {
     .pipe(
       filter((s) => s?.update?.type === "stream"),
       tap((state) => {
-        const key = `${state.update.device}_${state.update.modality}`;
+        const key = `${state.update.device} : ${state.update.modality}`;
         const chunk = state.dataStream?.[state.update.device];
-        if (state.update.device?.includes("event_markers")) {
-          lastMarker = chunk;
-        }
-        if (lastMarker) {
-          console.log("Event marker!");
-          console.log(lastMarker);
-          const [key, val] = Object.entries(lastMarker)[0];
-          console.log(key,val);
-          chunk[key] = val;
-          console.log(chunk);
-        }
         if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
       })
     )
@@ -78,14 +67,15 @@ function autoCSVDownload(saveObject, allDevicesMeta) {
     const json = JSON.stringify(value);
 
     const blob = new Blob([Papa.unparse(json)], { type: "text/csv" });
-    const thisFileName = key.toLowerCase().replace(/ /g, "_") + ".csv";
+    const thisFileName = key.toLowerCase().replace(" : ", "_").replace(/ /g, "_") + ".csv";
 
-    const [device, modality] = key.split("_");
+    const [device, modality] = key.split(" : ");
     const deviceMeta = allDevicesMeta[device];
     // Create basic metadata object
     const currentDeviceMeta = {
       "recording id": key,
       "file name": thisFileName,
+      "device id": device,
       "device name": deviceMeta?.device,
     };
 

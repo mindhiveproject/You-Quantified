@@ -6,7 +6,7 @@ import { LeftInfoPane } from "./info panel/main";
 import { GenericDeviceButtonsList } from "./buttons/generic";
 import { FileUploadButton } from "./buttons/upload";
 import { LSLDeviceButton } from "./buttons/lsl";
-import { useOutsideAlerter } from "../../utility/outsideClickDetection";
+
 
 const selectData = (state) => state.dataStream;
 const selectDeviceMeta = (state) => state.deviceMeta;
