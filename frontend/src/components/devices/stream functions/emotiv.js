@@ -1,6 +1,10 @@
 import CortexPower from "../../../utility/cortex";
 import store from "../../../store/store";
 
+// TO: DO in the codebase
+// Check the recordings & why playback is so slow
+
+
 export function connectEmotiv(changeConnectionStatus) {
   let socketUrl = "wss://localhost:6868";
   // this key does not inquire for EEG raw data

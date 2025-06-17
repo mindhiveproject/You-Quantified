@@ -1,33 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-import { subToStore, stopRecording, beginStream } from "../../utility/recorder";
+import { recordingManager } from "../../utility/recorder";
 import { useSelector } from "react-redux";
 
-export function RecordComponent({ recording, setRecording, saveObject }) {
-  // Save object might be changed to a hook?
-
-  const buttonClassName =
-    recording == false
-      ? "btn btn-outline-dark fw-medium mb-2"
-      : "btn btn-danger btn-outline-dark fw-medium mb-2";
-  const iconClassName =
-    recording != false ? "bi bi-stop-circle" : "bi bi-record-circle";
-  const recordingText = recording != false ? "Stop recording" : "Record data";
-
+export function RecordComponent({isRecording, setIsRecording}) {
+  
   const deviceMeta = useSelector((state) => state.deviceMeta);
   
+  // Sync component state with singleton on mount and unmount
+  useEffect(() => {
+    setIsRecording(recordingManager.getRecordingStatus());
+    
+    // If component unmounts while recording, stop recording
+    return () => {
+      if (isRecording) {
+        recordingManager.stopRecording();
+      }
+    };
+  }, []);
+  
   const handleClick = () => {
-    if (!recording) {
-      // beginStream(saveObject);
-      setRecording(subToStore());
+    if (!isRecording) {
+      recordingManager.startRecording();
+      setIsRecording(true);
     } else {
-      stopRecording(recording, deviceMeta);
-      setRecording(false);
+      recordingManager.stopRecording();
+      setIsRecording(false);
     }
   };
 
+  const buttonClassName = isRecording
+    ? "btn btn-danger btn-outline-dark fw-medium mb-2"
+    : "btn btn-outline-dark fw-medium mb-2";
+  
+  const iconClassName = isRecording 
+    ? "bi bi-stop-circle" 
+    : "bi bi-record-circle";
+  
+  const recordingText = isRecording 
+    ? "Stop recording" 
+    : "Record data";
+
   if (Object.keys(deviceMeta).length === 0) {
-    return;
+    return null;
   }
 
   return (

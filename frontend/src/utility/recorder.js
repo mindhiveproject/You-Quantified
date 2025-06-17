@@ -7,6 +7,52 @@ import { filter, tap } from "rxjs/operators";
 
 const buffers = new Map();
 
+// Recording Manager Singleton
+class RecordingManager {
+  constructor() {
+    this.subscription = null;
+    this.isRecording = false;
+  }
+
+  startRecording() {
+    if (this.isRecording) return;
+
+    this.subscription = storeToObservable(store)
+      .pipe(
+        filter((s) => s?.update?.type === "stream"),
+        tap((state) => {
+          const key = `${state.update.device} : ${state.update.modality}`;
+          const chunk = state.dataStream?.[state.update.device];
+          if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
+        })
+      )
+      .subscribe();
+
+    this.isRecording = true;
+    return this.subscription;
+  }
+
+  stopRecording() {
+    if (!this.isRecording || !this.subscription) return;
+
+    this.subscription.unsubscribe();
+    const deviceMeta = store.getState().deviceMeta;
+    autoCSVDownload(buffers, deviceMeta);
+
+    // Clear buffers after download
+    buffers.clear();
+
+    this.isRecording = false;
+    this.subscription = null;
+  }
+
+  getRecordingStatus() {
+    return this.isRecording;
+  }
+}
+
+// Create and export singleton instance
+export const recordingManager = new RecordingManager();
 
 function storeToObservable(store) {
   return new Observable((subscriber) => {
@@ -25,26 +71,6 @@ function getOrInitialize(map, key, init = () => []) {
 
 let lastMarker;
 
-export function subToStore() {
-  return storeToObservable(store)
-    .pipe(
-      filter((s) => s?.update?.type === "stream"),
-      tap((state) => {
-        const key = `${state.update.device} : ${state.update.modality}`;
-        const chunk = state.dataStream?.[state.update.device];
-        if (chunk !== undefined) getOrInitialize(buffers, key).push(chunk);
-      })
-    )
-    .subscribe();
-}
-
-export function beginStream(saveObject) {
-  const currentStream = store.getState().dataStream;
-  for (const device in currentStream) {
-    const currentDeviceData = currentStream[device];
-    saveObject[device] = [currentDeviceData];
-  }
-}
 
 function autoCSVDownload(saveObject, allDevicesMeta) {
   // CallBackFunction to download a CSV
@@ -138,10 +164,13 @@ function autoCSVDownload(saveObject, allDevicesMeta) {
   });
 }
 
+/**
+ * @deprecated Use recordingManager.stopRecording() instead
+ */
 export function stopRecording(unsub, deviceMeta) {
-  unsub.unsubscribe();
+  console.warn("stopRecording is deprecated. Use recordingManager.stopRecording() instead");
+  if (unsub) unsub.unsubscribe();
   autoCSVDownload(buffers, deviceMeta);
-  console.log(buffers);
 }
 
 const txtContent = `
