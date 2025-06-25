@@ -43,7 +43,11 @@ export function VisualScreen({
   const isDocsVisible = visMetadata?.docsVisible;
 
   const [collab, setCollab] = useState();
-  const [isDirty, setIsDirty] = useState(false);
+  const isDirty = useRef(false);
+  function setIsDirty(value) {
+    isDirty.current = value;
+  }
+
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("dashboard");
 
@@ -52,18 +56,15 @@ export function VisualScreen({
     currentScreen.left !== "none" &&
     (viewParam === "true" || viewParam === null);
 
-  const onYUpdate = () => {
-    console.log("[Collaborative Editing] Yjs document updated.");
+  function onYUpdate() {
     setIsDirty(true);
   }
 
   useEffect(() => {
-    if (!visMetadata?.id || !currentUser?.name) {
-      console.log("[Collaborative Editing] Missing visMetadata ID or currentUser name.");
+    if (!visMetadata?.id) {
+      console.log("[Collaborative Editing] Missing visMetadata ID");
       return;
     }
-
-    console.log("[Collaborative Editing] Initializing collaborative editing for visual:", visMetadata?.id);
 
     const doc = new Y.Doc();
     const wsProvider = new WebsocketProvider(collabEndpoint, visMetadata?.id, doc);
@@ -80,10 +81,11 @@ export function VisualScreen({
     initCollabMap("tiptap", () => new Y.XmlFragment());
     initCollabMap("code", () => new Y.Text());
 
+    const color = stringToColor(currentUser?.name || "Anonymous");
     // Set user awareness with consistent color
     wsProvider.awareness.setLocalStateField("user", {
-      name: currentUser.name,
-      color: stringToColor(currentUser.name),
+      name: currentUser?.name || "Anonymous",
+      color: color,
     });
 
     const collaboration = { doc, root, provider: wsProvider };
@@ -263,7 +265,7 @@ function MainView({ visID, queryData }) {
 
   const { currentUser } = useContext(UserContext);
   const isEditable =
-    visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
+    visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin || false;
 
   function setExtensions(input) {
     // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview

@@ -247,7 +247,7 @@ function LinkMenu({ editor, setIsAddingLink }) {
   );
 }
 
-export function DocsWindow({
+function DocsWindow({
   updateDocsData,
   setDocsVisibility,
   docsContent,
@@ -273,11 +273,11 @@ export function DocsWindow({
   const editor = useEditor({
     extensions: extensions,
     content: docsContent,
-    editable: true,
+    editable: isEditable,
   });
 
   const saveDocs = () => {
-    if (isDirty && editor && isEditable) {
+    if (isDirty.current && editor && isEditable) {
       const content = editor.getJSON();
       updateDocsData(content);
       setIsDirty(false);
@@ -291,29 +291,26 @@ export function DocsWindow({
 
   useEffect(() => {
     if (!editor) {
-      console.log("[Docs Editor] Editor not ready.");
       return;
     }
 
-    console.log("[Docs Editor] Setting up auto-save and update listeners.");
+
 
     let updateInterval = setInterval(() => {
-      if (isDirty) {
-        console.log("[Docs Editor] Performing periodic save.");
+      if (isDirty.current) {
+
         saveDocs();
       }
     }, 30000);
 
     const handleBeforeUnload = () => {
       if (isDirty) {
-        console.log("[Docs Editor] Saving docs before unload.");
         const content = editor.getJSON();
         updateDocsData(content);
       }
     };
 
     const handleEditorUpdate = () => {
-      console.log("[Docs Editor] Editor content updated.");
       debouncedSave();
     };
 
@@ -321,7 +318,6 @@ export function DocsWindow({
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      console.log("[Docs Editor] Cleaning up editor listeners.");
       clearTimeout(saveTimeout.current);
       clearInterval(updateInterval);
       window.removeEventListener("beforeunload", handleBeforeUnload);

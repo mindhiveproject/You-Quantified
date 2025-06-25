@@ -30,8 +30,8 @@ export function CodeEditor({
   const saveTimeoutRef = useRef();
 
   const saveCode = () => {
-    console.log("[Save Code] isDirty:", isDirty, "collab.root:", collab?.root, "isEditable:", isEditable);
-    if (!isDirty || !collab?.root || !isEditable) return;
+    console.log("[Save Code] isDirty:", isDirty.current, "collab.root:", collab?.root, "isEditable:", isEditable);
+    if (!isDirty.current || !collab?.root || !isEditable) return;
 
     const yText = collab.root.get("code");
     const currentText = yText.toString();
