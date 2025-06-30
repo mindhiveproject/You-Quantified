@@ -21,10 +21,6 @@ import { MyUserName } from "./components/visuals/menu/username";
 function NavBar({ setShowDevices, recording, setRecording }) {
   const deviceMeta = useSelector((state) => state?.deviceMeta);
 
-  function endRecording() {
-    stopRecording(recording, saveObject, deviceMeta);
-    setRecording(false);
-  }
 
   return (
     <nav className="navbar styled-navbar g-0 p-0 d-flex justify-content-between align-items-center">

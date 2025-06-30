@@ -120,9 +120,14 @@ async function predictWebcam() {
         }
     }
     if (results.faceBlendshapes) {
+        const newData= {}
         for (const shapes of results.faceBlendshapes) {
-            bc.postMessage(shapes);
+            for (const shape of shapes.categories) {
+                newData[shape.categoryName]=shape.score
+            }
+            bc.postMessage(newData);
         }
+        
     }
     drawBlendShapes(videoBlendShapes, results.faceBlendshapes);
     // Call this function again to keep predicting when the browser is ready.

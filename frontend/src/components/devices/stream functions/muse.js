@@ -3,6 +3,7 @@ import { MuseDevice } from "../../../utility/muse";
 export async function connectMuse(changeConnectionStatus) {
   const muse = new MuseDevice();
   changeConnectionStatus("awaiting")
+  
   try {
     await muse.connect();
   } catch (e) {

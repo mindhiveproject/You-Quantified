@@ -6,8 +6,6 @@
 //   you can find out more at https://keystonejs.com/docs/apis/config
 
 import { config } from "@keystone-6/core";
-import type { ServerConfig } from "@keystone-6/core/types";
-import type { AdminUIConfig } from "@keystone-6/core/types";
 
 // to keep this file tidy, we define our schema in a different file
 import { lists } from "./schema";
@@ -15,6 +13,8 @@ import { lists } from "./schema";
 // authentication is configured separately here too, but you might move this elsewhere
 // when you write your list-level access control functions, as they typically rely on session data
 import { withAuth, session } from "./auth";
+import { setupWSConnection } from "@y/websocket-server/utils";
+import { WebSocketServer } from "ws";
 
 import dotenv from "dotenv";
 
@@ -36,7 +36,7 @@ export default withAuth(
       url:
         process.env.NODE_ENV === "development"
           ? "file:./keystone.db"
-          : process.env.POSTGRES_URL || 'file:./keystone.db',
+          : process.env.POSTGRES_URL || "file:./keystone.db",
     },
     ui: {
       isAccessAllowed: (context) => context.session?.data.isAdmin,
@@ -52,7 +52,27 @@ export default withAuth(
             : process.env.FRONTEND_URL,
         ],
         credentials: true,
-        hostname: '127.0.0.1' // May secure server? Check alongside nginx request proxy
+        hostname: "127.0.0.1", // May secure server? Check alongside nginx request proxy
+      },
+      extendHttpServer: (httpServer, context) => {
+        const wss = new WebSocketServer({ noServer: true });
+
+        httpServer.on("upgrade", (req, socket, head) => {
+          const { pathname } = new URL(
+            req.url || "",
+            `http://${req.headers.host}`
+          );
+
+          if (pathname.startsWith("/collab")) {
+            wss.handleUpgrade(req, socket, head, (ws) => {
+              wss.emit("connection", ws, req);
+            });
+          }
+        });
+
+        wss.on("connection", (conn, req) => {
+          setupWSConnection(conn, req);
+        });
       },
     },
     storage: {

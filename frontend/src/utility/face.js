@@ -6,31 +6,20 @@ class Face {
     constructor(bc) {
         // create socket
         this.bc = bc;
+        this.lastMessageTime = null; // Add timestamp tracking
     }
 
     async initialize() {
 
         this.bc.onmessage = (eventMessage) => {
             this.receiveData(eventMessage.data)
-            
            }
 
     }
 
     receiveData(data) {
-        let newData= {}
-        for (const shape of data.categories){
-            newData[shape.categoryName]=shape.score
-        };
 
-        /*
-        //append the raw channels
-        for (let i = 0; i < chns.length; i++) {
-            let key = chns[i];
-            let val = rawVector[i];
-            newData[key] = val;
-        }*/
-        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Landmarker", data: newData } })
+        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Face Landmarker", data: data } })
     }
 
     isOpen(){

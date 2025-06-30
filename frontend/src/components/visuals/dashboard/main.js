@@ -7,8 +7,15 @@ import { VisualsWindow } from "./p5window/p5window";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { fetchCode } from "../utility/fetch_code";
-import DocsWindow from "./docs/main";
+import DocsWindowWrapper from "./docs/main";
 import { VisTopBar } from "./top_bar";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+
+const collabEndpoint =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_COLLAB_ENDPOINT_DEV || "ws://localhost:3001/collab"
+    : process.env.REACT_APP_COLLAB_ENDPOINT;
 
 // Fix names not appearing when in view mode
 
@@ -32,18 +39,72 @@ export function VisualScreen({
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
 
+  const { currentUser } = useContext(UserContext);
   const isDocsVisible = visMetadata?.docsVisible;
+
+  const [collab, setCollab] = useState();
+  const isDirty = useRef(false);
+  function setIsDirty(value) {
+    isDirty.current = value;
+  }
 
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("dashboard");
 
+  console.log("[Visual Screen] Code", code)
   const showDashboard =
     currentScreen.left !== "none" &&
     (viewParam === "true" || viewParam === null);
 
+  function onYUpdate() {
+    setIsDirty(true);
+  }
+
+  useEffect(() => {
+    if (!visMetadata?.id) {
+      console.log("[Collaborative Editing] Missing visMetadata ID");
+      return;
+    }
+
+    const doc = new Y.Doc();
+    const wsProvider = new WebsocketProvider(collabEndpoint, visMetadata?.id, doc);
+
+    const root = doc.getMap("root");
+
+    const initCollabMap = (key, factory) => {
+      if (!root.has(key)) {
+        root.set(key, factory());
+      }
+      return root.get(key);
+    };
+
+    initCollabMap("tiptap", () => new Y.XmlFragment());
+    initCollabMap("code", () => new Y.Text());
+
+    const color = stringToColor(currentUser?.name || "Anonymous");
+    // Set user awareness with consistent color
+    wsProvider.awareness.setLocalStateField("user", {
+      name: currentUser?.name || "Anonymous",
+      color: color,
+    });
+
+    const collaboration = { doc, root, provider: wsProvider };
+    setCollab(collaboration);
+
+    console.log("[Collaborative Editing] Collaboration initialized:", collaboration);
+
+    doc.on("update", onYUpdate);
+
+    return () => {
+      console.log("[Collaborative Editing] Cleaning up collaborative editing.");
+      wsProvider.disconnect();
+      doc.destroy();
+    };
+  }, [visMetadata?.id, currentUser?.name]);
+
   return (
     <SplitPane className="split-pane-row">
-      <SplitPaneLeft show={showDashboard}>
+      <SplitPaneLeft show={showDashboard === true ? "true" : "false"}>
         {currentScreen.left == "code" && (
           <CodePane
             visName={visName}
@@ -52,15 +113,21 @@ export function VisualScreen({
             isEditable={isEditable}
             extensions={visMetadata?.extensions}
             setExtensions={setters.setExtensions}
+            collab={collab}
+            isDirty={isDirty}
+            setIsDirty={setIsDirty}
           />
         )}
         {currentScreen.left == "docs" && (
-          <DocsWindow
+          <DocsWindowWrapper
             updateDocsData={setters.updateDocsData}
             setDocsVisibility={setters.setDocsVisibility}
             docsContent={docsContent}
             isEditable={isEditable}
             isDocsVisible={isDocsVisible}
+            collab={collab}
+            isDirty={isDirty}
+            setIsDirty={setIsDirty}
           />
         )}
         <DataManagementWindow
@@ -85,7 +152,6 @@ export function VisualScreen({
   );
 }
 
-
 export function QueryMainView() {
   const { visID } = useParams();
 
@@ -94,7 +160,6 @@ export function QueryMainView() {
     // fetchPolicy: "network-only",
   });
 
-  
   if (error) return `Error! ${error.message}`;
   if (loading) return "Loading...";
 
@@ -200,7 +265,7 @@ function MainView({ visID, queryData }) {
 
   const { currentUser } = useContext(UserContext);
   const isEditable =
-    visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
+    visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin || false;
 
   function setExtensions(input) {
     // In case I want prettier URLs https://www.jsdelivr.com/docs/data.jsdelivr.com#overview
@@ -219,6 +284,7 @@ function MainView({ visID, queryData }) {
 
   function setCode(str) {
     localStorage.setItem(`visuals/${visID}`, str);
+    console.log("This is my code", str);
     const file = createTextFileFromString(str, "code.txt");
     changeVisMetadata({
       variables: {
@@ -328,13 +394,31 @@ function MainView({ visID, queryData }) {
 }
 
 function createTextFileFromString(text, filename) {
-  // Create a Blob object from the string
-
   const blob = new Blob([text], { type: "text/plain" });
-
   //const file = new File([blob], filename, { type: "text/plain" });
   // const downloadLink = URL.createObjectURL(file);
 
   // Create a new File object from the Blob
   return blob;
+}
+
+
+
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const r = (hash >> 0) & 0xff;
+  const g = (hash >> 8) & 0xff;
+  const b = (hash >> 16) & 0xff;
+
+  const mix = 0.7; // 0 = no mix, 1 = full white
+  const toHex = (x) =>
+    Math.round(x + (255 - x) * mix)
+      .toString(16)
+      .padStart(2, "0");
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
