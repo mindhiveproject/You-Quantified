@@ -217,10 +217,11 @@ function drawBlendShapes(el, blendShapes) {
         };
       });
 
-      console.log(absoluteDifferences)
+
     
     let htmlMaker = "";
     bc.postMessage(absoluteDifferences)
+    console.log("Absolute Differences", absoluteDifferences);
     absoluteDifferences.map((shape) => {
         htmlMaker += `
       <li class="blend-shapes-item">
