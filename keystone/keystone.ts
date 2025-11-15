@@ -71,6 +71,7 @@ export default withAuth(
         });
 
         wss.on("connection", (conn, req) => {
+          console.log("Connecting to WS!")
           setupWSConnection(conn, req);
         });
       },
