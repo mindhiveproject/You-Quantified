@@ -272,12 +272,13 @@ function DocsWindow({
 
   const editor = useEditor({
     extensions: extensions,
-    content: docsContent,
     editable: isEditable,
   });
 
   const saveDocs = () => {
+    console.log("Calling save docs");
     if (isDirty.current && editor && isEditable) {
+      console.log("Saving docs...");
       const content = editor.getJSON();
       updateDocsData(content);
       setIsDirty(false);
@@ -286,19 +287,18 @@ function DocsWindow({
 
   const debouncedSave = useCallback(() => {
     clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(saveDocs, 2000);
-  }, []);
+    saveTimeout.current = setTimeout(saveDocs, 1000);
+  });
 
   useEffect(() => {
     if (!editor) {
       return;
     }
 
-
+    editor.commands.setContent(docsContent);
 
     let updateInterval = setInterval(() => {
       if (isDirty.current) {
-
         saveDocs();
       }
     }, 30000);
@@ -310,9 +310,7 @@ function DocsWindow({
       }
     };
 
-    const handleEditorUpdate = () => {
-      debouncedSave();
-    };
+    const handleEditorUpdate = debouncedSave;
 
     editor.on("update", handleEditorUpdate);
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -376,20 +374,13 @@ export default function DocsWindowWrapper(props) {
   const { collab } = props;
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    if (!collab?.doc) return;
+  if (!collab?.doc) return;
 
-    const root = collab.doc.getMap("root");
+  const root = collab.doc.getMap("root");
 
-    // Check if collaboration structures are ready
-    const checkReadiness = () => {
-      if (root.has("tiptap")) {
-        setReady(true);
-      }
-    };
-
-    checkReadiness();
-  }, [collab?.doc]);
+  if (!root) {
+    return;
+  }
 
   if (!collab || !ready) {
     return (

@@ -180,7 +180,7 @@ You: Quantified saves the data recorded from each of your devices as separate "c
 
 The data gathered from the web browser can have unreliable time synchrony or sampling rates, so be aware of its usage for research purposes. 
 
-If you have questions or suggestions, please visit the repository at https://github.com/esromerog/You-Quantified.
+If you have questions or suggestions, please visit the repository at https://github.com/mindhiveproject/You-Quantified.
 
 `;
 
