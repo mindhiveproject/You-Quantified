@@ -91,6 +91,8 @@ export function VisualScreen({
     const collaboration = { doc, root, provider: wsProvider };
     setCollab(collaboration);
 
+    console.log("[Collaborative Editing] Collaboration initialized:", collaboration);
+
     doc.on("update", onYUpdate);
 
     return () => {
