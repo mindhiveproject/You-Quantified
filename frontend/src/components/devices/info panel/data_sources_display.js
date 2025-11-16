@@ -25,7 +25,7 @@ function PopupItem({ item }) {
         <Overlay
           className="custom-tooltip"
           target={target.current}
-          show={show}
+          show={`${show}`}
           placement="bottom"
         >
           {(props) => (
@@ -62,14 +62,10 @@ function DataCards({ source, groupData }) {
 
   // Group data by type if it's defined
   if (groupData) {
-
-    
     const groupedData = dataArray.reduce((acc, curr) => {
       (acc[curr["type"]] = acc[curr["type"]] || []).push(curr);
       return acc;
     }, {});
-
-
 
     const groupDataCards = Object.keys(groupedData).map((group) => {
       return (

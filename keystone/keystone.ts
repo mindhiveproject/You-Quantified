@@ -52,32 +52,7 @@ export default withAuth(
             : process.env.FRONTEND_URL,
         ],
         credentials: true,
-<<<<<<< HEAD
-        hostname: "127.0.0.1", // May secure server? Check alongside nginx request proxy
-      },
-      extendHttpServer: (httpServer, context) => {
-        const wss = new WebSocketServer({ noServer: true });
-
-        httpServer.on("upgrade", (req, socket, head) => {
-          const { pathname } = new URL(
-            req.url || "",
-            `http://${req.headers.host}`
-          );
-
-          if (pathname.startsWith("/collab")) {
-            wss.handleUpgrade(req, socket, head, (ws) => {
-              wss.emit("connection", ws, req);
-            });
-          }
-        });
-
-        wss.on("connection", (conn, req) => {
-          console.log("Connecting to WS!")
-          setupWSConnection(conn, req);
-        });
-=======
         hostname: '127.0.0.1' // May secure server? Check alongside nginx request proxy
->>>>>>> parent of fb87194 (Merged with collab branch)
       },
     },
     storage: {

@@ -8,7 +8,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import javascript from "highlight.js/lib/languages/javascript";
 import { createLowlight } from "lowlight";
 import { sanitizeURL } from "../../../../utility/sanitize_urls";
@@ -17,17 +17,17 @@ import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 const lowlight = createLowlight();
 lowlight.register("js", javascript);
 
-const TAB_CHAR = '\u0009';
+const TAB_CHAR = "\u0009";
 
 const TabHandler = Extension.create({
-  name: 'tabHandler',
+  name: "tabHandler",
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
         // Sinks a list item / inserts a tab character
         editor
           .chain()
-          .sinkListItem('listItem')
+          .sinkListItem("listItem")
           .command(({ tr }) => {
             tr.insertText(TAB_CHAR);
             return true;
@@ -246,18 +246,29 @@ export default function DocsWindow({
   docsContent,
   isEditable,
   isDocsVisible,
+  setIsDirty,
+  isDirtyRef,
 }) {
+  const saveTimeout = React.useRef(null);
+
   const editor = useEditor({
     extensions: extensions,
     content: docsContent,
     editable: isEditable,
-    onUpdate: ({ editor }) => {
-      if (editor) {
-        const content = editor.getJSON();
-        updateDocsData(content);
-      }
-    },
   });
+
+  const saveDocs = useCallback(() => {
+    console.log("[Save Docs] IsDirty", isDirtyRef.current);
+    if (isDirtyRef.current && isEditable && editor) {
+      const content = editor.getJSON();
+      updateDocsData(content);
+    }
+  }, [isDirtyRef, isEditable, editor, updateDocsData]);
+
+  const debouncedSave = useCallback(() => {
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(saveDocs, 1000);
+  }, [saveDocs]);
 
   const [_isDocsVisible, _setIsDocsVisible] = useState(isDocsVisible);
 
@@ -265,10 +276,46 @@ export default function DocsWindow({
     setDocsVisibility(input);
     _setIsDocsVisible(input);
   }
-  
+
   const [isAddingLink, setIsAddingLink] = useState(false);
   const linkPopupRef = React.useRef(null);
   useOutsideAlerter(linkPopupRef, setIsAddingLink);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleEditorUpdate = () => {
+      console.log("[Handle Update] IsDirty", isDirtyRef.current);
+      setIsDirty(true);
+      debouncedSave();
+    };
+
+    editor.on("update", handleEditorUpdate);
+
+    const handleKeyDown = (event) => {
+      const isSaveShortcut =
+        (event.metaKey || event.ctrlKey) && event.key === "s";
+      if (isSaveShortcut) {
+
+        event.preventDefault();
+
+        console.log("Save shortcut pressed!");
+        saveDocs();
+      }
+    };
+    window.addEventListener("beforeunload", saveDocs);
+    window.addEventListener('keydown', handleKeyDown);
+
+    let updateInterval = setInterval(saveDocs, 30000);
+
+    return () => {
+      clearTimeout(saveTimeout.current);
+      clearInterval(updateInterval);
+      saveDocs();
+      window.removeEventListener("beforeunload", saveDocs);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div>

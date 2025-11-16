@@ -15,6 +15,7 @@ export function VisTopBar({
   mutationData,
   changeVisMetadata,
   isEditable,
+  isDirty
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const editPopupRef = useRef(null);
@@ -98,7 +99,7 @@ export function VisTopBar({
         </h5>
       </div>
       <div className="d-flex justify-content-end align-items-center">
-        {isEditable && <ShowUploadState mutationData={mutationData} />}
+        {isEditable && <ShowUploadState mutationData={mutationData} isDirty={isDirty}/>}
         <button
           className="btn btn-link"
           onClick={() => setPopupVisuals(!popupVisuals)}
@@ -265,10 +266,12 @@ function PrivacyDropdown({
   );
 }
 
-function ShowUploadState({ mutationData }) {
+function ShowUploadState({ mutationData, isDirty }) {
   const { loading, error } = mutationData;
   let statusText = "All changes saved";
 
+  console.log("[Top Bar] isDirty", isDirty);
+  if (isDirty) statusText = "Saving changes..."
   if (loading) statusText = "Saving changes…";
   if (error) statusText = "Error saving";
 

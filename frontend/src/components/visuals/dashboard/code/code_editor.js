@@ -1,7 +1,7 @@
 import Editor from "@monaco-editor/react";
 import downloadCode from "../../../../utility/code_download";
 import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // Code Editor Made Using monaco-editor/react
 // It has the advantage of using the same editor as VSCode
@@ -38,11 +38,33 @@ export default function CodePane({
   isEditable,
   extensions,
   setExtensions,
+  setRemoteCode,
 }) {
   // This is the component that contains the code pane
   const [showExtensions, setShowExtensions] = useState(false);
   const extensionsRef = useRef(null);
   useOutsideAlerter(extensionsRef, setShowExtensions);
+
+  useEffect(() => {
+    let codeUpdateInterval = setInterval(() => setRemoteCode(code), 30000);
+    const handleKeyDown = (event) => {
+      const isSaveShortcut =
+        (event.metaKey || event.ctrlKey) && event.key === "s";
+      if (isSaveShortcut) {
+        event.preventDefault();
+        setRemoteCode(code);
+      }
+    };
+    window.addEventListener("beforeunload", () => setRemoteCode(code));
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      clearInterval(codeUpdateInterval);
+      setRemoteCode(code);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("beforeunload", () => setRemoteCode(code));
+    };
+  }, []);
 
   return (
     <div className="h-100 d-flex flex-column">

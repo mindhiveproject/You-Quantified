@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useFullScreenHandle } from "react-full-screen";
 import { useParams, useSearchParams } from "react-router-dom";
 import CodePane from "./code/code_editor";
@@ -28,6 +34,8 @@ export function VisualScreen({
   docsContent,
   setters,
   isEditable,
+  isDirty,
+  isDirtyRef,
 }) {
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
@@ -43,7 +51,7 @@ export function VisualScreen({
 
   return (
     <SplitPane className="split-pane-row">
-      <SplitPaneLeft show={showDashboard}>
+      <SplitPaneLeft show={`${showDashboard}`}>
         {currentScreen.left == "code" && (
           <CodePane
             visName={visName}
@@ -52,6 +60,9 @@ export function VisualScreen({
             isEditable={isEditable}
             extensions={visMetadata?.extensions}
             setExtensions={setters.setExtensions}
+            isDirtyRef={isDirtyRef}
+            setIsDirty={setters.setIsDirty}
+            setRemoteCode={setters.setRemoteCode}
           />
         )}
         {currentScreen.left == "docs" && (
@@ -61,6 +72,8 @@ export function VisualScreen({
             docsContent={docsContent}
             isEditable={isEditable}
             isDocsVisible={isDocsVisible}
+            isDirtyRef={isDirtyRef}
+            setIsDirty={setters.setIsDirty}
           />
         )}
         <DataManagementWindow
@@ -85,7 +98,6 @@ export function VisualScreen({
   );
 }
 
-
 export function QueryMainView() {
   const { visID } = useParams();
 
@@ -94,7 +106,6 @@ export function QueryMainView() {
     // fetchPolicy: "network-only",
   });
 
-  
   if (error) return `Error! ${error.message}`;
   if (loading) return "Loading...";
 
@@ -176,6 +187,14 @@ function MainView({ visID, queryData }) {
   // This function bridges the left pane (code editor/parameters) with the visualization
 
   const [visMetadata, _setVisMetadata] = useState(queryData);
+  const [isDirty, _setIsDirty] = useState(false);
+  const isDirtyRef = useRef(false);
+  const saveCodeTimeout = useRef(null);
+
+  const setIsDirty = useCallback((value) => {
+    isDirtyRef.current = value;
+    _setIsDirty(value);
+  });
 
   useEffect(() => {
     _setVisMetadata(queryData);
@@ -193,6 +212,9 @@ function MainView({ visID, queryData }) {
       where: { id: visID },
     },
     refetchQueries: [MY_VISUALS, "VisualsQuery"],
+    onCompleted: () => {
+      setIsDirty(false);
+    },
   });
 
   const dispatch = useDispatch();
@@ -218,18 +240,30 @@ function MainView({ visID, queryData }) {
   }
 
   function setCode(str) {
+    setIsDirty(true);
     localStorage.setItem(`visuals/${visID}`, str);
-    const file = createTextFileFromString(str, "code.txt");
-    changeVisMetadata({
-      variables: {
-        data: {
-          code: {
-            upload: file,
+    _setCode(str);
+    debouncedCodeSave(str);
+  }
+
+  const debouncedCodeSave = useCallback((str) => {
+    clearTimeout(saveCodeTimeout.current);
+    saveCodeTimeout.current = setTimeout(() => setRemoteCode(str), 1000);
+  });
+
+  function setRemoteCode(str) {
+    if (isDirtyRef.current && isEditable) {
+      const file = createTextFileFromString(str, "code.txt");
+      changeVisMetadata({
+        variables: {
+          data: {
+            code: {
+              upload: file,
+            },
           },
         },
-      },
-    });
-    _setCode(str);
+      });
+    }
   }
 
   function updateDocsData(content) {
@@ -274,6 +308,8 @@ function MainView({ visID, queryData }) {
     updateDocsData,
     setExtensions,
     setPopupVisuals,
+    setIsDirty,
+    setRemoteCode,
   };
 
   // Get the code and docs when the program starts
@@ -284,6 +320,10 @@ function MainView({ visID, queryData }) {
     if (visMetadata?.docs) {
       _setDocsContent(visMetadata?.docs);
     }
+
+    return () => {
+      clearTimeout(saveCodeTimeout.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -312,6 +352,7 @@ function MainView({ visID, queryData }) {
         fullScreenHandle={fullScreenHandle}
         mutationData={mutationData}
         changeVisMetadata={changeVisMetadata}
+        isDirty={isDirty}
       />
       <VisualScreen
         isEditable={isEditable}
@@ -322,6 +363,9 @@ function MainView({ visID, queryData }) {
         fullScreenHandle={fullScreenHandle}
         docsContent={docsContent}
         setters={setters}
+        isDirty={isDirty}
+        isDirtyRef={isDirtyRef}
+
       />
     </div>
   );
