@@ -173,7 +173,7 @@ export function AINewVisual() {
     });
   }, [codeError]);
 
-  /*if (!currentUser?.id) {
+  if (!currentUser?.id) {
     return (
       <div className="vh-100 w-100 bg-black ai-overlay text-white">
         <div className="d-flex w-100 h-100 align-items-center justify-content-center">
@@ -186,9 +186,9 @@ export function AINewVisual() {
         </div>
       </div>
     );
-  }*/
+  }
 
-  /*if (!currentUser?.isAdmin) {
+  if (!currentUser?.isAdmin) {
     return (
       <div className="vh-100 w-100 bg-black ai-overlay text-white">
         <div className="d-flex w-100 h-100 align-items-center justify-content-center">
@@ -201,7 +201,7 @@ export function AINewVisual() {
         </div>
       </div>
     );
-  }*/
+  }
 
   return (
     <div className="vh-100 w-100 bg-black ai-overlay text-white overscroll-x-none">

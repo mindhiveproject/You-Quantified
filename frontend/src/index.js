@@ -6,7 +6,7 @@ import "./index.scss";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
-export const uriEndpoint =
+const uriEndpoint =
   process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_UPLOAD_URI_ENDPOINT_DEV
     : process.env.REACT_APP_UPLOAD_URI_ENDPOINT;

@@ -8,30 +8,26 @@ import TextStyle from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState, useCallback, useContext, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import javascript from "highlight.js/lib/languages/javascript";
 import { createLowlight } from "lowlight";
 import { sanitizeURL } from "../../../../utility/sanitize_urls";
 import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
-import { UserContext } from "../../../../App";
-import { use } from "react";
 
 const lowlight = createLowlight();
 lowlight.register("js", javascript);
 
-const TAB_CHAR = "\u0009";
+const TAB_CHAR = '\u0009';
 
 const TabHandler = Extension.create({
-  name: "tabHandler",
+  name: 'tabHandler',
   addKeyboardShortcuts() {
     return {
       Tab: ({ editor }) => {
         // Sinks a list item / inserts a tab character
         editor
           .chain()
-          .sinkListItem("listItem")
+          .sinkListItem('listItem')
           .command(({ tr }) => {
             tr.insertText(TAB_CHAR);
             return true;
@@ -172,7 +168,7 @@ const MenuBar = ({ editor, setIsAddingLink }) => {
   );
 };
 
-const baseExtensions = [
+const extensions = [
   Color.configure({ types: [TextStyle.name, ListItem.name] }),
   TextStyle.configure({ types: [ListItem.name] }),
   Link.extend({ inclusive: false }),
@@ -185,9 +181,6 @@ const baseExtensions = [
       keepMarks: true,
       keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
     },
-    codeBlock: false,
-    blockquote: false,
-    history: false,
   }),
   CodeBlockLowlight.configure({ lowlight }),
   TabHandler,
@@ -247,83 +240,24 @@ function LinkMenu({ editor, setIsAddingLink }) {
   );
 }
 
-function DocsWindow({
+export default function DocsWindow({
   updateDocsData,
   setDocsVisibility,
   docsContent,
   isEditable,
   isDocsVisible,
-  collab,
-  isDirty,
-  setIsDirty,
 }) {
-  const saveTimeout = React.useRef(null);
-  const extensions = [
-    ...baseExtensions,
-    Collaboration.configure({
-      document: collab.doc,
-      field: "editor",
-    }),
-    CollaborationCursor.configure({
-      provider: collab.provider,
-      user: collab.provider.awareness.getLocalState()?.user,
-    }),
-  ];
-
   const editor = useEditor({
     extensions: extensions,
     content: docsContent,
     editable: isEditable,
-  });
-
-  const saveDocs = () => {
-    if (isDirty.current && editor && isEditable) {
-      const content = editor.getJSON();
-      updateDocsData(content);
-      setIsDirty(false);
-    }
-  };
-
-  const debouncedSave = useCallback(() => {
-    clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(saveDocs, 2000);
-  }, []);
-
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
-
-
-
-    let updateInterval = setInterval(() => {
-      if (isDirty.current) {
-
-        saveDocs();
-      }
-    }, 30000);
-
-    const handleBeforeUnload = () => {
-      if (isDirty) {
+    onUpdate: ({ editor }) => {
+      if (editor) {
         const content = editor.getJSON();
         updateDocsData(content);
       }
-    };
-
-    const handleEditorUpdate = () => {
-      debouncedSave();
-    };
-
-    editor.on("update", handleEditorUpdate);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      clearTimeout(saveTimeout.current);
-      clearInterval(updateInterval);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      saveDocs();
-    };
-  }, []);
+    },
+  });
 
   const [_isDocsVisible, _setIsDocsVisible] = useState(isDocsVisible);
 
@@ -331,7 +265,7 @@ function DocsWindow({
     setDocsVisibility(input);
     _setIsDocsVisible(input);
   }
-
+  
   const [isAddingLink, setIsAddingLink] = useState(false);
   const linkPopupRef = React.useRef(null);
   useOutsideAlerter(linkPopupRef, setIsAddingLink);
@@ -370,39 +304,4 @@ function DocsWindow({
       )}
     </div>
   );
-}
-
-export default function DocsWindowWrapper(props) {
-  const { collab } = props;
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!collab?.doc) return;
-
-    const root = collab.doc.getMap("root");
-
-    // Check if collaboration structures are ready
-    const checkReadiness = () => {
-      if (root.has("tiptap")) {
-        setReady(true);
-      }
-    };
-
-    checkReadiness();
-  }, [collab?.doc]);
-
-  if (!collab || !ready) {
-    return (
-      <div className="docs-loading d-flex justify-content-center align-items-center h-100">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2 mb-0">Loading collaborative editor…</p>
-        </div>
-      </div>
-    );
-  }
-
-  return <DocsWindow {...props} />;
 }

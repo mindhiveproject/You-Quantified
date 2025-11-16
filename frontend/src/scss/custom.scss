@@ -88,10 +88,6 @@ body {
   overflow: hidden;
   position: relative;
   --bs-body-color: #1a1a1a;
-
-  ::-webkit-scrollbar-button {
-    display: none !important;
-  }
 }
 
 html {
@@ -250,6 +246,8 @@ div.w-10px {
   z-index: 102;
 }
 
+
+
 $popover-bg: rgba(255, 255, 255);
 $popover-header-bg: rgba(255, 255, 255);
 $popover-border-color: $gray-200;
@@ -398,33 +396,6 @@ $popover-border-color: $gray-200;
   }
 }
 
-/* Give a remote user a caret */
-.collaboration-cursor__caret {
-  border-left: 1px solid #0d0d0d;
-  border-right: 1px solid #0d0d0d;
-  margin-left: -1px;
-  margin-right: -1px;
-  pointer-events: none;
-  position: relative;
-  word-break: normal;
-}
-
-/* Render the username above the caret */
-.collaboration-cursor__label {
-  border-radius: 0px 0px 0px 0;
-  color: $black;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 600;
-  left: -1px;
-  line-height: normal;
-  padding: 0.1rem 0.3rem;
-  position: absolute;
-  top: -1.4em;
-  user-select: none;
-  white-space: nowrap;
-}
-
 .btn-docs-vis {
   height: 40px;
   padding-top: 0 !important;
@@ -512,6 +483,7 @@ $popover-border-color: $gray-200;
     max-width: 10%;
   }
 }
+
 
 .width-256px {
   width: 256px !important;
@@ -621,9 +593,6 @@ canvas {
   /* Chrome/Safari/Webkit */
   width: 0px;
 }
-.disable-scrollbar::-webkit-scrollbar-button {
-  display: none !important;
-}
 
 .disable-scrollbar {
   scrollbar-width: none;
@@ -632,17 +601,14 @@ canvas {
   /* IE 10+ */
 }
 
+.black-scrollbar {
+  scrollbar-color: $gray-600 $black;
+  scrollbar-width: thin;
+}
+
 .black-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  background-color: $black;
-}
-
-.black-scrollbar::-webkit-scrollbar-thumb {
-  background-color: $gray-600;
-}
-
-.black-scrollbar::-webkit-scrollbar-button {
-  display: none !important;
+  scrollbar-color: $gray-600 $black;
+  scrollbar-width: thin;
 }
 
 .mt-n0-1 {
@@ -1218,6 +1184,8 @@ canvas {
   }
 }
 
+
+
 .mt-n01 {
   margin-top: -1px;
 }
@@ -1604,6 +1572,8 @@ input.vis-name-input::placeholder {
   }
 }
 
+
+
 .ai-input-textbox {
   background: none !important;
   color: $white !important;
@@ -1613,7 +1583,7 @@ input.vis-name-input::placeholder {
   resize: none !important;
   padding: 0px;
 
-  max-height: 25vh !important;
+  max-height: 30vh !important;
 
   &::placeholder {
     color: $gray-600;
@@ -1623,6 +1593,7 @@ input.vis-name-input::placeholder {
     outline: none !important;
   }
 }
+
 
 .ai-ref-input {
   color: $white !important;
@@ -1670,6 +1641,7 @@ input.vis-name-input::placeholder {
   left: 100%;
   margin-left: 0.25rem;
 }
+
 
 .h-75vh {
   height: 75vh;

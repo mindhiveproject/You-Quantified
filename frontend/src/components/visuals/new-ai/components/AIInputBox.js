@@ -34,7 +34,7 @@ function AIInputBox({ inputValue, setInputValue, inputDisabled, onSubmit, additi
     if (myref) {
       myref.style.height = "0px";
       const scrollHeight = myref.scrollHeight;
-      myref.style.height = scrollHeight + 2 + "px";
+      myref.style.height = scrollHeight + "px";
     }
   }, [textareaRef, inputValue]);
 
@@ -63,7 +63,7 @@ function AIInputBox({ inputValue, setInputValue, inputDisabled, onSubmit, additi
         >
           <motion.textarea
             key="text-area"
-            className="mt-2 mb-2 ps-2 ai-input-textbox w-100 overflow-x-hidden black-scrollbar lh-base"
+            className="mt-2 mb-2 ps-2 ai-input-textbox w-100 black-scrollbar"
             value={inputValue}
             onChange={changeText}
             placeholder="Describe your visual"

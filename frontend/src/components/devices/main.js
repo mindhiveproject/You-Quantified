@@ -48,8 +48,8 @@ export function DevicesManager({
       <div className="record-button" ref={recordButtonRef}>
         <RecordComponent
           saveObject={saveObject}
-          isRecording={recording}
-          setIsRecording={setRecording}
+          recording={recording}
+          setRecording={setRecording}
         />
       </div>
       <div className="sources-top">

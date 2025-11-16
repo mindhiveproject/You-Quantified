@@ -29,7 +29,7 @@ export default function HomePage() {
               href="https://docs.youquantified.com"
               target="_blank"
             >
-              About
+              Docs
             </a>
           </div>
         </div>
