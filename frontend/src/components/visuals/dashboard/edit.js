@@ -38,7 +38,6 @@ export function EditModalManager({
           id: currentUser?.id,
         },
       },
-      editable: true,
       code: {
         upload: codeBlob,
       },

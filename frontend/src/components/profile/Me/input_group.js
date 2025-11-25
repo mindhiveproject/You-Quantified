@@ -9,7 +9,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { useState } from "react";
 
 export function MyUsernameButtonGroup({ userData }) {
-  const [userInput, setUserInput] = useState(userData.name);
+  const [userInput, setUserInput] = useState(userData.username);
   const [inputError, setError] = useState();
 
   const [editingUsername, setEditingUsername] = useState(false);

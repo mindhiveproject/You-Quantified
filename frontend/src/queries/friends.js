@@ -61,15 +61,13 @@ export const GET_FRIENDS = gql`
     ) {
       recipient {
         id
-        name
+        username
         visualsCount
-        isAdmin
       }
       requester {
         id
-        name
+        username
         visualsCount
-        isAdmin
       }
       status
       id
@@ -89,12 +87,12 @@ export const GET_REQUESTS = gql`
     ) {
       recipient {
         id
-        name
+        username
         visualsCount
       }
       requester {
         id
-        name
+        username
         visualsCount
       }
       createdAt
@@ -115,7 +113,7 @@ export const GET_SENT_REQUESTS = gql`
     ) {
       recipient {
         id
-        name
+        username
         visualsCount
       }
       createdAt
@@ -136,7 +134,7 @@ export const GET_RECEIVED_REQUESTS = gql`
     ) {
       requester {
         id
-        name
+        username
         visualsCount
       }
       createdAt
@@ -146,11 +144,11 @@ export const GET_RECEIVED_REQUESTS = gql`
 `;
 
 export const GET_USER_DATA = gql`
-  query GetOtherUser($userID: ID!, $name: String) {
-    users(
-      where: { OR: [{ id: { equals: $userID } }, { name: { equals: $name } }] }
+  query GetOtherUser($userID: ID!, $username: String) {
+    profiles(
+      where: { OR: [{ id: { equals: $userID } }, { username: { equals: $username } }] }
     ) {
-      name
+      username
       visuals {
         id
         createdAt

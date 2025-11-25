@@ -39,6 +39,7 @@
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
     "clsx": "^2.1.1",
+    "cross-env": "^10.1.0",
     "fft-js": "^0.0.12",
     "formik": "^2.4.6",
     "graphql": "^16.9.0",
@@ -84,7 +85,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-scripts start",
+    "start": "cross-env PORT=5173 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

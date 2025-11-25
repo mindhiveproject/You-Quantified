@@ -5,7 +5,7 @@ export const MY_VISUALS = gql`
     visuals(where: $where) {
       author {
         id
-        name
+        username
       }
       code {
         url
@@ -20,7 +20,6 @@ export const MY_VISUALS = gql`
       id
       docs
       docsVisible
-      editable
       extensions
       likes {
         id
@@ -50,7 +49,7 @@ export const SEARCH_VISUALS = gql`
       }
       id
       author {
-        name
+        username
       }
       createdAt
       parameters
@@ -83,7 +82,7 @@ export const NEW_VISUAL = gql`
 
 export const GET_ALL_TAGS = gql`
   query AllTags {
-    tags {
+    yQTags {
       label
     }
   }

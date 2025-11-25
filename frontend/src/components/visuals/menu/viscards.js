@@ -75,7 +75,7 @@ export function ImageCard({
           <div className="d-flex justify-content-between m-0">
             {showAuthor && (
               <p className="card-text text-body-tertiary m-0">
-                by: {userInfo.name}
+                by: {userInfo.username}
               </p>
             )}
             <p className="text-end text-body-tertiary m-0">{parsedCreatedAt}</p>
@@ -189,14 +189,6 @@ export function VisualizationCards({
 
   if (currentFilter === "favorites") {
     whereValue["likes"] = { some: { id: { equals: currentUser?.id } } };
-    whereValue["OR"] = [
-      {
-        privacy: { equals: "friends" },
-      },
-      {
-        privacy: { equals: "public" },
-      },
-    ];
   }
 
   const tagLabels = (currentTags || [])

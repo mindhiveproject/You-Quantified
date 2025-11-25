@@ -83,7 +83,7 @@ function UserAuthenticatedPage({ rawMyFriends }) {
 
   if (loading) return <div>Loading profile</div>;
 
-  if (error || data?.users.length === 0) {
+  if (error || data?.profiles.length === 0) {
     return (
       <div className="d-flex h-100 align-items-center justify-content-center">
         <span className=" me-1">Error 404!</span> User Not Found
@@ -96,7 +96,7 @@ function UserAuthenticatedPage({ rawMyFriends }) {
   } else {
     return (
       <FriendPage
-        friendData={data.users[0]}
+        friendData={data.profiles[0]}
         currentUser={currentUser}
         currentFriendship={currentFriendship}
       />

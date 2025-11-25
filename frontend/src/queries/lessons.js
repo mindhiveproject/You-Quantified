@@ -42,7 +42,6 @@ export const GET_UNITS = gql`
         }
         author {
           id
-          isAdmin
         }
       }
     }
