@@ -44,7 +44,7 @@ export function AddNewFriendModal({ userData, myFriends, setShowAddModal }) {
   const [foundFriendship, setFoundFriendship] = useState();
   const [searchFriend, { data, loading, error: queryError }] =
     useLazyQuery(GET_USER_DATA);
-  const searchData = data?.users?.[0];
+  const searchData = data?.profiles?.[0];
 
   useEffect(() => {
     if (searchData) {
@@ -74,13 +74,13 @@ export function AddNewFriendModal({ userData, myFriends, setShowAddModal }) {
       console.log("Not URL");
     }
 
-    if (search === userData.id || search === userData.name) {
+    if (search === userData.id || search === userData.username) {
       setSearchError("You cannot add yourself as a friend!");
       return;
     }
 
     const foundFriend = myFriends.find(
-      (friend) => friend?.id === search || friend?.name === search
+      (friend) => friend?.id === search || friend?.username === search
     );
 
     if (foundFriend?.status === "accepted") {
@@ -96,8 +96,9 @@ export function AddNewFriendModal({ userData, myFriends, setShowAddModal }) {
     if (error) {
       setSearchError("Error fetching data");
     }
+    console.log(data);
 
-    if (data?.users.length === 0) {
+    if (data?.profiles.length === 0) {
       setSearchError("No users found!");
     }
   }
@@ -144,11 +145,11 @@ export function AddNewFriendModal({ userData, myFriends, setShowAddModal }) {
       {searchData &&
         !searchError &&
         (foundFriendship?.status === "accepted" ? (
-          <ActiveFriendCard friendInfo={data?.users?.[0]} />
+          <ActiveFriendCard friendInfo={data?.profiles?.[0]} />
         ) : (
           <FriendRequestCard
             currentUserID={userData.id}
-            friendInfo={data?.users?.[0]}
+            friendInfo={data?.profiles?.[0]}
             currentFriendship={foundFriendship}
             fullWidth
           />

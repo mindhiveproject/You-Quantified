@@ -29,7 +29,6 @@ function CreateButton({ isDisabled, visualMetaAI }) {
       code: {
         upload: codeFile,
       },
-      editable: true,
       author: {
         connect: {
           id: currentUser?.id,

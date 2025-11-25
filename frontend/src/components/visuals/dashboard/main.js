@@ -221,6 +221,7 @@ function MainView({ visID, queryData }) {
   const fullScreenHandle = useFullScreenHandle();
 
   const { currentUser } = useContext(UserContext);
+
   const isEditable =
     visMetadata?.author?.id === currentUser?.id || currentUser?.isAdmin;
 

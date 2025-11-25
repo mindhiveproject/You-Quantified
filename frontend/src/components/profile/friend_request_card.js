@@ -72,12 +72,12 @@ export function FriendRequestCard({
       <div className={`card rounded-0 ${fullWidth && "w-100 h-100"}`}>
         <div className="card-body d-flex justify-content-between flex-wrap align-content-between">
           <div className="me-3">
-            <h5 className="card-title m-0">{friendInfo?.name}</h5>
+            <h5 className="card-title m-0">{friendInfo?.username}</h5>
             <small>
               <span>
                 {visualsCount} {visualsCount === 1 ? "visual" : "visuals"}
               </span>
-              {friendInfo?.isAdmin && <span> | Admin</span>}
+              {friendInfo?.permissions?.some((perm) => perm.canAccessAdminUI) && <span> | Admin</span>}
             </small>
           </div>
           <div>

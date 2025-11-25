@@ -170,7 +170,7 @@ function PrivacyDropdown({
       },
     });
   }
-
+  console.log(currentUser?.permissions);
   return (
     <div className="dropdown me-1">
       <button
@@ -270,7 +270,6 @@ function ShowUploadState({ mutationData, isDirty }) {
   const { loading, error } = mutationData;
   let statusText = "All changes saved";
 
-  console.log("[Top Bar] isDirty", isDirty);
   if (isDirty) statusText = "Saving changes..."
   if (loading) statusText = "Saving changes…";
   if (error) statusText = "Error saving";

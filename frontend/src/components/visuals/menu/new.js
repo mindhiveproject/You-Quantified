@@ -94,7 +94,6 @@ export function NewVisual() {
           id: currentUser?.id,
         },
       },
-      editable: true,
       code: {
         upload: codeFile,
       },

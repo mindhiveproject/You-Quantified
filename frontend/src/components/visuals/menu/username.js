@@ -34,7 +34,7 @@ export function MyUserName() {
       disabled
     >
       <div>
-        <p className="fw-medium m-0">{currentUser?.name}</p>
+        <p className="fw-medium m-0">{currentUser?.username}</p>
       </div>
     </Link>
   );

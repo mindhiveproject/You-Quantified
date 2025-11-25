@@ -47,7 +47,14 @@ export function MyUserPage({ userData, myFriends }) {
   return (
     <div className="h-100 center-margin overflow-scroll disable-scrollbar">
       <div className="align-items-start mb-3">
-        <h2 className="mt-5 mb-2 ">You</h2>
+        <div className="d-flex align-items-end">
+          <h2 className="mt-5 mb-2 ">You</h2>
+          {userData?.isAdmin && (
+            <small className="ms-3 mb-3 p-1 ps-2 pe-2 border border-dark bg-light">
+              Admin
+            </small>
+          )}
+        </div>
         <span>
           Manage your visuals, add new friends, and view your profile.
         </span>
@@ -146,13 +153,15 @@ function ActiveFriendCard({ friendInfo }) {
             className="btn btn-link p-0 text-decoration-none text-start w-100"
             to={`/user/${friendInfo.id}`}
           >
-            <h5 className="card-title m-0">{friendInfo.name}</h5>
+            <h5 className="card-title m-0">{friendInfo.username}</h5>
             <small className="text-primary">
               <span>
                 {friendInfo.visualsCount}{" "}
                 {friendInfo.visualsCount === 1 ? "visual" : "visuals"}
               </span>
-              {friendInfo?.isAdmin && <span> | Admin</span>}
+              {friendInfo?.permissions?.some(
+                (perm) => perm.canAccessAdminUI
+              ) && <span> | Admin</span>}
             </small>
           </Link>
           <button

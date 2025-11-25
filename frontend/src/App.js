@@ -93,10 +93,16 @@ export default function App() {
   );
   const { data, loading, error } = useQuery(AUTH_USER);
 
-  const [currentUser, setCurrentUser] = useState(data?.authenticatedItem);
+  const [currentUser, setCurrentUser] = useState();
 
   useEffect(() => {
-    setCurrentUser(data?.authenticatedItem);
+    let isAdmin = false;
+    if (data?.authenticatedItem) {
+      isAdmin = data?.authenticatedItem?.permissions.some(
+        (x) => x.canAccessAdminUI
+      );
+    }
+    setCurrentUser({ ...data?.authenticatedItem, isAdmin });
   }, [data]);
 
   if (loading) return <div></div>;

@@ -30,7 +30,6 @@ export default function Login() {
 }
 
 export function LoggedInScreen({ currentUser, setCurrentUser }) {
-
   const [endSession, { data, loading }] = useMutation(END_SESSION, {
     update() {
       setCurrentUser(undefined);
@@ -41,17 +40,16 @@ export function LoggedInScreen({ currentUser, setCurrentUser }) {
   const redirectVisual = searchParams.get("visual");
   const redirectUser = searchParams.get("user");
 
-
   if (redirectVisual) {
     return <Navigate to={`/visuals/${redirectVisual}`} />;
   }
   if (redirectUser) {
-    return <Navigate to={`/user/${redirectUser}`} />
+    return <Navigate to={`/user/${redirectUser}`} />;
   }
 
   return (
     <div>
-      <p>Logged in as {currentUser?.name}</p>
+      <p>Logged in as {currentUser?.username}</p>
       <p>Not you? </p>
       <button
         className="btn btn-link link-primary m-0 p-0"
@@ -70,15 +68,24 @@ function LoginScreen({ setCurrentUser }) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [loginFunction, { data, loading, error }] = useMutation(LOGIN_USER, {
-    update(cache, { data }) {
-      if (data?.authenticateUserWithPassword?.item) {
-        setAuthSuccess(true);
-        setCurrentUser(data?.authenticateUserWithPassword?.item);
-      } else if (data?.authenticateUserWithPassword?.message) {
-        setErrorMessage(data?.authenticateUserWithPassword?.message);
+    update(cache, { data, error }) {
+      if (error) {
         setAuthSuccess(false);
+        setErrorMessage("Error logging in");
+      } else if (data?.authenticateProfileWithPassword?.message) {
+        setErrorMessage("Cannot find username or password");
+        setAuthSuccess(false);
+      } else if (data?.authenticateProfileWithPassword?.item) {
+        const loggedInUser = data?.authenticateProfileWithPassword?.item;
+        let isAdmin = false;
+        if (loggedInUser) {
+          isAdmin = loggedInUser.permissions.some((x) => x.canAccessAdminUI);
+        }
+        setAuthSuccess(true);
+        setCurrentUser({ ...loggedInUser, isAdmin: !!isAdmin });
       } else {
-        setAuthSuccess(null);
+        setAuthSuccess(false);
+        setErrorMessage("Error logging in");
       }
     },
   });

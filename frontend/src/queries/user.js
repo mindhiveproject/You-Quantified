@@ -3,11 +3,14 @@ import { gql } from "@apollo/client";
 export const AUTH_USER = gql`
   query {
     authenticatedItem {
-      ... on User {
+      ... on Profile {
         id
-        name
+        username
         email
-        isAdmin
+        permissions {
+          name
+          canAccessAdminUI
+        }
       }
     }
   }
@@ -15,29 +18,32 @@ export const AUTH_USER = gql`
 
 export const CHANGE_USERNAME = gql`
 mutation ChangeUsername($newName: String!, $userID: ID!) {
-  updateUser(where:  {
+  updateProfile(where:  {
      id: $userID
   }, data:  {
-     name: $newName
+     username: $newName
   }) {
     id
-    name
+    username
   }
 }`
 
 export const LOGIN_USER = gql`
   mutation UserLogin($email: String!, $password: String!) {
-    authenticateUserWithPassword(email: $email, password: $password) {
-      ... on UserAuthenticationWithPasswordSuccess {
+    authenticateProfileWithPassword(email: $email, password: $password) {
+      ... on ProfileAuthenticationWithPasswordSuccess {
         item {
           id
           email
-          name
-          isAdmin
+          username
+          permissions {
+            name
+            canAccessAdminUI
+          }
         }
         sessionToken
       }
-      ... on UserAuthenticationWithPasswordFailure {
+      ... on ProfileAuthenticationWithPasswordFailure {
         message
       }
     }
@@ -51,20 +57,20 @@ export const END_SESSION = gql`
 `;
 
 export const REGISTER_USER = gql`
-  mutation UserSignin($data: UserCreateInput!) {
-    createUser(data: $data) {
+  mutation ProfileSignin($data: UserCreateInput!) {
+    createProfile(data: $data) {
       email
-      name
+      username
       id
     }
   }
 `;
 
 export const CHECK_REPEATED_USER = gql`
-  query CheckRepeatedUser($email: String, $name: String) {
-    usersCount(
+  query CheckRepeatedUser($email: String, $username: String) {
+    profilesCount(
       where: {
-        OR: [{ email: { equals: $email } }, { name: { equals: $name } }]
+        OR: [{ email: { equals: $email } }, { username: { equals: $username } }]
       }
     )
   }

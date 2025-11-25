@@ -82,7 +82,7 @@ function getVisualFilterQuery(session: any) {
 }
 
 export const lists: Lists = {
-  User: list({
+  Profile: list({
     access: allowAll,
     fields: {
       name: text({ isIndexed: "unique" }),
@@ -115,7 +115,7 @@ export const lists: Lists = {
       liked: relationship({ ref: "Visual.likes", many: true }),
       following: relationship({ ref: "Friendship.requester", many: true }),
       followers: relationship({ ref: "Friendship.recipient", many: true }),
-      genAI: relationship({ ref: "GenAI.author", many: true }),
+      yqGenAI: relationship({ ref: "YQGenAI.author", many: true }),
     },
   }),
   GenAI: list({

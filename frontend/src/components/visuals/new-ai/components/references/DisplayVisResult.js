@@ -54,7 +54,7 @@ function DisplayVisResult({
         </div>
         <div className="d-flex w-100 justify-content-between">
           <span className="truncate-text text-gray-600">
-            {visInfo?.author?.name}
+            {visInfo?.author?.username}
           </span>
           <span className="truncate-text text-gray-600">
             {formatDateToLong(visInfo?.createdAt)}
