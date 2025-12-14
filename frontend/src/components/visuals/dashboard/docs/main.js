@@ -303,8 +303,8 @@ export default function DocsWindow({
         saveDocs();
       }
     };
-    window.addEventListener("beforeunload", saveDocs);
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("beforeunload", saveDocs);
 
     let updateInterval = setInterval(saveDocs, 30000);
 
