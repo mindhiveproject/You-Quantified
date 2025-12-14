@@ -118,15 +118,6 @@ export const lists: Lists = {
       yqGenAI: relationship({ ref: "YQGenAI.author", many: true }),
     },
   }),
-  GenAI: list({
-    access: allowAll,
-    fields: {
-      langGraphThread: text({ isIndexed: "unique" }),
-      author: relationship({ ref: "User.genAI", many: false }),
-      visual: relationship({ ref: "Visual.genAI", many: false }),
-      createdAt: timestamp({ defaultValue: { kind: "now" } }), // May 12, 2025
-    },
-  }),
   Friendship: list({
     access: allowAll,
     fields: {
@@ -143,6 +134,16 @@ export const lists: Lists = {
       createdAt: timestamp({ defaultValue: { kind: "now" } }),
     },
   }),
+  GenAI: list({
+    access: allowAll,
+    fields: {
+      langGraphThread: text({ isIndexed: "unique" }),
+      author: relationship({ ref: "User.genAI", many: false }),
+      visual: relationship({ ref: "Visual.genAI", many: false }),
+      createdAt: timestamp({ defaultValue: { kind: "now" } }), // May 12, 2025
+    },
+  }),
+  
   Visual: list({
     access: {
       operation: {
