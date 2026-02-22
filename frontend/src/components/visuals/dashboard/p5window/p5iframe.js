@@ -87,7 +87,7 @@ export function P5iFrame({
       title="embedded-visualization"
       ref={iframeRef}
       src="https://sandbox.youquantified.com"
-      sandbox="allow-same-origin allow-scripts"
+      sandbox="allow-same-origin allow-scripts allow-downloads"
       className="h-100 w-100"
     />
   );

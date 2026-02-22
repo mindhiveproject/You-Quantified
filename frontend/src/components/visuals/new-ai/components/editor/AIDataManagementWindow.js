@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import DataManagement from "../../../dashboard/data mappings/data_management";
+import DataManagement from "../../../dashboard/data mappings/DataCard";
 
 /**
  * Window component for managing data mappings and parameters in the AI visual generation interface

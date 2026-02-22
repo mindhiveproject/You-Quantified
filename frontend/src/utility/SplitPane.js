@@ -73,7 +73,7 @@ export const SplitPaneLeft = (props) => {
             setClientWidth(topRef.current.clientWidth);
             return;
         }
-        console.log(clientWidth);
+        
         if (clientWidth< window.innerWidth - 200 || clientWidth<200) {
             topRef.current.style.minWidth = clientWidth + "px";
             topRef.current.style.maxWidth = clientWidth + "px";

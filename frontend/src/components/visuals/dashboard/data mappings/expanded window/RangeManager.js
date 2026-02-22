@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import { selectParamValues } from "../../utility/selectors";
+import { selectParamValues } from "../../../utility/selectors";
 
 // Change the z-index of the dropdown
 // Change the name of the "Manual"/"Range" Slider

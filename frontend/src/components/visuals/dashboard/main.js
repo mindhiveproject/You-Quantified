@@ -8,7 +8,7 @@ import React, {
 import { useFullScreenHandle } from "react-full-screen";
 import { useParams, useSearchParams } from "react-router-dom";
 import CodePane from "./code/code_editor";
-import DataManagementWindow from "./data mappings/main";
+import DataManagementWindow from "./data mappings/Dashboard";
 import { VisualsWindow } from "./p5window/p5window";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import { useDispatch } from "react-redux";

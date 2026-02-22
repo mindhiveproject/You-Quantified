@@ -107,7 +107,11 @@ function rootReducer(state = initialState, action) {
 
       return {
         ...state,
-        update: { type: "stream", device: action.payload.id, modality: action.payload?.modality || 'device' },
+        update: {
+          type: "stream",
+          device: action.payload.id,
+          modality: action.payload?.modality || "device",
+        },
         dataStream: {
           ...state.dataStream,
           [action.payload.id]: {

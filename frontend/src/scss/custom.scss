@@ -18,9 +18,20 @@ $h5-font-weight: 600;
 $h6-font-weight: 600;
 
 $enable-negative-margins: true;
-$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
-  "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
-  "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-family-sans-serif:
+  system-ui,
+  -apple-system,
+  "Segoe UI",
+  Roboto,
+  "Helvetica Neue",
+  "Noto Sans",
+  "Liberation Sans",
+  Arial,
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji";
 
 // Gray colors
 $white: #fff;
@@ -71,8 +82,8 @@ $h6-font-size: $font-size-base;
 
 $enable-validation-icons: false;
 
-$font-family-sans-serif: Inter, "Inter", "Helvetica Neue", Arial, Helvetica,
-  sans-serif;
+$font-family-sans-serif:
+  Inter, "Inter", "Helvetica Neue", Arial, Helvetica, sans-serif;
 
 :root {
   --bs-border-radius: 0rem;
@@ -245,8 +256,6 @@ div.w-10px {
   text-align: left;
   z-index: 102;
 }
-
-
 
 $popover-bg: rgba(255, 255, 255);
 $popover-header-bg: rgba(255, 255, 255);
@@ -484,7 +493,6 @@ $popover-border-color: $gray-200;
   }
 }
 
-
 .width-256px {
   width: 256px !important;
 }
@@ -500,6 +508,10 @@ div.big-right-margin {
 
 .ps-15 {
   padding-left: 15% !important;
+}
+
+.ps-1p {
+  padding-left: 1px !important;
 }
 
 .pe-20 {
@@ -1186,8 +1198,6 @@ canvas {
   }
 }
 
-
-
 .mt-n01 {
   margin-top: -1px;
 }
@@ -1574,8 +1584,6 @@ input.vis-name-input::placeholder {
   }
 }
 
-
-
 .ai-input-textbox {
   background: none !important;
   color: $white !important;
@@ -1595,7 +1603,6 @@ input.vis-name-input::placeholder {
     outline: none !important;
   }
 }
-
 
 .ai-ref-input {
   color: $white !important;
@@ -1643,7 +1650,6 @@ input.vis-name-input::placeholder {
   left: 100%;
   margin-left: 0.25rem;
 }
-
 
 .h-75vh {
   height: 75vh;
