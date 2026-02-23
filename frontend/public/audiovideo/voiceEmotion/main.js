@@ -86030,10 +86030,10 @@ let currentArousal = 0;
                           bc.postMessage({
                             valence: valence,
                             arousal: arousal,
-                            H: d[t]["H"],
-                            N: d[t]["N"],
-                            A: d[t]["A"],
-                            S: d[t]["S"],
+                            H: d[t]["H"] / r,
+                            N: d[t]["N"] / r,
+                            A: d[t]["A"] / r,
+                            S: d[t]["S"] / r,
                           });
 
                           for (let i = 0; i < n.length; i++) {
