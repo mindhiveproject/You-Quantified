@@ -24,13 +24,7 @@ class VoiceEmotion {
     } = data;
 
     const newData = { Valence, Arousal, Happiness, Neutral, Anger, Sadness };
-    /*
-        //append the raw channels
-        for (let i = 0; i < chns.length; i++) {
-            let key = chns[i];
-            let val = rawVector[i];
-            newData[key] = val;
-        }*/
+
     store.dispatch({
       type: "devices/streamUpdate",
       payload: { id: "Voice Emotion", data: newData },

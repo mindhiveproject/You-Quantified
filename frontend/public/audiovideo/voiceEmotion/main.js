@@ -86024,16 +86024,22 @@ let currentArousal = 0;
                           let r = 0;
                           for (let e = 0; e < n.length; e++) r += d[t][n[e]];
                           console.log("Spy:");
+                          console.log(d[t]);
                           let valence = (d[t]["H"] / r) * 3;
                           let arousal = 1 - d[t]["N"] / r;
+                          // WORK ON THIS!
+                          for (const [key, valuev] of Object.entries(d[t])) {
+                            console.log("Key: ", key);
+                            console.log("Value: ", valuev);
+                          }
 
                           bc.postMessage({
                             valence: valence,
                             arousal: arousal,
-                            H: d[t]["H"] / r,
-                            N: d[t]["N"] / r,
-                            A: d[t]["A"] / r,
-                            S: d[t]["S"] / r,
+                            H: d[t]["H"],
+                            N: d[t]["N"],
+                            A: d[t]["A"],
+                            S: d[t]["S"],
                           });
 
                           for (let i = 0; i < n.length; i++) {
