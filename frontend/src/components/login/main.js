@@ -15,7 +15,7 @@ import { Nav } from "react-bootstrap";
 export default function Login() {
   const { currentUser, setCurrentUser } = useContext(UserContext);
 
-  if (currentUser) {
+  if (currentUser?.id) {
     return (
       <div className="login-div mt-5 align-text-center">
         <LoggedInScreen
