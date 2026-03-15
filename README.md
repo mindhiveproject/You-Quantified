@@ -1,4 +1,4 @@
-# You: Quantified
+# YouQuantified
 This project brings tools to easily visualize, record and work with physiological data on a web-based environment. It's meant as a learning tool to help us understand the _Quantified Self_ (self-knowledge through numbers). You can visit the website at [youquantified.com](https://youquantified.com).
 
 ## Installing and running the App
