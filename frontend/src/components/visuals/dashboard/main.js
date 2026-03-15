@@ -317,7 +317,7 @@ function MainView({ visID, queryData }) {
   useEffect(() => {
     fetchCode(visMetadata?.code?.url)
       .then((response) => _setCode(response))
-      .catch((error) => _setCode(null));
+      .catch((error) => console.log(error));
     if (visMetadata?.docs) {
       _setDocsContent(visMetadata?.docs);
     }
@@ -331,7 +331,7 @@ function MainView({ visID, queryData }) {
     if (visMetadata?.parameters) {
       dispatch({ type: "params/load", payload: visMetadata?.parameters });
     }
-  }, [visMetadata]);
+  }, []);
 
   if (!isEditable && visMetadata?.privacy === "private") {
     return (
