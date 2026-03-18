@@ -14,7 +14,7 @@ function BackButton() {
     >
       <span className="material-symbols-outlined">keyboard_arrow_left</span>
       <span className="fw-normal">
-        You: <span className="fw-bold">Quantified</span>
+        You<span className="fw-bold">Quantified</span>
       </span>
     </Link>
   );
