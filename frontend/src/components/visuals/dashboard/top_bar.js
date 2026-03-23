@@ -170,7 +170,7 @@ function PrivacyDropdown({
       },
     });
   }
-  console.log(currentUser?.permissions);
+
   return (
     <div className="dropdown me-1">
       <button

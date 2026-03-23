@@ -143,7 +143,7 @@ function NoVisualScreen() {
       // If the entire Konami code is successfully entered
       if (konamiIndexRef.current + 1 === konamiCode.length) {
         alert(
-          "Stranger, whoever you are, open this to find what will amaze you"
+          "Stranger, whoever you are, open this to find what will amaze you",
         );
         setIsDino(true);
         setKonamiIndex(0); // Reset the index
@@ -160,12 +160,12 @@ function NoVisualScreen() {
 
   useEffect(() => {
     document.addEventListener("keydown", (event) =>
-      konamiCodeFunc(event, konamiIndexRef)
+      konamiCodeFunc(event, konamiIndexRef),
     );
 
     return () => {
       document.removeEventListener("keydown", (event) =>
-        konamiCodeFunc(event, konamiIndexRef)
+        konamiCodeFunc(event, konamiIndexRef),
       );
     };
   }, []);
@@ -366,7 +366,6 @@ function MainView({ visID, queryData }) {
         setters={setters}
         isDirty={isDirty}
         isDirtyRef={isDirtyRef}
-
       />
     </div>
   );
