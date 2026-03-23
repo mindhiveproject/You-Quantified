@@ -100,7 +100,7 @@ function DataManagement({ changeParameters, visInfo, custom }) {
         {dataCards}
       </div>
       {!isExpanded && (
-        <div className="w-100 border border-tertiary ms-2 overflow-y-scroll">
+        <div className="w-100 border border-tertiary ms-2">
           <MappingWindow
             parameter={expandedParam?.visParameter}
             currentMapping={expandedParam?.currentMapping}
