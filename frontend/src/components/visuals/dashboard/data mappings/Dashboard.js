@@ -21,11 +21,11 @@ export default function DataManagementWindow({
     return <div>Loading...</div>;
 
   return (
-    <div className={`h-100 overflow-none `}>
+    <div className="h-100 d-flex flex-column" style={{ overflow: "hidden" }}>
       <div className="p-3 mb-3 m-0 bg-light border border-dark mt-n1">
         <h6 className="mb-0 mt-1">Data Mappings</h6>
       </div>
-      <div className="ms-3 me-3 h-100">
+      <div className="ms-3 me-3 flex-grow-1 overflow-hidden">
         <DataManagement
           visInfo={visInfo}
           custom={custom}
@@ -95,12 +95,12 @@ function DataManagement({ changeParameters, visInfo, custom }) {
   // custom && to check if you can add a new parameter
 
   return (
-    <div className="mb-5 d-flex">
+    <div className="d-flex h-100 overflow-y-scroll">
       <div className={clsx("rounded-0", isExpanded && "w-100")}>
         {dataCards}
       </div>
       {!isExpanded && (
-        <div className="w-100 border border-tertiary ms-2">
+        <div className="w-100 border border-tertiary ms-2 overflow-y-scroll">
           <MappingWindow
             parameter={expandedParam?.visParameter}
             currentMapping={expandedParam?.currentMapping}
