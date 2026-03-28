@@ -29,7 +29,7 @@ function NavBar({ setShowDevices, recording, setRecording }) {
   return (
     <nav className="navbar styled-navbar g-0 p-0 d-flex justify-content-between align-items-center">
       <NavLink className="navbar-brand m-0 ms-4 h5" to="/">
-        <span className="fw-normal">You:</span> Quantified
+        <span className="fw-normal">You</span>Quantified
       </NavLink>
       <div className="h-100 m-0 g-0 d-flex align-items-center">
         <div className="me-4">

@@ -260,14 +260,19 @@ async function checkCDNPackage(inputURL) {
   } else if (hostname.includes("jsdelivr") && pathname.includes("npm")) {
     origin = "jsdelivr";
     apiEndpoint = "https://data.jsdelivr.com/v1/packages/npm/";
-    matched = pathname.match(/\/npm\/([^@]+)@([\w.\-+]+)\//);
+    matched = pathname.match(/\/npm\/((?:@[^@/]+\/)?[^@/]+)@([^/]+)/);
     if (!matched) {
       throw new Error(
         "Could not parse package name and version from jsDelivr URL"
       );
     }
     [, name, version] = matched;
-    metaURL = `${apiEndpoint}${name}@${version}`;
+    if (version === "latest") {
+      metaURL = `${apiEndpoint}${name}`;
+    } else {
+      metaURL = `${apiEndpoint}${name}@${version}`;
+    }
+    console.log(metaURL);
   } else {
     throw new Error("Package not found in jsdelivr or cdnjs");
   }

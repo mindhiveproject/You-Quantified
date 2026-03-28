@@ -8,7 +8,7 @@ export default function HomePage() {
       <div className="row h-95 align-items-center">
         <div className="col-6 ps-15 foreground">
           <Reveal>
-            <h1 className="text-start fw-light mb-0">You:</h1>
+            <h1 className="text-start fw-light mb-0">You</h1>
           </Reveal>
           <Reveal>
             <h1 className="text-start">Quantified</h1>

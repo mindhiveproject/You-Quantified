@@ -143,7 +143,7 @@ function NoVisualScreen() {
       // If the entire Konami code is successfully entered
       if (konamiIndexRef.current + 1 === konamiCode.length) {
         alert(
-          "Stranger, whoever you are, open this to find what will amaze you"
+          "Stranger, whoever you are, open this to find what will amaze you",
         );
         setIsDino(true);
         setKonamiIndex(0); // Reset the index
@@ -160,12 +160,12 @@ function NoVisualScreen() {
 
   useEffect(() => {
     document.addEventListener("keydown", (event) =>
-      konamiCodeFunc(event, konamiIndexRef)
+      konamiCodeFunc(event, konamiIndexRef),
     );
 
     return () => {
       document.removeEventListener("keydown", (event) =>
-        konamiCodeFunc(event, konamiIndexRef)
+        konamiCodeFunc(event, konamiIndexRef),
       );
     };
   }, []);
@@ -317,7 +317,7 @@ function MainView({ visID, queryData }) {
   useEffect(() => {
     fetchCode(visMetadata?.code?.url)
       .then((response) => _setCode(response))
-      .catch((error) => _setCode(null));
+      .catch((error) => console.log(error));
     if (visMetadata?.docs) {
       _setDocsContent(visMetadata?.docs);
     }
@@ -331,7 +331,7 @@ function MainView({ visID, queryData }) {
     if (visMetadata?.parameters) {
       dispatch({ type: "params/load", payload: visMetadata?.parameters });
     }
-  }, [visMetadata]);
+  }, []);
 
   if (!isEditable && visMetadata?.privacy === "private") {
     return (
@@ -366,7 +366,6 @@ function MainView({ visID, queryData }) {
         setters={setters}
         isDirty={isDirty}
         isDirtyRef={isDirtyRef}
-
       />
     </div>
   );
