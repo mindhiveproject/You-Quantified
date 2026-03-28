@@ -56,6 +56,8 @@ export class MuseDevice {
   async connect() {
     try {
       await this.muse.connect();
+      const info = await this.muse.deviceInfo();
+      console.log("Muse Device Info", info);
       this.id = this.muse.deviceName;
       this.connected = true;
       store.dispatch({
@@ -89,9 +91,9 @@ export class MuseDevice {
         });
       });
 
-      const info = await this.muse.deviceInfo();
+      
     } catch (error) {
-      throw new Error("Unable to connect to muse")
+      throw new Error("Unable to connect to muse: "+error);
     }
   }
 

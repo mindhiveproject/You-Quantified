@@ -57,7 +57,10 @@ export function P5iFrame({
       </body>
       </html>
       `;
-    iframeRef.current.srcdoc = source;
+    const blob = new Blob([source], { type: "text/html" });
+    const blobUrl = URL.createObjectURL(blob);
+    iframeRef.current.src = blobUrl;
+    return () => URL.revokeObjectURL(blobUrl);
   }, [code, extensions]);
 
   useEffect(() => {
@@ -86,8 +89,10 @@ export function P5iFrame({
       id="visFrame"
       title="embedded-visualization"
       ref={iframeRef}
-      src="https://sandbox.youquantified.com"
-      sandbox="allow-same-origin allow-scripts"
+      src="https://youquantified.mindhive.science"
+      allow="autoplay; encrypted-media"
+      sandbox="allow-same-origin allow-scripts allow-downloads allow-popups allow-forms allow-presentation"
+      referrerPolicy="strict-origin-when-cross-origin"
       className="h-100 w-100"
     />
   );

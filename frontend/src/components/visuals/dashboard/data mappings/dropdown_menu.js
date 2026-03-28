@@ -8,18 +8,19 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   // Display text on the card. Upon creation, it checks the status
   const [display, setDisplay] = useState(() => {
     let disp = dataMappings[parameter.name];
-    if (disp === "Manual") disp = "Manual";
-    else disp = disp[1];
+    console.log("Display pre processing: ", disp);
+    if (disp === "Manual") disp = { Device: "Mapping", Metric: "Manual" };
+    else disp = { Device: disp[0], Metric: disp[1] };
     return disp;
   });
 
   // Changes the color of the button as dataMappings changes
   const dispColor = useMemo(
     () =>
-      display.includes("Manual")
+      display.Metric == "Manual"
         ? "btn btn-mapping ms-2 rounded-0"
-        : "btn btn-mapping ms-2 rounded-0",
-    [dataMappings]
+        : "btn btn-mapping ms-2 rounded-0 active",
+    [dataMappings],
   );
 
   function selectNewSource(sourceName) {
@@ -27,8 +28,8 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
 
     let disp = sourceName;
 
-    if (sourceName === "Manual") setDisplay("Manual");
-    else setDisplay(disp[1]);
+    if (sourceName === "Manual") setDisplay({ Device: "Mapping", Metric: "Manual" });
+    else setDisplay({ Device: disp[0], Metric: disp[1] });
     setShow(false);
   }
 
@@ -36,7 +37,7 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
 
   const deviceKeys = useSelector(
     (state) => Object.keys(state.dataStream),
-    shallowEqual
+    shallowEqual,
   );
 
   const dataStream = useSelector((state) => state.dataStream);
@@ -49,7 +50,7 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
       if (updatedKeys[dev]) {
         // Figure out what's new
         const newVals = currKeys.filter(
-          (key) => !updatedKeys[dev].includes(key)
+          (key) => !updatedKeys[dev].includes(key),
         );
         if (newVals.length > 0) {
           updatedKeys[dev] = [...updatedKeys[dev], ...newVals];
@@ -63,7 +64,6 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   }, [dataStream, deviceKeys]);
 
   const updatedClaves = useMemo(() => {
-
     return Object.keys(savedKeys).map((option) => {
       const hasDefault = [];
       const notHasDefault = [];
@@ -98,8 +98,8 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
         aria-expanded="false"
         onMouseEnter={() => setShow(true)}
       >
-        <small className="m-0 p-0 opacity-50">Mapping</small>
-        <p className="m-0 mt-n1 p-0">{display}</p>
+        <small className="d-block m-0 p-0 opacity-75 lh-sm mt-1 mb-1">{display.Device}</small>
+        <p className="m-0 mt-n1 p-0">{display.Metric}</p>
       </button>
       <ul className={`dropdown-menu z-3 ${show ? "visible" : "hidden"}`}>
         <li>

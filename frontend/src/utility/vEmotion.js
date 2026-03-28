@@ -1,44 +1,39 @@
 import store from "../store/store";
 
-
 class VoiceEmotion {
+  constructor(bc) {
+    // create socket
+    this.bc = bc;
+  }
 
-    constructor(bc) {
-        // create socket
-        this.bc = bc;
-    }
+  async initialize() {
+    this.bc.onmessage = (eventMessage) => {
+      console.log(eventMessage.data);
+      this.receiveData(eventMessage.data);
+    };
+  }
 
-    async initialize() {
+  receiveData(data) {
+    const {
+      valence: Valence,
+      arousal: Arousal,
+      H: Happiness,
+      N: Neutral,
+      A: Anger,
+      S: Sadness,
+    } = data;
 
-        this.bc.onmessage = (eventMessage) => {
-            console.log(eventMessage.data)
-            this.receiveData(eventMessage.data)
-            
-           }
+    const newData = { Valence, Arousal, Happiness, Neutral, Anger, Sadness };
 
-    }
+    store.dispatch({
+      type: "devices/streamUpdate",
+      payload: { id: "Voice Emotion", data: newData },
+    });
+  }
 
-    receiveData(data) {
-        let newData= {}
-        newData["Valence"]= data[0]
-        newData["Arousal"]= data[1]
-        
-
-        /*
-        //append the raw channels
-        for (let i = 0; i < chns.length; i++) {
-            let key = chns[i];
-            let val = rawVector[i];
-            newData[key] = val;
-        }*/
-        store.dispatch({ type: 'devices/streamUpdate', payload: { id: "Voice Emotion", data: newData } })
-    }
-
-    isOpen(){
-        return true;
-    }
-      
-
+  isOpen() {
+    return true;
+  }
 }
 
 export default VoiceEmotion;

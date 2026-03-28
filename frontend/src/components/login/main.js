@@ -15,7 +15,7 @@ import { Nav } from "react-bootstrap";
 export default function Login() {
   const { currentUser, setCurrentUser } = useContext(UserContext);
 
-  if (currentUser) {
+  if (currentUser?.id) {
     return (
       <div className="login-div mt-5 align-text-center">
         <LoggedInScreen
@@ -94,7 +94,13 @@ function LoginScreen({ setCurrentUser }) {
   let passwordInput;
 
   return (
-    <div>
+    <div className="w-100 h-100">
+      <div className="w-100 bg-warning d-flex align-items-center p-3 ps-4 pe-4">
+        <span className="material-symbols-outlined me-2">warning</span>
+        <p className="m-0">
+          If you made an account before March 16th, you will have to create a new one. To transfer your data, contact us at <a href="mailto:youquantified@nyu.edu">youquantified@nyu.edu</a>
+        </p>
+      </div>
       <div className="login-div mt-5">
         <div className="d-flex mb-4 align-items-center justify-content-between">
           <h5 className="m-0 p-0">Log in</h5>
@@ -145,7 +151,9 @@ function LoginScreen({ setCurrentUser }) {
             Submit
           </button>
         </form>
+        
       </div>
+
     </div>
   );
 }

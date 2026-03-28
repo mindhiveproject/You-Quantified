@@ -147,7 +147,7 @@ export function stopRecording(unsub, deviceMeta) {
 const txtContent = `
 Hi! I'm a small file meant to describe the contents of your folder. 
 
-You: Quantified saves the data recorded from each of your devices as separate "csv" files. There is an additional file with the metadata for each device.
+YouQuantified saves the data recorded from each of your devices as separate "csv" files. There is an additional file with the metadata for each device.
 
 The data gathered from the web browser can have unreliable time synchrony or sampling rates, so be aware of its usage for research purposes. 
 
