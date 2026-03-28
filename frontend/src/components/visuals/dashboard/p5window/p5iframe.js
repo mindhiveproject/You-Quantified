@@ -89,8 +89,10 @@ export function P5iFrame({
       id="visFrame"
       title="embedded-visualization"
       ref={iframeRef}
-      src="about:blank"
-      sandbox="allow-same-origin allow-scripts allow-downloads"
+      src="https://youquantified.mindhive.science"
+      allow="autoplay; encrypted-media"
+      sandbox="allow-same-origin allow-scripts allow-downloads allow-popups allow-forms allow-presentation"
+      referrerPolicy="strict-origin-when-cross-origin"
       className="h-100 w-100"
     />
   );
