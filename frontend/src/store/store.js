@@ -61,6 +61,18 @@ function rootReducer(state = initialState, action) {
         },
       };
 
+    case "params/rename": {
+      const { oldName, newName } = action.payload;
+      const { [oldName]: paramData, ...rest } = state.params;
+      return {
+        ...state,
+        params: {
+          ...rest,
+          [newName]: paramData,
+        },
+      };
+    }
+
     case "params/updateRange":
       return {
         ...state,

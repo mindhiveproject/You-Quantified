@@ -8,9 +8,8 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   // Display text on the card. Upon creation, it checks the status
   const [display, setDisplay] = useState(() => {
     let disp = dataMappings[parameter.name];
-    console.log("Display pre processing: ", disp);
     if (disp === "Manual") disp = { Device: "Mapping", Metric: "Manual" };
-    else disp = { Device: disp[0], Metric: disp[1] };
+    else disp = { Device: disp.device, Metric: disp.stream };
     return disp;
   });
 
@@ -29,7 +28,7 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
     let disp = sourceName;
 
     if (sourceName === "Manual") setDisplay({ Device: "Mapping", Metric: "Manual" });
-    else setDisplay({ Device: disp[0], Metric: disp[1] });
+    else setDisplay({ Device: disp.device, Metric: disp.stream });
     setShow(false);
   }
 
@@ -82,7 +81,7 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   useEffect(() => {
     for (const option of updatedClaves) {
       if (option.hasDefault.length > 0) {
-        selectNewSource([option.device, option.hasDefault[0]]);
+        selectNewSource({ device: option.device, stream: option.hasDefault[0] });
         break;
       }
     }
@@ -161,7 +160,7 @@ function NestedDropDown({
         <li key={data}>
           <button
             className={`dropdown-item ${data === display && "text-primary"}`}
-            onClick={() => selectNewSource([option.device, data])}
+            onClick={() => selectNewSource({ device: option.device, stream: data })}
           >
             {data}
           </button>
@@ -174,7 +173,7 @@ function NestedDropDown({
         <li key={data}>
           <button
             className={`dropdown-item ${data === display && "text-primary"}`}
-            onClick={() => selectNewSource([option.device, data])}
+            onClick={() => selectNewSource({ device: option.device, stream: data })}
           >
             {data}
           </button>

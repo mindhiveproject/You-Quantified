@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import clsx from "clsx";
 import DataCard from "./DataCard";
 import { useSelector, useDispatch } from "react-redux";
 import { selectDataMappings } from "../../utility/selectors";
 import { MappingWindow } from "./expanded window";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function DataManagementWindow({
   showDashbord,
@@ -17,15 +17,16 @@ export default function DataManagementWindow({
   const selectorKeys = Object.keys(parameters);
   const visInfoKeys = visInfo?.parameters.map(({ name }) => name);
 
+  
   if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
     return <div>Loading...</div>;
 
   return (
     <div className="h-100 d-flex flex-column" style={{ overflow: "hidden" }}>
-      <div className="p-3 mb-3 m-0 bg-light border border-dark mt-n1">
+      <div className="p-3 m-0 bg-light border border-dark mt-n1">
         <h6 className="mb-0 mt-1">Data Mappings</h6>
       </div>
-      <div className="ms-3 me-3 flex-grow-1 overflow-hidden">
+      <div className="flex-grow-1 overflow-hidden">
         <DataManagement
           visInfo={visInfo}
           custom={custom}
@@ -35,7 +36,6 @@ export default function DataManagementWindow({
     </div>
   );
 }
-
 
 function DataManagement({ changeParameters, visInfo, custom }) {
   // Contains the entire accordion with all vis properties based on the current visInfo
@@ -67,6 +67,14 @@ function DataManagement({ changeParameters, visInfo, custom }) {
     newMeta.parameters = newMeta.parameters.map((param) =>
       param.name === oldInfo.name ? updatedParam : param,
     );
+
+    if (newInfo.name && newInfo.name !== oldInfo.name) {
+      dispatch({
+        type: "params/rename",
+        payload: { oldName: oldInfo.name, newName: newInfo.name },
+      });
+    }
+
     changeParameters(newMeta.parameters);
   }
 
@@ -95,24 +103,41 @@ function DataManagement({ changeParameters, visInfo, custom }) {
   // custom && to check if you can add a new parameter
 
   return (
-    <div className="d-flex h-100 overflow-y-scroll">
-      <div className={clsx("rounded-0", isExpanded && "w-100")}>
+    <div className="d-flex h-100 p-2 pb-4">
+      <motion.div
+        className="rounded-0 overflow-hidden flex-shrink-0"
+        animate={{ width: isExpanded ? "100%" : 68 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
         {dataCards}
-      </div>
-      {!isExpanded && (
-        <div className="w-100 border border-tertiary ms-2">
-          <MappingWindow
-            parameter={expandedParam?.visParameter}
-            currentMapping={expandedParam?.currentMapping}
-            visInfo={expandedParam?.visInfo}
-            updateParameter={expandedParam?.updateParameter}
-            deleteParameter={expandedParam?.deleteParameter}
-            dataMappings={expandedParam?.dataMappings}
-            changeSource={expandedParam?.changeSource}
-            onClose={handleCloseExpanded}
-          />
-        </div>
-      )}
+      </motion.div>
+      <AnimatePresence>
+        {!isExpanded && (
+          <motion.div
+            className="border border-tertiary ms-2 h-100 overflow-y-auto"
+            initial={{ width: 0 }}
+            animate={{ width: "100%" }}
+            exit={{ width: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <MappingWindow
+              parameter={expandedParam?.visParameter}
+              currentMapping={(() => {
+                const raw = expandedParam?.visParameter
+                  ? dataMappings?.[expandedParam.visParameter.name]
+                  : undefined;
+                return raw !== "Manual" ? raw : undefined;
+              })()}
+              visInfo={expandedParam?.visInfo}
+              updateParameter={expandedParam?.updateParameter}
+              deleteParameter={expandedParam?.deleteParameter}
+              dataMappings={dataMappings}
+              changeSource={expandedParam?.changeSource}
+              onClose={handleCloseExpanded}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

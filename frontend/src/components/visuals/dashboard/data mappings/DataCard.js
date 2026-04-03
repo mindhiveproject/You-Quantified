@@ -4,12 +4,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectDataMappings } from "../../utility/selectors";
 import { WaveFormIcon } from "./expanded window/WaveFormIcon";
 import { MappingWindow } from "./expanded window";
-import { motion } from "motion/react";
-import useMeasure from "react-use-measure";
 // Fix the problem where data doesn't get auto mapped when you enter
 // Change the buffer length in the auto slider
-
-
+import { motion } from "motion/react";
 
 function DataCard({
   visParameter,
@@ -26,14 +23,13 @@ function DataCard({
   // Represents an individual parameter
 
   const dispatch = useDispatch();
-  const [ref, { height }] = useMeasure();
 
-  // Where the current mapping is rendered. Could be changed in the render stack.
-  const currentMapping = dataMappings?.[visParameter.name];
+  // Where the current mapping is rendered. "Manual" means unmapped, otherwise {device, stream}.
+  const rawMapping = dataMappings?.[visParameter.name];
+  const currentMapping = rawMapping !== "Manual" ? rawMapping : undefined;
 
-  const isMapped = currentMapping?.device != "None";
+  const isMapped = currentMapping !== undefined;
   const isCurrentExpanded = expandedParam?.visParameter == visParameter;
-  console.log(expandedParam);
 
   const [showEditOverlay, setShowEditOverlay] = useState(false);
 
@@ -50,23 +46,28 @@ function DataCard({
   function expandCard() {
     setIsExpanded(!isExpanded);
     if (isExpanded) {
-      setExpandedParam({ visParameter, currentMapping, visInfo, updateParameter, deleteParameter, dataMappings, changeSource });
+      setExpandedParam({
+        visParameter,
+        currentMapping,
+        visInfo,
+        updateParameter,
+        deleteParameter,
+        dataMappings,
+        changeSource,
+      });
     } else {
       setExpandedParam(null);
     }
   }
 
   return (
-    <motion.button
-      ref={ref}
+    <button
       className={clsx(
         "btn",
         isCurrentExpanded && "active border border-primary",
-        "btn-outline-dark overflow-hidden",
+        "btn-outline-dark overflow-hidden w-100",
       )}
       onClick={expandCard}
-      animate={{ width: isExpanded ? "100%" : height || "auto" }}
-      transition={{ duration: 0.15, ease: "easeIn" }}
     >
       <div className="d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
@@ -95,7 +96,7 @@ function DataCard({
           </div>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
 export default DataCard;

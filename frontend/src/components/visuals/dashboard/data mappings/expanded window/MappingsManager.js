@@ -1,28 +1,76 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { WaveFormIcon } from "./WaveFormIcon";
-
+import { useSelector, shallowEqual } from "react-redux";
+import clsx from "clsx";
 export function MappingsManager({ parameter, changeSource, currentMapping }) {
   // Contains the search, pinned parameters, and connected devices for mapping
+
+  const deviceKeys = useSelector(
+    (state) => Object.keys(state.dataStream),
+    shallowEqual,
+  );
+
+  const dataStream = useSelector((state) => state.dataStream);
+
+  const [searchInput, setSearchInput] = useState("");
+
+  function selectNewSource(device, stream) {
+    if (device === "Manual") {
+      changeSource("Manual");
+    } else {
+      changeSource({ device, stream });
+    }
+  }
+
+  const isMapped = currentMapping !== undefined;
+
+  const deviceEntries = Object.entries(dataStream)
+    .filter(([key, value]) => {
+      if (!searchInput) return true;
+      const q = searchInput.toLowerCase();
+      if (key.toLowerCase().includes(q)) return true;
+      return Object.keys(value).some((s) => s.toLowerCase().includes(q));
+    })
+    .map(([key, value]) => {
+      const filteredStreams = searchInput
+        ? Object.fromEntries(
+            Object.entries(value).filter(
+              ([s]) =>
+                key.toLowerCase().includes(searchInput.toLowerCase()) ||
+                s.toLowerCase().includes(searchInput.toLowerCase()),
+            ),
+          )
+        : value;
+      return (
+        <ConnectedDeviceAccordion
+          key={key}
+          device={key}
+          streams={filteredStreams}
+          selectNewSource={selectNewSource}
+          currentMapping={currentMapping}
+        />
+      );
+    });
+
   return (
-    <div className="p-3">
-      <div>
-        <h6 className="text-body-tertiary mb-1">Search</h6>
-        <input
-          className="form-control pt-2 pb-2"
-          placeholder="Type to look for a device or parameter"
-          aria-label="search"
-          autoComplete="off"
-        ></input>
+    <div className="d-flex flex-column h-100">
+      <div className="p-3 flex-shrink-0">
+        <div>
+          <h6 className="text-body-tertiary mb-1">Search</h6>
+          <input
+            className="form-control pt-2 pb-2"
+            placeholder="Type to look for a device or parameter"
+            aria-label="search"
+            autoComplete="off"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          ></input>
+        </div>
       </div>
-      <div className="mt-3">
-        <h6 className="text-body-tertiary mb-1">Pinned</h6>
-        <ParameterDataCard />
-        <ParameterDataCard />
-      </div>
-      <div className="mt-3">
+      <div className="flex-grow-1 overflow-y-auto p-3 pt-0">
         <h6 className="text-body-tertiary mb-1">Connected Devices</h6>
-        <ConnectedDeviceAccordion />
+        {deviceEntries}
       </div>
     </div>
   );
@@ -30,39 +78,77 @@ export function MappingsManager({ parameter, changeSource, currentMapping }) {
 
 function ConnectedDeviceAccordion({
   parameter,
-  changeSource,
   currentMapping,
   isPinned,
+  device,
+  streams,
+  selectNewSource,
 }) {
+  const parameterCards = Object.keys(streams).map((key) => (
+    <ParameterDataCard
+      parameter={parameter}
+      currentMapping={currentMapping}
+      stream={key}
+      isPinned={isPinned}
+      selectNewSource={selectNewSource}
+      device={device}
+    />
+  ));
+
   return (
-    <div className="d-flex justify-content-between border border-dark p-2 ps-3">
-      <div className="d-flex align-items-center">
-        <div>
-          <h6 className="m-0 p-0">EMOTIV</h6>
-          <p className="m-0 p-0 text-body-tertiary">EMOTIV HQ-22</p>
+    <div>
+      <div className="d-flex justify-content-between border border-dark p-2 ps-3">
+        <div className="d-flex align-items-center">
+          <div>
+            <h6 className="m-0 p-0 mb-1 mt-1">{device}</h6>
+            {/*<p className="m-0 p-0 text-body-tertiary">EMOTIV HQ-22</p>*/}
+          </div>
         </div>
+        <span className="material-symbols-outlined"></span>
       </div>
-      <span className="material-symbols-outlined"></span>
+      {parameterCards}
     </div>
   );
 }
 
 function ParameterDataCard({
-  parameter,
-  changeSource,
   currentMapping,
+  stream,
+  device,
+  selectNewSource,
   isPinned,
 }) {
   const [isHovering, setIsHovering] = useState(false);
 
+  function onLink() {
+    if (!isMappedParam) {
+      selectNewSource(device, stream);
+    } else {
+      selectNewSource("Manual");
+    }
+  }
+
+  function checkIfMapped() {
+    return (
+      currentMapping?.device === device && currentMapping?.stream === stream
+    );
+  }
+
+  const isMappedParam = checkIfMapped();
+
   return (
     <div
-      className="d-flex align-items-stretch p-0 justify-content-between"
+      className={clsx(
+        "d-flex align-items-stretch p-0 justify-content-between m-0",
+        isMappedParam && "bg-primary",
+      )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       <div className="p-2 border border-tertiary w-100">
-        <p className="m-0 p-0">Alpha</p>
+        <p className={clsx("m-0 p-0", isMappedParam && "text-white")}>
+          {stream}
+        </p>
       </div>
       <div className="d-flex">
         <motion.div
@@ -71,11 +157,16 @@ function ParameterDataCard({
           animate={{ width: isHovering ? "auto" : 0 }}
           transition={{ duration: 0.1, ease: "easeInOut" }}
         >
-          <button className="btn btn-outline-primary p-2 h-100 align-items-center d-flex">
-            <span className="material-symbols-outlined m-0 p-0">link</span>
+          <button
+            className="btn btn-outline-primary p-2 h-100 align-items-center d-flex"
+            onClick={onLink}
+          >
+            <span className="material-symbols-outlined m-0 p-0">
+              {isMappedParam ? "link_off" : "link"}
+            </span>
           </button>
         </motion.div>
-        <motion.div
+        {/*<motion.div
           className="overflow-hidden"
           initial={false}
           animate={{ width: isHovering ? "auto" : 0 }}
@@ -84,21 +175,24 @@ function ParameterDataCard({
           <button className="btn btn-outline-dark p-2 h-100 align-items-center d-flex">
             <span className="material-symbols-outlined m-0 p-0">keep</span>
           </button>
-        </motion.div>
+        </motion.div>*/}
       </div>
     </div>
   );
 }
 
-export function MappedParameterTag({ currentMapping, onRemove }) {
+export function MappedParameterTag({ isMapped, currentMapping, onRemove }) {
   return (
     <div className="d-flex justify-content-between bg-primary align-items-center px-3 py-2">
       <div className="d-flex align-items-center">
         <div className="d-flex me-2 p-0 m-0 align-items-center text-white">
-          <WaveFormIcon active={true} />
+          <WaveFormIcon active={isMapped} />
         </div>
-        <span className="fw-semibold text-white ms-1">
-          {currentMapping?.stream || "None"}
+        <span className="fw-semibold">
+          {currentMapping?.stream || "None"}{" "}
+          <span className="fw-normal opacity-75">
+            ({currentMapping?.device || "Manual"})
+          </span>
         </span>
       </div>
       {onRemove && (
@@ -113,4 +207,3 @@ export function MappedParameterTag({ currentMapping, onRemove }) {
     </div>
   );
 }
-

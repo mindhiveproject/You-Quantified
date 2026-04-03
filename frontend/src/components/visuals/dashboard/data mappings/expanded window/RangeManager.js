@@ -112,7 +112,7 @@ export function DataAutoSlider({ dataMappings, parameter }) {
 
   const lastValidSource = useRef(undefined);
 
-  const currentSource = stream?.[select[0]]?.[select[1]];
+  const currentSource = stream?.[select?.device]?.[select?.stream];
   
   useEffect(() => {
     if (currentSource !== undefined) {

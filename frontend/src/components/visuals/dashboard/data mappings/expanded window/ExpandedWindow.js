@@ -1,12 +1,8 @@
-import { useState, useRef } from "react";
-import { OverlayTrigger } from "react-bootstrap";
-import { Popover } from "react-bootstrap";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import clsx from "clsx";
-import { useSelector, useDispatch } from "react-redux";
 import { DataManualSlider, DataAutoSlider } from "./RangeManager";
 import { MappingsManager, MappedParameterTag } from "./MappingsManager";
-import { checkNameValidity, validateCommaSeparatedList } from "../utils";
+import { checkNameValidity } from "../utils";
 
 export function MappingWindow({
   parameter,
@@ -18,162 +14,184 @@ export function MappingWindow({
   dataMappings,
   onClose,
 }) {
-  const [showEditOverlay, setShowEditOverlay] = useState(false);
-  const isMapped = currentMapping?.device !== "None" && currentMapping?.device !== undefined;
+  const isMapped = currentMapping !== undefined;
 
   return (
-    <div>
+    <div className="d-flex flex-column h-100">
       {/* Header */}
-      <div className="m-3 d-flex justify-content-between align-items-start">
-        <div>
-          <h5 className="m-0 p-0">{parameter?.name}</h5>
-          <p className="m-0 p-0">Map the parameter to a stream</p>
-        </div>
-        <button className="btn btn-link p-0" aria-label="Close modal" onClick={onClose}>
-          <i className="bi bi-x fs-5"></i>
-        </button>
-      </div>
-
-      {/* Currently Mapped */}
-      <div className="bg-dark text-light">
-        <div className="p-3">
-          <h6>Currently Mapped</h6>
-          <MappedParameterTag
-            currentMapping={currentMapping}
-            onRemove={() => changeSource?.("Manual")}
-          />
-        </div>
-      </div>
-
-      {/* Sliders / Range Editor */}
-      <div className="p-3">
-        <h6 className="text-body-tertiary mb-2">Value Control</h6>
-        {parameter && dataMappings && (
-          isMapped ? (
-            <DataAutoSlider
-              parameter={parameter.name}
-              dataMappings={dataMappings}
-            />
-          ) : (
-            <DataManualSlider parameter={parameter.name} />
-          )
-        )}
-      </div>
-
-      {/* Edit Parameter */}
-      <div className="p-3">
-        <h6 className="text-body-tertiary mb-2">Edit Parameter</h6>
-        {parameter && visInfo && (
-          <EditParameterModal
-            oldInfo={parameter}
+      <div className="m-3 flex-shrink-0 d-flex justify-content-between align-items-start">
+        <div className="d-flex align-items-center">
+          <EditableTitle
+            parameter={parameter}
             visInfo={visInfo}
             updateParameter={updateParameter}
             deleteParameter={deleteParameter}
-            setShowEditOverlay={setShowEditOverlay}
           />
-        )}
+        </div>
+        <button
+          className="btn btn-link p-0"
+          aria-label="Close modal"
+          onClick={onClose}
+        >
+          <i className="bi bi-x fs-5"></i>
+        </button>
+      </div>
+      {/* Currently Mapped — always visible, no accordion toggle */}
+      <div className="p-3 bg-dark text-light flex-shrink-0">
+        <h6>Currently Mapped</h6>
+        <MappedParameterTag
+          isMapped={isMapped}
+          currentMapping={currentMapping}
+          onRemove={() => changeSource?.("Manual")}
+        />
       </div>
 
-      {/* Mappings Manager (search, pinned, connected devices) */}
-      <MappingsManager
-        parameter={parameter}
-        changeSource={changeSource}
-        currentMapping={currentMapping}
-      />
+      {/* Accordion for the remaining sections */}
+      <div className="accordion rounded-0 flex-grow-1 overflow-hidden d-flex flex-column" id="mappingAccordion">
+        <AccordionSection
+          id="collapseMapStream"
+          title="Map Stream"
+          parentId="mappingAccordion"
+          bodyClassName="p-0"
+        >
+          <MappingsManager
+            parameter={parameter}
+            changeSource={changeSource}
+            currentMapping={currentMapping}
+          />
+        </AccordionSection>
+
+        <AccordionSection
+          id="collapseValueControl"
+          title="Manage"
+          parentId="mappingAccordion"
+        >
+          {parameter &&
+            dataMappings &&
+            (isMapped ? (
+              <DataAutoSlider
+                parameter={parameter.name}
+                dataMappings={dataMappings}
+              />
+            ) : (
+              <DataManualSlider parameter={parameter.name} />
+            ))}
+        </AccordionSection>
+      </div>
     </div>
   );
 }
 
-function EditParameterModal({
-  oldInfo,
-  visInfo,
-  updateParameter,
-  deleteParameter,
-  setShowEditOverlay,
-}) {
-  const [newName, setNewName] = useState(oldInfo.name);
-  const [newNameError, setNewNameError] = useState(false);
-  const [newSuggested, setNewSuggested] = useState(
-    (oldInfo?.suggested || []).join(","),
+function AccordionSection({ id, title, parentId, bodyClassName, children }) {
+  return (
+    <div className="accordion-item d-flex flex-column overflow-hidden" style={{ minHeight: "40px" }}>
+      <button
+        className="accordion-button collapsed w-100 rounded-0 bg-body-tertiary h-40 flex-shrink-0"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target={`#${id}`}
+        aria-expanded="false"
+        aria-controls={id}
+        style={{"minHeight": "40px"}}
+      >
+        {title}
+      </button>
+      <div
+        id={id}
+        className="accordion-collapse collapse overflow-y-auto"
+        data-bs-parent={`#${parentId}`}
+      >
+        <div className={clsx("accordion-body", bodyClassName)}>{children}</div>
+      </div>
+    </div>
   );
-  const [newSuggestedError, setNewSuggestedError] = useState(false);
+}
 
-  const isDeletable = visInfo.parameters.length > 1;
+function EditableTitle({ parameter, visInfo, updateParameter, deleteParameter }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState(parameter?.name || "");
+  const [error, setError] = useState("");
 
-  function validateNewName(e) {
+  const isDeletable = visInfo?.parameters?.length > 1;
+
+  function handleEdit() {
+    setNewName(parameter?.name || "");
+    setError("");
+    setIsEditing(true);
+  }
+
+  function handleSave() {
+    if (error || !newName.trim()) return;
+    if (newName !== parameter.name) {
+      updateParameter(parameter, { name: newName });
+    }
+    setIsEditing(false);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+    }
+  }
+
+  function handleChange(e) {
     const val = e.target.value;
     const isValid = checkNameValidity(visInfo, val);
-    if (isValid) {
-      setNewName(e.target.value);
-      setNewNameError("");
-    } else {
-      setNewNameError("Invalid length!");
-    }
+    setNewName(val);
+    setError(isValid ? "" : "Invalid name");
   }
 
-  function validateSuggested(e) {
-    const isValid = validateCommaSeparatedList(e.target.value);
-    // Make suggested a list instead of just a string
-    if (isValid) {
-      setNewSuggested(e.target.value);
-      setNewSuggestedError("");
-    } else {
-      setNewSuggestedError("Invalid list!");
-    }
-  }
+  if (!parameter) return null;
 
-  function submitChanges(e) {
-    e.preventDefault();
-    if (newNameError || newSuggestedError) return;
-    updateParameter(oldInfo, {
-      name: newName,
-      suggested: newSuggested.split(/,\s*|,/),
-    });
-    setShowEditOverlay(false);
+  if (isEditing) {
+    return (
+      <div>
+        <div className="d-flex align-items-center">
+          <input
+            className={clsx("form-control form-control-sm", error && "is-invalid")}
+            type="text"
+            autoComplete="off"
+            value={newName}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleSave}
+            autoFocus
+          />
+        </div>
+        <p className="m-0 p-0 mt-1">Map the parameter to a stream</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <form onSubmit={submitChanges}>
-        <div className="mb-3">
-          <label htmlFor="name">Name</label>
-          <input
-            className={clsx("form-control", newNameError && "is-invalid")}
-            type="text"
-            autoComplete="off"
-            placeholder="Name"
-            id="name"
-            defaultValue={oldInfo.name}
-            onChange={validateNewName}
-          ></input>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="suggested">Suggested mappings</label>
-          <input
-            className={clsx("form-control", newSuggestedError && "is-invalid")}
-            type="text"
-            autoComplete="off"
-            placeholder="i.e. Alpha, Beta, eye_blink_left, ..."
-            id="suggested"
-            defaultValue={(oldInfo?.suggested || []).join(",")}
-            onChange={validateSuggested}
-          ></input>
-        </div>
-        <div className="d-flex justify-content-between">
+      <div className="d-flex align-items-center">
+        <h5 className="m-0 p-0">{parameter.name}</h5>
+        <button
+          className="btn btn-link p-0 ms-2"
+          aria-label="Edit parameter name"
+          onClick={handleEdit}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+            edit
+          </span>
+        </button>
+        {isDeletable && (
           <button
-            className="btn btn-outline-danger"
-            disabled={!isDeletable}
-            onClick={() => deleteParameter(oldInfo.name)}
-            type="button"
+            className="btn btn-link p-0 ms-1 text-danger"
+            aria-label="Delete parameter"
+            onClick={() => deleteParameter(parameter.name)}
           >
-            Delete
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+              delete
+            </span>
           </button>
-          <button className="btn btn-primary" type="submit">
-            Save
-          </button>
-        </div>
-      </form>
+        )}
+      </div>
+      <p className="m-0 p-0">Map the parameter to a stream</p>
     </div>
   );
 }
-
