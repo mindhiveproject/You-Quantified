@@ -15,7 +15,9 @@ export function MappingWindow({
   onClose,
 }) {
   const isMapped = currentMapping !== undefined;
+  
 
+  
   return (
     <div className="d-flex flex-column h-100">
       {/* Header */}
@@ -58,6 +60,7 @@ export function MappingWindow({
             parameter={parameter}
             changeSource={changeSource}
             currentMapping={currentMapping}
+            updateParameter={updateParameter}
           />
         </AccordionSection>
 

@@ -45,16 +45,22 @@ function DataCard({
 
   function expandCard() {
     setIsExpanded(!isExpanded);
+    console.log(isExpanded);
     if (isExpanded) {
-      setExpandedParam({
-        visParameter,
-        currentMapping,
-        visInfo,
-        updateParameter,
-        deleteParameter,
-        dataMappings,
-        changeSource,
-      });
+      if (expandedParam?.visParameter.name === visParameter.name) {
+        // setIsExpanded(true);
+      } else {
+        // setIsExpanded(false);
+        setExpandedParam({
+          visParameter,
+          currentMapping,
+          visInfo,
+          updateParameter,
+          deleteParameter,
+          dataMappings,
+          changeSource,
+        });
+      }
     } else {
       setExpandedParam(null);
     }
@@ -77,7 +83,7 @@ function DataCard({
             animate={{ opacity: isExpanded ? 1 : 0 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="text-nowrap">
+            <div className="text-nowrap text-start">
               <small>{isMapped ? "Streaming" : "Not mapped"}</small>
               <h6 className="text-start m-0">{visParameter.name}</h6>
             </div>

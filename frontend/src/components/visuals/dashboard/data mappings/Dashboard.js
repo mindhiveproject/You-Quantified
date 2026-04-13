@@ -17,9 +17,7 @@ export default function DataManagementWindow({
   const selectorKeys = Object.keys(parameters);
   const visInfoKeys = visInfo?.parameters.map(({ name }) => name);
 
-  
-  if (JSON.stringify(selectorKeys) != JSON.stringify(visInfoKeys))
-    return <div>Loading...</div>;
+
 
   return (
     <div className="h-100 d-flex flex-column" style={{ overflow: "hidden" }}>
@@ -55,6 +53,19 @@ function DataManagement({ changeParameters, visInfo, custom }) {
       ({ name }) => name != paramName,
     );
 
+    changeParameters(newMeta.parameters);
+  }
+
+  function newParameter() {
+    const existingNames = new Set(visInfo.parameters.map(({ name }) => name));
+    let newName = "New Parameter";
+    let counter = 1;
+    while (existingNames.has(newName)) {
+      newName = `New Parameter ${counter}`;
+      counter++;
+    }
+    const newMeta = JSON.parse(JSON.stringify(visInfo));
+    newMeta.parameters.push({ name: newName });
     changeParameters(newMeta.parameters);
   }
 
@@ -99,6 +110,8 @@ function DataManagement({ changeParameters, visInfo, custom }) {
     />
   ));
 
+
+
   if (Object.keys(dataMappings).length === 0) return <div>Loading...</div>;
   // custom && to check if you can add a new parameter
 
@@ -110,6 +123,9 @@ function DataManagement({ changeParameters, visInfo, custom }) {
         transition={{ duration: 0.3, ease: "easeOut" }}
       >
         {dataCards}
+        <button onClick={newParameter}>
+          New Param
+        </button>
       </motion.div>
       <AnimatePresence>
         {!isExpanded && (

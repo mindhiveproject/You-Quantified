@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { WaveFormIcon } from "./WaveFormIcon";
 import { useSelector, shallowEqual } from "react-redux";
 import clsx from "clsx";
-export function MappingsManager({ parameter, changeSource, currentMapping }) {
+export function MappingsManager({ parameter, changeSource, currentMapping, updateParameter }) {
   // Contains the search, pinned parameters, and connected devices for mapping
 
   const deviceKeys = useSelector(
@@ -21,6 +21,15 @@ export function MappingsManager({ parameter, changeSource, currentMapping }) {
     } else {
       changeSource({ device, stream });
     }
+  }
+
+  function pinDefault(newSuggested) {
+    updateParameter(parameter, { suggested: [...(parameter?.suggested || []), newSuggested] });
+  }
+
+  function unpinDefault(oldSuggested) {
+    const newSuggested = parameter?.suggested?.filter((x) => x !== oldSuggested) || [];
+    updateParameter(parameter, { suggested: newSuggested });
   }
 
   const isMapped = currentMapping !== undefined;
@@ -49,6 +58,9 @@ export function MappingsManager({ parameter, changeSource, currentMapping }) {
           streams={filteredStreams}
           selectNewSource={selectNewSource}
           currentMapping={currentMapping}
+          parameter={parameter}
+          pinDefault={pinDefault}
+          unpinDefault={unpinDefault}
         />
       );
     });
@@ -79,21 +91,31 @@ export function MappingsManager({ parameter, changeSource, currentMapping }) {
 function ConnectedDeviceAccordion({
   parameter,
   currentMapping,
-  isPinned,
   device,
   streams,
   selectNewSource,
+  pinDefault,
+  unpinDefault,
 }) {
-  const parameterCards = Object.keys(streams).map((key) => (
-    <ParameterDataCard
-      parameter={parameter}
-      currentMapping={currentMapping}
-      stream={key}
-      isPinned={isPinned}
-      selectNewSource={selectNewSource}
-      device={device}
-    />
-  ));
+  const parameterCards = Object.keys(streams).map((key) => {
+
+    const isPinned = parameter?.suggested?.some(
+      (s) => s.device === device && s.stream === key,
+    );
+
+    return (
+      <ParameterDataCard
+        key={key}
+        currentMapping={currentMapping}
+        stream={key}
+        isPinned={isPinned}
+        selectNewSource={selectNewSource}
+        device={device}
+        pinDefault={pinDefault}
+        unpinDefault={unpinDefault}
+      />
+    );
+  });
 
   return (
     <div>
@@ -117,6 +139,8 @@ function ParameterDataCard({
   device,
   selectNewSource,
   isPinned,
+  pinDefault,
+  unpinDefault,
 }) {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -155,6 +179,25 @@ function ParameterDataCard({
           className="overflow-hidden"
           initial={false}
           animate={{ width: isHovering ? "auto" : 0 }}
+          transition={{ duration: 0.1, delay: 0.05, ease: "easeInOut" }}
+        >
+          <button
+            className="btn btn-outline-dark p-2 h-100 align-items-center d-flex"
+            onClick={() =>
+              isPinned
+                ? unpinDefault({ device, stream })
+                : pinDefault({ device, stream })
+            }
+          >
+            <span className="material-symbols-outlined m-0 p-0">
+              {isPinned ? "keep_off" : "keep"}
+            </span>
+          </button>
+        </motion.div>
+        <motion.div
+          className="overflow-hidden"
+          initial={false}
+          animate={{ width: isHovering ? "auto" : 0 }}
           transition={{ duration: 0.1, ease: "easeInOut" }}
         >
           <button
@@ -166,24 +209,21 @@ function ParameterDataCard({
             </span>
           </button>
         </motion.div>
-        {/*<motion.div
-          className="overflow-hidden"
-          initial={false}
-          animate={{ width: isHovering ? "auto" : 0 }}
-          transition={{ duration: 0.1, delay: 0.05, ease: "easeInOut" }}
-        >
-          <button className="btn btn-outline-dark p-2 h-100 align-items-center d-flex">
-            <span className="material-symbols-outlined m-0 p-0">keep</span>
-          </button>
-        </motion.div>*/}
       </div>
     </div>
   );
 }
 
 export function MappedParameterTag({ isMapped, currentMapping, onRemove }) {
+
   return (
-    <div className="d-flex justify-content-between bg-primary align-items-center px-3 py-2">
+    <div
+      className={clsx(
+        "d-flex justify-content-between align-items-center px-3 py-2",
+        isMapped && "bg-primary",
+        !isMapped && "border border-white"
+      )}
+    >
       <div className="d-flex align-items-center">
         <div className="d-flex me-2 p-0 m-0 align-items-center text-white">
           <WaveFormIcon active={isMapped} />
@@ -195,7 +235,7 @@ export function MappedParameterTag({ isMapped, currentMapping, onRemove }) {
           </span>
         </span>
       </div>
-      {onRemove && (
+      {isMapped && (
         <button
           className="btn btn-link p-0 ms-2 text-white"
           aria-label="Unmap parameter"
