@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import devicesRaw from "../../../metadata/devices.json";
 
@@ -35,12 +35,16 @@ export function closestEdge(mouse, elem) {
   }
 }
 
-export function GenericDeviceButtonsList({ setCurrentDevice }) {
+export function GenericDeviceButtonsList({ setCurrentDevice, setCamStream, videoRef, canvasRef, processingVideoRef }) {
   const deviceCards = devicesRaw.map((jsonMeta) => {
     return (
       <GenericDeviceButton
         jsonMeta={jsonMeta}
         setCurrentDevice={setCurrentDevice}
+        setCamStream={setCamStream}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        processingVideoRef={processingVideoRef}
         key={jsonMeta.device}
       />
     );
@@ -49,16 +53,19 @@ export function GenericDeviceButtonsList({ setCurrentDevice }) {
   return <div>{deviceCards}</div>;
 }
 
-function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
+function GenericDeviceButton({ jsonMeta, setCurrentDevice, setCamStream, videoRef, canvasRef, processingVideoRef }) {
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const divRef = useRef(null);
 
   const deviceStreams = Object.entries(deviceMeta).filter(
-    ([key, value]) => value.device === jsonMeta.device
+    ([key, value]) => value.device === jsonMeta.device,
   );
 
   const handleMouseEnter = () => {
-    setCurrentDevice({ device: jsonMeta.device, card_type: "generic" });
+    setCurrentDevice({
+      device: jsonMeta.device,
+      card_type: jsonMeta?.card_type || "generic",
+    });
   };
 
   const handleMouseLeave = (mouse) => {
@@ -66,6 +73,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
     if (closeEdge === "left") return;
     setCurrentDevice({ device: "none", card_type: "none" });
   };
+
 
   const onButtonConnect = deviceConnectionFunctions[jsonMeta.device];
 
@@ -76,8 +84,16 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
     setConnInfo(connectionText[status]);
   }
 
+  const connectCallback = useCallback(() => {
+    // Always pass both arguments - functions can ignore what they don't need
+    onButtonConnect(changeConnectionStatus, setCamStream, videoRef, canvasRef, processingVideoRef);
+  }, [onButtonConnect, setCamStream, videoRef, canvasRef, processingVideoRef]);
+
   useEffect(() => {
-    if (typeof navigator.bluetooth === "undefined" && jsonMeta.device === "Muse") {
+    if (
+      typeof navigator.bluetooth === "undefined" &&
+      jsonMeta.device === "Muse"
+    ) {
       setDisabled(true);
     }
     if (jsonMeta.connections !== "multiple" && deviceStreams.length > 0) {
@@ -99,7 +115,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
           className={`${
             connText.text === "Connecting" ? "btn-connect" : ""
           } card-body btn btn-link text-decoration-none text-start`}
-          onClick={() => onButtonConnect(changeConnectionStatus)}
+          onClick={connectCallback}
           disabled={(connText.text === "Connecting") | disabled}
         >
           <div className="d-flex text-start justify-content-between">
@@ -116,7 +132,7 @@ function GenericDeviceButton({ jsonMeta, setCurrentDevice }) {
       {deviceStreams.length > 0 && (
         <ul className="list-group list-group-flush">
           {deviceStreams.map((obj) => (
-            <DeviceConnectionIndicator myDeviceMeta={obj[1]} key={obj[1]?.id}/>
+            <DeviceConnectionIndicator myDeviceMeta={obj[1]} key={obj[1]?.id} />
           ))}
         </ul>
       )}

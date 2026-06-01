@@ -9,9 +9,11 @@
     "cors": {
       "allow_origins": [
         "http://localhost:3000",
+        "http://localhost:4444",
         "http://localhost:5173",
         "https://youquantified.com",
         "https://backend.youquantified.com",
+        "https://smith.langchain.com",
         "https://api.smith.langchain.com"
       ],
       "allow_headers": ["*"]

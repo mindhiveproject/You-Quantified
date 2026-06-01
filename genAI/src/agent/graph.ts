@@ -1,4 +1,5 @@
-import { ChatOpenAI } from "@langchain/openai";
+
+import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { tool } from "@langchain/core/tools";
 import { interrupt } from "@langchain/langgraph";
@@ -8,14 +9,14 @@ import { z } from "zod";
 import { loadDocs } from "./fetch_docs.js";
 // https://langchain-ai.github.io/langgraph/cloud/how-tos/use_stream_react/#typescript
 
-const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
-  apiKey: process.env.OPEN_AI_API,
+const model = new ChatAnthropic({
+  model: "claude-sonnet-4-6",
+  apiKey: process.env.ANTHROPIC_KEY,
 });
 
-const advancedModel = new ChatOpenAI({
-  model: "o4-mini",
-  apiKey: process.env.OPEN_AI_API,
+const advancedModel = new ChatAnthropic({
+  model: "claude-haiku-4-5-20251001",
+  apiKey: process.env.ANTHROPIC_KEY,
 })
 
 const codeFormatter = tool(async () => {}, {
@@ -220,7 +221,9 @@ async function createP5Code(state: typeof StateAnnotation.State) {
     context: `${contextCache.introDocs} \n\n ${contextCache.quickStartDocs}`,
   });
 
-  const structuredLLM = advancedModel.bindTools([codeFormatter]);
+  const structuredLLM = advancedModel.bindTools([codeFormatter], {
+    tool_choice: "any"
+  });
   const response = await structuredLLM.invoke(prompt.messages);
 
   // Extract data directly from the structured tool call
@@ -273,7 +276,9 @@ async function fixP5Code(state: typeof StateAnnotation.State) {
     code: state.visual?.code || "",
   });
 
-  const structuredLLM = advancedModel.bindTools([codeFormatter]);
+  const structuredLLM = advancedModel.bindTools([codeFormatter], {
+    tool_choice: "any"
+  });
   const response = await structuredLLM.invoke(prompt.messages);
 
   const code = response?.tool_calls?.[0]?.args?.code || "";

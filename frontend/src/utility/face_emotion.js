@@ -14,26 +14,39 @@ export class FaceEmotionRecognition {
   expressions;
   ageGender;
   id;
+  isRunning = false;
+  connected = false;
 
-  constructor(modelBasePath, videoElement, canvasElement, id) {
+  constructor(
+    modelBasePath,
+    videoElement,
+    canvasElement,
+    id = "face-emotion-recognition",
+  ) {
     this.modelBasePath = modelBasePath;
     this.htmlVideoElement = videoElement;
     this.canvasHtmlElement = canvasElement;
-    this.id = id || videoElement.id || "face-emotion-recognition";
+    this.id = id || videoElement.id;
+  }
+
+  updateCanvas(canvasElement) {
+    this.canvasHtmlElement = canvasElement;
   }
 
   async connect() {
     await this._loadModels();
+    this.connected = true;
+    
     store.dispatch({
       type: "devices/create",
       payload: {
         id: this.id,
         metadata: {
-          device: "Face Emotion Recognition",
+          device: "Video Emotion",
           connected: true,
           id: this.id,
           // Need to find the sampling rate. Is it the same as the video frame rate?
-          "sampling_rate": 24,
+          sampling_rate: 24,
           type: "default",
         },
       },
@@ -48,86 +61,138 @@ export class FaceEmotionRecognition {
       await faceapi.loadFaceExpressionModel(this.modelBasePath);
       this.loadedModels = true;
       console.log("Successfully loaded face emotion models");
-    } catch(e) {
+    } catch (e) {
       console.log("Error loading models", e);
     }
   }
 
   async stream() {
-
     if (!this.htmlVideoElement || !this.loadedModels) return;
-    console.log("Started streaming")
-    console.log("HTML Video Element", this.htmlVideoElement);
-    console.log("Type of video element", this.htmlVideoElement instanceof HTMLVideoElement);
-    console.log("Type of video element", this.htmlVideoElement.constructor.name);
+    
+    this.isRunning = true;
 
-    this.detections = await faceapi.detectAllFaces(this.htmlVideoElement);
-    if (this.detections.length === 0) return;
+    const processFrame = async () => {
+      if (!this.htmlVideoElement || !this.loadedModels || !this.isRunning) return;
 
-    this.landmarks = await detections.withFaceLandmarks();
-    this.expressions = await landmarks.withFaceExpressions();
-    this.ageGender = await landmarks.withAgeAndGender();
+      if (this.htmlVideoElement.readyState < 2) {
+        this.htmlVideoElement.requestVideoFrameCallback(processFrame);
+      }
 
-    // Add multi-face support by running face recognition on each face
-    // Then, calculate every metric by face
-    // Stream for each face using different ids (dispatch)
-    // The face recognition should only occurr when new faces enter/leave the frame and it should save old faces (in case someone comes back)
-    // Dispatch an type "devices/create" action for each new face (should only happen when a new face enters)
+      try {
+        // Chain all methods BEFORE awaiting - this is the correct face-api.js pattern
+        const results = await faceapi.detectAllFaces(this.htmlVideoElement)
+          .withFaceLandmarks()
+          .withFaceExpressions()
+          .withAgeAndGender();
 
-    console.log(this.expressions);
+        if (results.length === 0) {
+          // No faces detected, continue to next frame
+          this.htmlVideoElement.requestVideoFrameCallback(processFrame);
+          return;
+        }
 
-    /* store.dispatch({
-      type: "devices/streamUpdate",
-      payload: {
-        id: this.id,
-        data: {
-          ...this.expressions[0].expressions,
+        this.detections = results;
+
+        // For now, use the first detected face
+        // TODO: Add multi-face support by running face recognition on each face
+        // Then, calculate every metric by face
+        // Stream for each face using different ids (dispatch)
+        // The face recognition should only occurr when new faces enter/leave the frame and it should save old faces (in case someone comes back)
+        // Dispatch an type "devices/create" action for each new face (should only happen when a new face enters)
+        
+        const firstFace = results[0];
+
+        store.dispatch({
+          type: "devices/streamUpdate",
+          payload: {
+            id: this.id,
+            data: {
+              ...firstFace.expressions,
+              // age: firstFace.age,
+              // gender: firstFace.gender,
+            },
+          },
+        });
+
+        if (this.canvasHtmlElement && results) {
+          this.drawResults();
+        }
+
+      } catch (error) {
+        console.error("Error processing frame:", error);
+      }
+
+      // Request next frame
+      if (this.htmlVideoElement && this.isRunning) {
+        this.htmlVideoElement.requestVideoFrameCallback(processFrame);
+      }
+    };
+
+    this.htmlVideoElement.requestVideoFrameCallback(processFrame);
+  }
+
+  stop() {
+    this.isRunning = false;
+    
+    if (this.connected) {
+      store.dispatch({
+        type: "devices/updateMetadata",
+        payload: {
+          id: this.id,
+          field: "connected",
+          data: false,
         },
-      },
-    });*/
+      });
+    }
+    
+    this.connected = false;
+  }
+
+  isOpen() {
+    return this.connected && this.isRunning;
   }
 
   async drawResults(
-    showAgeGender = true,
+    showAgeGender = false,
     showExpressions = true,
-    showLandmarks = true
+    showLandmarks = false,
   ) {
-    if (!this.canvasHtmlElement || !this.loadedModels) return;
+    if (!this.canvasHtmlElement || !this.loadedModels || !this.detections) return;
+    
     const input = this.htmlVideoElement;
     const canvas = this.canvasHtmlElement;
-    const displaySize = { width: input.width, height: input.height };
+    const displaySize = { width: input.videoWidth, height: input.videoHeight };
 
     faceapi.matchDimensions(canvas, displaySize);
 
-    const resizedDetections = faceapi.resizeResults(
-      this.detections,
-      displaySize
-    );
+    // Now this.detections contains the full results with all data
+    const resizedResults = faceapi.resizeResults(this.detections, displaySize);
 
-    const resizedLandmarks = faceapi.resizeResults(this.landmarks, displaySize);
+    // Clear canvas
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const resizedExpressions = faceapi.resizeResults(
-      this.expressions,
-      displaySize
-    );
+    // Draw detections (bounding boxes)
+    faceapi.draw.drawDetections(canvas, resizedResults);
 
-    const resizedAgeGender = faceapi.resizeResults(this.ageGender, displaySize);
-
-    faceapi.draw.drawDetections(canvas, resizedDetections);
-
-    if (showAgeGender) {
-      faceapi.draw.drawDetections(canvas, resizedAgeGender);
+    if (showLandmarks) {
+      faceapi.draw.drawFaceLandmarks(canvas, resizedResults);
     }
 
     if (showExpressions) {
-      faceapi.draw.drawFaceExpressions(canvas, resizedExpressions);
+      const minProbability = 0.05;
+      faceapi.draw.drawFaceExpressions(canvas, resizedResults, minProbability);
     }
 
-    const minProbability = 0.05;
-    faceapi.draw.drawFaceExpressions(canvas, resizedResults, minProbability);
-
-    if (showLandmarks) {
-      faceapi.draw.drawFaceLandmarks(canvas, resizedLandmarks);
+    if (showAgeGender) {
+      // Draw age and gender for each face
+      resizedResults.forEach((result) => {
+        const { age, gender, genderProbability, detection } = result;
+        const box = detection.box;
+        const text = `${Math.round(age)} years, ${gender} (${Math.round(genderProbability * 100)}%)`;
+        const drawBox = new faceapi.draw.DrawTextField([text], box.topLeft);
+        drawBox.draw(canvas);
+      });
     }
   }
 }

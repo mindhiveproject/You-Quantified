@@ -1,17 +1,29 @@
 import devicesRaw from "../../../metadata/devices.json";
 import React from "react";
 import { ModalDataInformation } from "./data_sources_display";
+import { VideoInfoPane } from "./video_generic";
 
-export function LeftInfoPane({ currentDevice, leftPaneInfoRef }) {
+export function LeftInfoPane({
+  currentDevice,
+  leftPaneInfoRef,
+  camStream,
+  setCamStream,
+  videoRef,
+  canvasRef,
+}) {
   /*
     if (currentDevice?.name === "Upload") {
       return <FileUploader />;
-    }*/
+    }
+  */
 
   return (
     <div className="w-100 h-100 ms-3 pe-4-5 mb-5">
       {currentDevice?.card_type === "generic" && (
-        <div className="card rounded-0 text-start black-hover border-dark" ref={leftPaneInfoRef}>
+        <div
+          className="card rounded-0 text-start black-hover border-dark"
+          ref={leftPaneInfoRef}
+        >
           <GenericInfoPane currentDevice={currentDevice} />
         </div>
       )}
@@ -20,13 +32,24 @@ export function LeftInfoPane({ currentDevice, leftPaneInfoRef }) {
           <UploadInfoPane />
         </div>
       )}
+      {currentDevice?.card_type === "video" && (
+        <div className="card rounded-0 text-start black-hover border-dark">
+          <VideoInfoPane 
+            currentDevice={currentDevice} 
+            camStream={camStream} 
+            setCamStream={setCamStream} 
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 function GenericInfoPane({ currentDevice }) {
   const deviceJsonInfo = devicesRaw.find(
-    ({ device }) => device === currentDevice?.device
+    ({ device }) => device === currentDevice?.device,
   );
 
   return (

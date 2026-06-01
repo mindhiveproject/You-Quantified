@@ -1,5 +1,5 @@
 import "./App.scss";
-import React, { useState, createContext, useEffect } from "react";
+import React, { useState, createContext, useEffect, useRef } from "react";
 import { QueryMainView } from "./components/visuals/dashboard/main";
 import { MainMenu } from "./components/visuals/menu/menu";
 import { DevicesManager } from "./components/devices/main";
@@ -36,7 +36,7 @@ function NavBar({ setShowDevices, recording, setRecording }) {
           <MyUserName />
         </div>
         <NavLink className="nav-link" to="/visuals">
-          Visuals
+          Projects
         </NavLink>
         <button className="data-btn" onClick={() => setShowDevices(true)}>
           Data
@@ -53,6 +53,10 @@ const saveObject = {};
 function DesktopApp() {
   const [showDevices, setShowDevices] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [camStream, setCamStream] = useState(null);
+  const videoRef = useRef(null); // For UI display
+  const canvasRef = useRef(null); // For canvas overlay
+  const processingVideoRef = useRef(null); // Hidden video for face detection
 
   return (
     <>
@@ -61,6 +65,14 @@ function DesktopApp() {
         recording={recording}
         setRecording={setRecording}
       />
+      {/* Hidden video element for face detection processing */}
+      <video 
+        ref={processingVideoRef}
+        style={{ display: 'none' }}
+        autoPlay
+        playsInline
+        muted
+      />
       <div className="hv-100">
         {showDevices && (
           <DevicesManager
@@ -68,6 +80,11 @@ function DesktopApp() {
             saveObject={saveObject}
             recording={recording}
             setRecording={setRecording}
+            camStream={camStream}
+            setCamStream={setCamStream}
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            processingVideoRef={processingVideoRef}
           />
         )}
         <Routes>

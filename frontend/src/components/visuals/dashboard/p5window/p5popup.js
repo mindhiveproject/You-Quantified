@@ -9,6 +9,7 @@ export function P5PopupVisuals({
   extensions,
   additionalScripts,
   handleWindowMessage,
+  handleWindowDismount,
 }) {
   const [params, setParams] = useState(initialParams);
   const [code, setCode] = useState(initialCode);

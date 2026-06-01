@@ -15,7 +15,9 @@ export function VisTopBar({
   mutationData,
   changeVisMetadata,
   isEditable,
-  isDirty
+  isPaused,
+  isDirty,
+  setIsPaused
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const editPopupRef = useRef(null);
@@ -99,7 +101,15 @@ export function VisTopBar({
         </h5>
       </div>
       <div className="d-flex justify-content-end align-items-center">
-        {isEditable && <ShowUploadState mutationData={mutationData} isDirty={isDirty}/>}
+        {isEditable && (
+          <ShowUploadState mutationData={mutationData} isDirty={isDirty} />
+        )}
+        <button className="btn btn-link" onClick={()=>setIsPaused(!isPaused)}>
+          <span className="material-symbols-outlined inline-icon">
+            {isPaused ? "play_arrow" : "pause"}
+          </span>
+        </button>
+
         <button
           className="btn btn-link"
           onClick={() => setPopupVisuals(!popupVisuals)}
@@ -270,7 +280,7 @@ function ShowUploadState({ mutationData, isDirty }) {
   const { loading, error } = mutationData;
   let statusText = "All changes saved";
 
-  if (isDirty) statusText = "Saving changes..."
+  if (isDirty) statusText = "Saving changes...";
   if (loading) statusText = "Saving changes…";
   if (error) statusText = "Error saving";
 

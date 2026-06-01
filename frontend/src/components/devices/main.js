@@ -7,7 +7,6 @@ import { GenericDeviceButtonsList } from "./buttons/generic";
 import { FileUploadButton } from "./buttons/upload";
 import { LSLDeviceButton } from "./buttons/lsl";
 
-
 const selectData = (state) => state.dataStream;
 const selectDeviceMeta = (state) => state.deviceMeta;
 
@@ -17,7 +16,7 @@ export const selectDevices = createSelector(
     const ids = Object.keys(dataStream);
     const devices = ids.map((id) => deviceMeta[id]?.device);
     return devices.filter(Boolean);
-  }
+  },
 );
 
 // Add an outside click alerter
@@ -28,8 +27,14 @@ export function DevicesManager({
   saveObject,
   recording,
   setRecording,
+  camStream,
+  setCamStream,
+  videoRef,
+  canvasRef,
+  processingVideoRef,
 }) {
   const [currentDevice, setCurrentDevice] = useState();
+
   const rightPanelRef = useRef(null);
   const leftPaneInfoRef = useRef(null);
   const recordButtonRef = useRef(null);
@@ -40,7 +45,7 @@ export function DevicesManager({
 
   useMultiOutsideAlerter(
     [rightPanelRef, leftPaneInfoRef, recordButtonRef],
-    setShowDevices
+    setShowDevices,
   );
 
   return (
@@ -75,6 +80,10 @@ export function DevicesManager({
             <LeftInfoPane
               currentDevice={currentDevice}
               leftPaneInfoRef={leftPaneInfoRef}
+              camStream={camStream}
+              setCamStream={setCamStream}
+              videoRef={videoRef}
+              canvasRef={canvasRef}
             />
           </div>
         </div>
@@ -82,18 +91,30 @@ export function DevicesManager({
           className="sources-pane-right disable-scrollbar me-3"
           ref={rightPanelRef}
         >
-          <RightPane setCurrentDevice={setCurrentDevice} />
+          <RightPane
+            setCurrentDevice={setCurrentDevice}
+            setCamStream={setCamStream}
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            processingVideoRef={processingVideoRef}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-function RightPane({ setCurrentDevice }) {
+function RightPane({ setCurrentDevice, setCamStream, videoRef, canvasRef, processingVideoRef }) {
   return (
     <div>
       <FileUploadButton setCurrentDevice={setCurrentDevice} />
-      <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
+      <GenericDeviceButtonsList 
+        setCurrentDevice={setCurrentDevice} 
+        setCamStream={setCamStream}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        processingVideoRef={processingVideoRef}
+      />
       <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
     </div>
   );
@@ -103,7 +124,7 @@ export function useMultiOutsideAlerter(refs, setShow) {
   useEffect(() => {
     function handleClickOutside(event) {
       const clickedInsideAny = refs.some(
-        (ref) => ref.current && ref.current.contains(event.target)
+        (ref) => ref.current && ref.current.contains(event.target),
       );
       if (!clickedInsideAny) {
         setShow(false);
@@ -121,7 +142,7 @@ function EventMarkerCard() {
   const deviceMeta = useSelector((state) => state.deviceMeta);
 
   const eventMarkerStreams = Object.entries(deviceMeta).filter(
-    ([key, value]) => value.type === "event marker"
+    ([key, value]) => value.type === "event marker",
   );
 
   const eventMarkerIndicators = eventMarkerStreams?.map((obj) => {
@@ -144,7 +165,7 @@ function EventMarkerCard() {
 
 function EventMarkerIndicator({ name, deviceMeta }) {
   const [connectionText, setConnectionText] = useState(
-    connText["disconnected"]
+    connText["disconnected"],
   );
 
   function changeConnectionStatus(status) {

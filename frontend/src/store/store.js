@@ -27,7 +27,19 @@ function rootReducer(state = initialState, action) {
       // Logic to handle initializing parameters
 
       let loadedParams = action.payload.reduce((acc, obj) => {
-        acc[obj.name] = { value: 0, mapping: "Manual", range: [0, 1] };
+        const storageKey = `mapping_${obj.name}`;
+        const stored = sessionStorage.getItem(storageKey);
+        let mapping = "Manual";
+        let hasUserSelected = false;
+        if (stored) {
+          try {
+            mapping = JSON.parse(stored);
+            hasUserSelected = true;
+          } catch (e) {
+            // invalid data, ignore
+          }
+        }
+        acc[obj.name] = { value: 0, mapping, range: [0, 1], hasUserSelected };
         return acc;
       }, {});
 
@@ -36,17 +48,30 @@ function rootReducer(state = initialState, action) {
         params: loadedParams,
       };
 
-    case "params/updateMappings":
+    case "params/updateMappings": {
+      const paramName = action.payload.name;
+      const newMapping = action.payload.mapping;
+      const userSelected = action.payload.userSelected || false;
+
+      if (userSelected) {
+        sessionStorage.setItem(
+          `mapping_${paramName}`,
+          JSON.stringify(newMapping)
+        );
+      }
+
       return {
         ...state,
         params: {
           ...state.params,
-          [action.payload.name]: {
-            ...state.params[action.payload.name],
-            mapping: action.payload.mapping,
+          [paramName]: {
+            ...state.params[paramName],
+            mapping: newMapping,
+            ...(userSelected ? { hasUserSelected: true } : {}),
           },
         },
       };
+    }
 
     case "params/create":
       return {
@@ -57,6 +82,7 @@ function rootReducer(state = initialState, action) {
             value: 0,
             mapping: "Manual",
             range: [0, 1],
+            hasUserSelected: false,
           },
         },
       };

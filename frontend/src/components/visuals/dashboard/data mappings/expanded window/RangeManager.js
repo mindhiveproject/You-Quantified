@@ -40,11 +40,6 @@ export function DataManualSlider({ parameter }) {
   const handleFormChange = (e) => {
     e.preventDefault();
     let formValue = e.target.value;
-    if (formValue > max) {
-      formValue = max;
-    } else if (formValue < min) {
-      formValue = min;
-    }
     dispatch({
       type: "params/update",
       payload: {
@@ -80,11 +75,13 @@ export function DataManualSlider({ parameter }) {
       <div className="input-group me-1">
         <form className="form-floating" autoComplete="off">
           <input
-            type="text"
-            className="form-control w-75px"
+            type="number"
+            className="form-control w-75px no-spin"
             id="valorManualInput"
-            value={Math.round(valor * 1000) / 1000 || 0}
+            value={valor || 0}
             onChange={handleFormChange}
+            min={0}
+            max={1}
           />
           <label htmlFor="valorManualInput">Value</label>
         </form>
@@ -92,7 +89,7 @@ export function DataManualSlider({ parameter }) {
       <div className="align-self-center">
         <OverlayTrigger
           trigger="click"
-          placement="left"
+          placement="bottom"
           rootClose={true}
           overlay={sliderToolTip}
         >

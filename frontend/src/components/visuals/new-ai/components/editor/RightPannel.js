@@ -136,6 +136,7 @@ function RightPannel({ visualMetaAI, isLoading, isVerifying, setError }) {
             <CodePane
               visName={"AI-Generated Visual"}
               setCode={setCode}
+              setRemoteCode={setCode}
               code={code}
               isEditable={!isLoading || !isVerifying}
               extensions={extensions}

@@ -31,12 +31,14 @@ export function VisualScreen({
   code,
   popupVisuals,
   currentScreen,
+  isPaused,
   docsContent,
   setters,
   isEditable,
   isDirty,
   isDirtyRef,
 }) {
+  const [errors, setErrors] = useState([]);
   const fullScreenHandle = useFullScreenHandle();
   const visName = visMetadata?.title;
 
@@ -63,6 +65,8 @@ export function VisualScreen({
             isDirtyRef={isDirtyRef}
             setIsDirty={setters.setIsDirty}
             setRemoteCode={setters.setRemoteCode}
+            errors={errors}
+            setErrors={setErrors}
           />
         )}
         {currentScreen.left == "docs" && (
@@ -87,11 +91,13 @@ export function VisualScreen({
       <SplitPaneRight>
         <VisualsWindow
           code={code}
+          setErrors={setErrors}
           visMetadata={visMetadata}
           fullScreenHandle={fullScreenHandle}
           popupVisuals={popupVisuals}
           setPopupVisuals={setters.setPopupVisuals}
           extensions={visMetadata?.extensions}
+          isPaused={isPaused}
         />
       </SplitPaneRight>
     </SplitPane>
@@ -190,6 +196,7 @@ function MainView({ visID, queryData }) {
   const [isDirty, _setIsDirty] = useState(false);
   const isDirtyRef = useRef(false);
   const saveCodeTimeout = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const setIsDirty = useCallback((value) => {
     isDirtyRef.current = value;
@@ -211,7 +218,7 @@ function MainView({ visID, queryData }) {
     variables: {
       where: { id: visID },
     },
-    refetchQueries: [MY_VISUALS, "VisualsQuery"],
+    // refetchQueries: [MY_VISUALS, "VisualsQuery"],
     onCompleted: () => {
       setIsDirty(false);
     },
@@ -325,7 +332,7 @@ function MainView({ visID, queryData }) {
     return () => {
       clearTimeout(saveCodeTimeout.current);
     };
-  }, []);
+  }, [visMetadata?.code]);
 
   useEffect(() => {
     if (visMetadata?.parameters) {
@@ -354,11 +361,14 @@ function MainView({ visID, queryData }) {
         mutationData={mutationData}
         changeVisMetadata={changeVisMetadata}
         isDirty={isDirty}
+        isPaused={isPaused}
+        setIsPaused={setIsPaused}
       />
       <VisualScreen
         isEditable={isEditable}
         visMetadata={visMetadata}
         code={code}
+        isPaused={isPaused}
         popupVisuals={popupVisuals}
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}

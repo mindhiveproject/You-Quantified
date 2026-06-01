@@ -34,7 +34,7 @@ function CreateButton({ isDisabled, visualMetaAI }) {
           id: currentUser?.id,
         },
       },
-      genAI: {
+      yqGenAI: {
         connect: {
           langGraphThread: searchParams.get("ai-thread")
         }
