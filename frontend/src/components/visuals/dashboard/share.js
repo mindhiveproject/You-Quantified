@@ -5,6 +5,7 @@ import {
   GET_USERS_IN_CLASS,
   REMOVE_COLLABORATOR,
 } from "../../../queries/visuals";
+import { GET_FRIENDS } from "../../../queries/friends";
 import { UserContext } from "../../../App";
 
 export function ShareMenu({ visURL, setShowShare, visMetadata, isOwner }) {
@@ -121,9 +122,26 @@ function CollaboratorSearch({
 
   const debounceRef = useRef(null);
 
-  const { loading, error, data } = useQuery(GET_USERS_IN_CLASS, {
+  const {
+    loading: classesLoading,
+    error: classesError,
+    data: classesData,
+  } = useQuery(GET_USERS_IN_CLASS, {
     variables: { classIDs: userClasses },
+    skip: userClasses.length === 0,
   });
+
+  const {
+    loading: friendsLoading,
+    error: friendsError,
+    data: friendsData,
+  } = useQuery(GET_FRIENDS, {
+    variables: { userID: currentUserID },
+    skip: !currentUserID,
+  });
+
+  const loading = classesLoading || friendsLoading;
+  const error = classesError || friendsError;
 
   function onSearchChange(value) {
     setSearchText(value);
@@ -135,9 +153,24 @@ function CollaboratorSearch({
     debounceRef.current = setTimeout(() => setDebouncedSearch(value), 250);
   }
 
-  const classUsers = data?.profiles ?? [];
+  const friends = (friendsData?.friendships ?? [])
+    .filter(({ status }) => status === "accepted")
+    .map(({ requester, recipient }) =>
+      requester?.id === currentUserID ? recipient : requester,
+    )
+    .filter(Boolean);
+
+  const candidates = [
+    ...new Map(
+      [...(classesData?.profiles ?? []), ...friends].map((user) => [
+        user.id,
+        user,
+      ]),
+    ).values(),
+  ];
+
   const search = debouncedSearch.trim().toLowerCase();
-  const filteredUsers = classUsers.filter((user) => {
+  const filteredUsers = candidates.filter((user) => {
     if (user.id === currentUserID) return false;
     if (!search) return true;
     return (
