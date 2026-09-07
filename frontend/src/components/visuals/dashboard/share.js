@@ -125,17 +125,6 @@ function CollaboratorSearch({
     variables: { classIDs: userClasses },
   });
 
-  // ---- TEMP DEBUG (remove after diagnosing share-menu bug) ----
-  console.log(
-    "[share-debug] CollaboratorSearch render — loading:",
-    loading,
-    "error:",
-    error?.message,
-    "users:",
-    data?.profiles?.length,
-  );
-  // -------------------------------------------------------------
-
   function onSearchChange(value) {
     setSearchText(value);
 
