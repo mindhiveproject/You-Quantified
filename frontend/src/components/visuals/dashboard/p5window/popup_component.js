@@ -1,21 +1,25 @@
 
-import React, {useRef, useEffect} from "react";
-import { createRoot } from "react-dom/client";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
-export function PopupComponent({ params, code, children, setPopupVisuals }) {
-  const popupRef = useRef(null);
+export function PopupComponent({ children, setPopupVisuals }) {
+  // DOM node inside the popup window that children get portaled into.
+  // Portaling (instead of a separate root) keeps the popup in this React tree,
+  // so props like params and code flow in directly without postMessage.
+  const [container, setContainer] = useState(null);
 
   useEffect(() => {
-    // Create a new window and assign it to popupRef.current
-    popupRef.current = window.open(
+    const popup = window.open(
       "",
       "_blank",
       `width=${window.innerWidth / 2}, height=${window.innerHeight}`
     );
-    popupRef.current.document.title = "Visualization";
-    popupRef.current.addEventListener("unload", () => setPopupVisuals(false));
+    popup.document.title = "Visualization";
 
-    const styleElement = popupRef.current.document.createElement("style");
+    const handleUnload = () => setPopupVisuals(false);
+    popup.addEventListener("unload", handleUnload);
+
+    const styleElement = popup.document.createElement("style");
 
     // Set the CSS rules
     styleElement.textContent = `
@@ -25,11 +29,11 @@ export function PopupComponent({ params, code, children, setPopupVisuals }) {
           height: 100vh;
           width: 100vw;
         }
-  
+
         * {
           overflow: hidden;
         }
-    
+
         div {
           width: 100vw;
           height: 100vh;
@@ -43,32 +47,19 @@ export function PopupComponent({ params, code, children, setPopupVisuals }) {
       `;
 
     // Append the <style> element to the <head>
-    popupRef.current.document.head.appendChild(styleElement);
+    popup.document.head.appendChild(styleElement);
 
-    var rootDiv = popupRef.current.document.createElement("div");
-    popupRef.current.document.body.appendChild(rootDiv);
-
-    const root = createRoot(rootDiv);
-    root.render(children);
+    const rootDiv = popup.document.createElement("div");
+    popup.document.body.appendChild(rootDiv);
+    setContainer(rootDiv);
 
     // Cleanup function
     return () => {
-      root.unmount();
-      popupRef.current.removeEventListener("unload", () =>
-        setPopupVisuals(false)
-      );
-      popupRef.current.close();
+      popup.removeEventListener("unload", handleUnload);
+      setContainer(null);
+      popup.close();
     };
   }, []);
 
-  useEffect(() => {
-    if (popupRef.current != null) {
-      // Use popupRef.current instead of popupRef.current.contentWindow
-      popupRef.current.opener.postMessage(
-        JSON.stringify({ params, code }),
-        window.location.origin
-      );
-    }
-  }, [params, code]);
+  return container ? createPortal(children, container) : null;
 }
-

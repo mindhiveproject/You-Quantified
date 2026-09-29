@@ -8,17 +8,11 @@ export function P5iFrame({
   isExecuting = true,
   extensions,
   additionalScripts,
-  isPaused,
   handleWindowMessage,
   handleWindowDismount = () => {},
   postRunScripts,
 }) {
   const iframeRef = useRef(null);
-
-  const paramsRef = useRef(params);
-  const isPausedRef = useRef(isPaused);
-  isPausedRef.current = isPaused;
-  paramsRef.current = params;
 
   const source = useMemo(() => {
     if (isExecuting === "false" || isExecuting === false) {
@@ -87,8 +81,6 @@ export function P5iFrame({
               const originalDraw = window.draw;
               window.draw = function() {
                 try {
-                  if (data?.["isVisualJSPaused"]) noLoop();
-                  if (!data?.["isVisualJSPaused"]) loop();
                   return originalDraw.apply(this, arguments);
                 } catch (error) {
                   console.error('Error in draw:', error);
@@ -118,15 +110,9 @@ export function P5iFrame({
 
   useEffect(() => {
     if (iframeRef.current != null) {
-      const messageData = {
-        ...paramsRef.current,
-        isVisualJSPaused: isPaused
-      };
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify(messageData)
-      );
+      iframeRef.current?.contentWindow?.postMessage(JSON.stringify(params));
     }
-  }, [params, isPaused]);
+  }, [params]);
 
   function getWindowMessage(message) {
     if (message.source != iframeRef.current?.contentWindow) return;

@@ -16,8 +16,8 @@ export function VisTopBar({
   changeVisMetadata,
   isEditable,
   isOwner,
-  isPaused,
-  setIsPaused,
+  isStopped,
+  setIsStopped,
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const editPopupRef = useRef(null);
@@ -109,9 +109,13 @@ export function VisTopBar({
         {/*isEditable && (
           <ShowUploadState mutationData={mutationData} isDirty={isDirty} />
         )*/}
-        <button className="btn btn-link" onClick={() => setIsPaused(!isPaused)}>
+        <button
+          className="btn btn-link"
+          onClick={() => setIsStopped(!isStopped)}
+          title={isStopped ? "Run visual" : "Stop visual"}
+        >
           <span className="material-symbols-outlined inline-icon">
-            {isPaused ? "play_arrow" : "pause"}
+            {isStopped ? "play_arrow" : "stop"}
           </span>
         </button>
         <button

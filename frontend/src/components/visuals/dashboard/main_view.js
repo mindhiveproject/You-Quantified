@@ -39,7 +39,7 @@ export default function MainView({ visID, queryData }) {
     left: queryData?.docsVisible ? "docs" : "dashboard",
   });
   const [popupVisuals, setPopupVisuals] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
   const fullScreenHandle = useFullScreenHandle();
   const provider = useHocuspocusProvider();
 
@@ -203,14 +203,14 @@ export default function MainView({ visID, queryData }) {
         fullScreenHandle={fullScreenHandle}
         mutationData={mutationData}
         changeVisMetadata={changeVisMetadata}
-        isPaused={isPaused}
-        setIsPaused={setIsPaused}
+        isStopped={isStopped}
+        setIsStopped={setIsStopped}
       />
       <VisualScreen
         isEditable={isEditable}
         visMetadata={visMetadata}
         code={code}
-        isPaused={isPaused}
+        isStopped={isStopped}
         popupVisuals={popupVisuals}
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}

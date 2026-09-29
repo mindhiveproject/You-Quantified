@@ -15,7 +15,7 @@ export function VisualScreen({
   code,
   popupVisuals,
   currentScreen,
-  isPaused,
+  isStopped,
   docsContent,
   setters,
   isEditable,
@@ -81,7 +81,7 @@ export function VisualScreen({
           popupVisuals={popupVisuals}
           setPopupVisuals={setters.setPopupVisuals}
           extensions={visMetadata?.extensions}
-          isPaused={isPaused}
+          isStopped={isStopped}
         />
       </SplitPaneRight>
     </SplitPane>

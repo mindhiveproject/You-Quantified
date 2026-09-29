@@ -1,5 +1,4 @@
 import { PopupComponent } from "./popup_component";
-import { P5PopupVisuals } from "./p5popup";
 import { P5iFrame } from "./p5iframe";
 import { FullScreen } from "react-full-screen";
 import { useSelector } from "react-redux";
@@ -14,7 +13,7 @@ export function VisualsWindow({
   fullScreenHandle,
   popupVisuals,
   setPopupVisuals,
-  isPaused,
+  isStopped,
   setErrors,
   extensions,
 }) {
@@ -99,40 +98,25 @@ export function VisualsWindow({
   const [searchParams, setSearchParams] = useSearchParams();
   const isExecuting = searchParams.get("execute");
 
+  // Stopping unmounts the iframe entirely, so the sketch is torn down rather than paused
+  const visual = !isStopped && (
+    <P5iFrame
+      code={code}
+      params={params}
+      isExecuting={isExecuting}
+      extensions={extensions}
+      additionalScripts={additionalScripts}
+      handleWindowMessage={handleWindowMessage}
+      handleWindowDismount={handleWindowDismount}
+    />
+  );
+
   return (
     <div className={`${popupVisuals ? "d-none" : "h-100 w-100"}`}>
-      {!popupVisuals && (
-        <div className="w-100 h-100">
-
-            <P5iFrame
-              code={code}
-              params={params}
-              isExecuting={isExecuting}
-              extensions={extensions}
-              additionalScripts={additionalScripts}
-              handleWindowMessage={handleWindowMessage}
-              handleWindowDismount={handleWindowDismount}
-              isPaused={isPaused}
-            />
-
-        </div>
-      )}
+      {!popupVisuals && <div className="w-100 h-100">{visual}</div>}
       {popupVisuals && (
-        <PopupComponent
-          params={params}
-          code={code}
-          setPopupVisuals={setPopupVisuals}
-        >
-          <P5PopupVisuals
-            secureOrigin={window.location.origin}
-            initialCode={code}
-            initialParams={params}
-            isExecuting={isExecuting}
-            extensions={extensions}
-            additionalScripts={additionalScripts}
-            handleWindowMessage={handleWindowMessage}
-            handleWindowDismount={handleWindowDismount}
-          />
+        <PopupComponent setPopupVisuals={setPopupVisuals}>
+          <div className="h-100 w-100">{visual}</div>
         </PopupComponent>
       )}
     </div>
