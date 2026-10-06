@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { SEARCH_VISUALS } from "../../../../../queries/visuals";
 import DisplayVisResult from "./DisplayVisResult";
+import { withoutNewBackendVisuals } from "../../../../../utility/newBackendVisuals";
 
 /**
  * Modal component for searching and selecting visual references
@@ -43,7 +44,9 @@ function ReferenceVisualModal({
     },
   });
 
-  const visResults = data?.visuals.map((visInfo) => {
+  const visibleVisuals = withoutNewBackendVisuals(data?.visuals);
+
+  const visResults = visibleVisuals?.map((visInfo) => {
     const hasBeenAdded = additionalReferences.find(
       (object) => object?.id === visInfo?.id
     );
@@ -76,7 +79,7 @@ function ReferenceVisualModal({
       {search && error && (
         <span className="mt-1">{`Error loading visuals: ${error}`}</span>
       )}
-      {data?.visuals.length === 0 && (
+      {visibleVisuals?.length === 0 && (
         <span className="mt-1">No results found</span>
       )}
     </div>

@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { MY_VISUALS } from "../../../queries/visuals";
 import MainView from "./main_view";
 import NoVisualScreen from "./no_visual_screen";
+import { isNewBackendVisual } from "../../../utility/newBackendVisuals";
 import { HocuspocusProviderWebsocketComponent, HocuspocusRoom } from "@hocuspocus/provider-react";
 
 export { VisualScreen } from "./visual_screen";
@@ -25,7 +26,7 @@ export function QueryMainView() {
 
   if (dataState === "empty") return "Loading...";
 
-  if (data?.visuals?.length === 0) {
+  if (data?.visuals?.length === 0 || isNewBackendVisual(data?.visuals?.[0])) {
     return <NoVisualScreen />;
   }
 
