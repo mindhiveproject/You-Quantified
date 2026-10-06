@@ -1,11 +1,9 @@
 import React from "react";
 
-import { subToStore, stopRecording, beginStream } from "../../utility/recorder";
+import { deviceRuntime } from "../../devices/runtime";
 import { useSelector } from "react-redux";
 
-export function RecordComponent({ recording, setRecording, saveObject }) {
-  // Save object might be changed to a hook?
-
+export function RecordComponent({ recording, setRecording }) {
   const buttonClassName =
     recording == false
       ? "btn btn-outline-dark fw-medium mb-2"
@@ -15,14 +13,20 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
   const recordingText = recording != false ? "Stop recording" : "Record data";
 
   const deviceMeta = useSelector((state) => state.deviceMeta);
-  
-  const handleClick = () => {
+
+  const handleClick = async () => {
     if (!recording) {
-      // beginStream(saveObject);
-      setRecording(subToStore());
+      await deviceRuntime.startRecording();
+      setRecording(true);
     } else {
-      stopRecording(recording, deviceMeta);
       setRecording(false);
+      try {
+        await deviceRuntime.stopRecording();
+      } catch (error) {
+        // yq-data refuses to write an empty archive.
+        console.warn(error);
+        window.alert(error.message);
+      }
     }
   };
 
@@ -35,11 +39,4 @@ export function RecordComponent({ recording, setRecording, saveObject }) {
       <i className={iconClassName}> </i>{recordingText}
     </button>
   );
-}
-
-function getMemoryUsage() {
-  if (performance && performance.memory) {
-    return performance.memory.usedJSHeapSize;
-  }
-  return null;
 }

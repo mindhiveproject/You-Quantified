@@ -1,5 +1,5 @@
 import "./App.scss";
-import React, { useState, createContext, useEffect, useRef } from "react";
+import React, { useState, createContext, useEffect } from "react";
 import { QueryMainView } from "./components/visuals/dashboard/main";
 import { MainMenu } from "./components/visuals/menu/menu";
 import { DevicesManager } from "./components/devices/main";
@@ -13,19 +13,10 @@ import { useQuery } from "@apollo/client/react";
 import { AUTH_USER } from "./queries/user";
 import { NewVisual } from "./components/visuals/menu/new";
 import { AINewVisual } from "./components/visuals/new-ai/main";
-import { useSelector } from "react-redux";
-import { stopRecording } from "./utility/recorder";
 import { User } from "./components/profile/main";
 import { MyUserName } from "./components/visuals/menu/username";
 
-function NavBar({ setShowDevices, recording, setRecording }) {
-  const deviceMeta = useSelector((state) => state?.deviceMeta);
-
-  function endRecording() {
-    stopRecording(recording, saveObject, deviceMeta);
-    setRecording(false);
-  }
-
+function NavBar({ setShowDevices, recording }) {
   return (
     <nav className="navbar styled-navbar g-0 p-0 d-flex justify-content-between align-items-center">
       <NavLink className="navbar-brand m-0 ms-4 h5" to="/">
@@ -47,44 +38,19 @@ function NavBar({ setShowDevices, recording, setRecording }) {
   );
 }
 
-// Object where recording is temporarily stored - Save Object Origin
-const saveObject = {};
-
 function DesktopApp() {
   const [showDevices, setShowDevices] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [camStream, setCamStream] = useState(null);
-  const videoRef = useRef(null); // For UI display
-  const canvasRef = useRef(null); // For canvas overlay
-  const processingVideoRef = useRef(null); // Hidden video for face detection
 
   return (
     <div className="h-100 d-flex flex-column">
-      <NavBar
-        setShowDevices={setShowDevices}
-        recording={recording}
-        setRecording={setRecording}
-      />
-      {/* Hidden video element for face detection processing */}
-      <video 
-        ref={processingVideoRef}
-        style={{ display: 'none' }}
-        autoPlay
-        playsInline
-        muted
-      />
+      <NavBar setShowDevices={setShowDevices} recording={recording} />
       <div className="hv-100">
         {showDevices && (
           <DevicesManager
             setShowDevices={setShowDevices}
-            saveObject={saveObject}
             recording={recording}
             setRecording={setRecording}
-            camStream={camStream}
-            setCamStream={setCamStream}
-            videoRef={videoRef}
-            canvasRef={canvasRef}
-            processingVideoRef={processingVideoRef}
           />
         )}
         <Routes>

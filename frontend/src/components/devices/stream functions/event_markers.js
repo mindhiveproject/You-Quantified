@@ -1,54 +1,34 @@
-import store from "../../../store/store";
+import { deviceRuntime } from "../../../devices/runtime";
 
+// A visual's `sendEvent({ data: '{"key": 1}' })` becomes markers: each key of
+// the payload is a label, its value what was marked. A payload that isn't an
+// object is marked as a single label.
+function toMarks(message) {
+  let payload = message?.data ?? message;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload);
+    } catch {
+      return [[payload, undefined]];
+    }
+  }
+  if (payload && typeof payload === "object") {
+    return Object.entries(payload).map(([label, value]) => [label, Number(value)]);
+  }
+  return [[String(payload), undefined]];
+}
+
+// The channel between one running visual and the marker stream in the runtime.
 export class EventMarkerStream {
   constructor(visID) {
-    this.eventReceived = false;
-    this.id = "event_markers_" + visID;
+    this.visID = visID;
   }
 
   streamEventMarkers(message) {
-    if (!this.eventReceived) {
-      this._createEventMarkers();
-      this.eventReceived = true;
-    }
-    this._sendEventMarker(message);
-  }
-
-  _createEventMarkers() {
-    store.dispatch({
-      type: "devices/create",
-      payload: {
-        id: this.id,
-        metadata: {
-          device: "Event Markers",
-          type: "event marker",
-          id: this.id,
-          connected: true,
-        },
-      },
-    });
-  }
-
-  _sendEventMarker(message) {
-    const data = JSON.parse(message.data);
-
-    store.dispatch({
-      type: "devices/streamUpdate",
-      payload: {
-        id: this.id,
-        data,
-      },
-    });
+    deviceRuntime.mark(this.visID, toMarks(message));
   }
 
   unmountEventMarkers() {
-    store.dispatch({
-      type: "devices/updateMetadata",
-      payload: {
-        id: this.id,
-        field: "connected",
-        data: false,
-      },
-    });
+    deviceRuntime.closeMarkers(this.visID);
   }
 }

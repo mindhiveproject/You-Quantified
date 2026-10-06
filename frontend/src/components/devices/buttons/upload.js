@@ -7,11 +7,10 @@ import {
   formUploadFile,
   dropZoneUpload,
 } from "../../../utility/uploadUtils";
+import { deviceRuntime } from "../../../devices/runtime";
 // Add a dropdown menu of sample files
 // Let the user select various modalities
 // Let the user download the data
-
-window.recordings = {};
 
 export function FileUploadButton({ setCurrentDevice }) {
   const [connText, setConnText] = useState({ text: "", type: "" });
@@ -93,21 +92,28 @@ export function FileUploadButton({ setCurrentDevice }) {
 function ManageMultiple() {
   // grab entire deviceMeta in one hook
   const deviceMeta = useSelector((state) => state.deviceMeta);
-  const deviceIDs = Object.keys(window.recordings);
+  const deviceIDs = Object.keys(deviceMeta).filter((id) =>
+    deviceMeta[id].hasOwnProperty("playing")
+  );
   const isAllPlaying = deviceIDs.every((id) => deviceMeta[id]?.playing);
   const isAllLooping = deviceIDs.every((id) => deviceMeta[id]?.looping);
 
   const toggleStreaming = () => {
     deviceIDs.forEach((id) => {
-      const stream = window.recordings[id];
+      const controls = deviceRuntime.replayControls(id);
       isAllPlaying
-        ? stream.pausePlayback()
-        : !stream.playing && stream.startPlayback();
+        ? controls.pause()
+        : !deviceMeta[id]?.playing && controls.play();
     });
   };
 
+  // Puts every recording in the same looping state, rather than flipping each.
   const toggleLooping = () => {
-    deviceIDs.forEach((id) => window.recordings[id].loopPlayback());
+    deviceIDs.forEach((id) => {
+      if (Boolean(deviceMeta[id]?.looping) === isAllLooping) {
+        deviceRuntime.replayControls(id).toggleLoop();
+      }
+    });
   };
 
   return (
@@ -146,31 +152,40 @@ function ManageMultiple() {
 }
 
 function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
-  const streamObject = window.recordings[deviceID];
-
   const playing = useSelector((state) => state?.deviceMeta[deviceID]?.playing);
   const looping = useSelector((state) => state?.deviceMeta[deviceID]?.looping);
+  const legacy = useSelector((state) => state?.deviceMeta[deviceID]?.legacy);
 
   function startStreaming() {
-    streamObject.startPlayback();
+    deviceRuntime.replayControls(deviceID)?.play();
   }
 
   function pauseStreaming() {
-    streamObject.pausePlayback();
+    deviceRuntime.replayControls(deviceID)?.pause();
   }
 
   function loopStreaming() {
-    streamObject.loopPlayback();
+    deviceRuntime.replayControls(deviceID)?.toggleLoop();
   }
 
   function restartStreaming() {
-    streamObject.restartPlayback();
+    deviceRuntime.replayControls(deviceID)?.restart();
+  }
+
+  function removeRecording() {
+    deviceRuntime.disconnect(deviceID);
   }
 
   return (
     <li className="list-group-item border p-0 border-dark mt-n01">
       <div className="d-flex justify-content-between">
-        <span className="align-self-center ps-3 text-truncate">{deviceID}</span>
+        <span
+          className="align-self-center ps-3 text-truncate"
+          title={legacy ? "Recorded before the yq-data update; converted on load" : undefined}
+        >
+          {deviceID}
+          {legacy && <small className="ms-2 opacity-50">legacy</small>}
+        </span>
         <div className="d-flex">
           <button className="btn btn-link" onClick={restartStreaming}>
             <i className="bi bi-rewind" />
@@ -189,6 +204,9 @@ function FileConnectionIndicator({ myDeviceMeta, deviceID }) {
               className={`bi bi-arrow-repeat ${looping ? "text-primary" : ""}`}
               onClick={loopStreaming}
             />
+          </button>
+          <button className="btn btn-link" title="Remove" onClick={removeRecording}>
+            <i className="bi bi-x" />
           </button>
         </div>
       </div>

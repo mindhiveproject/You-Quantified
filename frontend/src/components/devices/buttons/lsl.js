@@ -1,16 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useSelector } from "react-redux";
 
 import { connectionText } from "./connectionText";
-import { closestEdge } from "./generic";
-import { connectLSL } from "../stream functions/lsl";
+import { closestEdge, DeviceConnectionIndicator } from "./generic";
+import { lslDevice } from "../../../devices/definitions";
+import { deviceRuntime } from "../../../devices/runtime";
 
 export function LSLDeviceButton({ setCurrentDevice }) {
   const deviceMeta = useSelector((state) => state.deviceMeta);
   const divRef = useRef(null);
+  const [connText, setConnInfo] = useState({ text: "", type: "" });
+  const [error, setError] = useState("");
 
   const deviceStreams = Object.entries(deviceMeta).filter(
-    ([key, value]) => value.device === "LSL"
+    ([key, value]) => value.device === lslDevice.name,
   );
 
   const handleMouseEnter = () => {
@@ -23,20 +26,26 @@ export function LSLDeviceButton({ setCurrentDevice }) {
     setCurrentDevice({ device: "none", card_type: "none" });
   };
 
-  const onButtonConnect = connectLSL;
-
-  const [connText, setConnInfo] = useState({ text: "", type: "" });
-  const [disabled, setDisabled] = useState(false);
-
-  function changeConnectionStatus(status) {
-    setConnInfo(connectionText[status]);
+  async function connect() {
+    setError("");
+    setConnInfo(connectionText["awaiting"]);
+    try {
+      await deviceRuntime.connect(lslDevice.id);
+      setConnInfo(connectionText["connected"]);
+    } catch (e) {
+      console.error("Could not connect to the LSL relay", e);
+      setError(e?.message || "Could not connect to the LSL relay");
+      setConnInfo(connectionText["failed"]);
+    }
   }
+
+  const connecting = connText.text === "Connecting";
 
   return (
     <div className="mb-3 d-flex flex-column">
       <div
         className={`card rounded-0 black-hover ${
-          connText.text === "Connecting" ? "border-primary" : "border-dark"
+          connecting ? "border-primary" : "border-dark"
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -44,10 +53,10 @@ export function LSLDeviceButton({ setCurrentDevice }) {
       >
         <button
           className={`${
-            connText.text === "Connecting" ? "btn-connect" : ""
+            connecting ? "btn-connect" : ""
           } card-body btn btn-link text-decoration-none text-start`}
-          onClick={() => onButtonConnect(changeConnectionStatus)}
-          disabled={(connText.text === "Connecting") | disabled}
+          onClick={connect}
+          disabled={connecting || deviceStreams.length > 0}
         >
           <div className="d-flex text-start justify-content-between">
             <div>
@@ -60,41 +69,14 @@ export function LSLDeviceButton({ setCurrentDevice }) {
           </div>
         </button>
       </div>
+      {error && <small className="text-danger mt-1">{error}</small>}
       {deviceStreams.length > 0 && (
         <ul className="list-group list-group-flush">
           {deviceStreams.map((obj) => (
-            <LSLConnectionIndicator myDeviceMeta={obj[1]} />
+            <DeviceConnectionIndicator myDeviceMeta={obj[1]} key={obj[1]?.id} />
           ))}
         </ul>
       )}
     </div>
-  );
-}
-
-function LSLConnectionIndicator({myDeviceMeta}) {
-  const deviceMeta = useSelector((state) => state.deviceMeta);
-
-  const [connText, setConnText] = useState(connectionText["disconnected"]);
-
-  function changeConnectionStatus(status) {
-    setConnText(connectionText[status]);
-  }
-
-  useEffect(() => {
-    const connStatus = deviceMeta?.[myDeviceMeta?.id]?.connected;
-    if (!connStatus) {
-      changeConnectionStatus("lost");
-    } else {
-      changeConnectionStatus("connected");
-    }
-  }, [deviceMeta]);
-
-  return (
-    <li className="list-group-item border border-dark mt-n01">
-      <div className="d-flex justify-content-between">
-        <span>{myDeviceMeta?.id}</span>
-        <span className={`${connText.type}`}>{connText.text}</span>
-      </div>
-    </li>
   );
 }

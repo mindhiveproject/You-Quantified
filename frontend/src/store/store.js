@@ -4,7 +4,6 @@ const initialState = {
   params: {},
   dataStream: {},
   deviceMeta: {},
-  update: { type: "none" },
 };
 
 
@@ -108,6 +107,12 @@ function rootReducer(state = initialState, action) {
         },
       };
 
+    case "devices/remove": {
+      const { [action.payload.id]: _meta, ...deviceMeta } = state.deviceMeta;
+      const { [action.payload.id]: _data, ...dataStream } = state.dataStream;
+      return { ...state, deviceMeta, dataStream };
+    }
+
     case "devices/updateMetadata":
       // This logic is especially useful in a device that may disconnect like the emotiv
       // It is also useful for handling pre-recorded files
@@ -128,7 +133,6 @@ function rootReducer(state = initialState, action) {
 
       return {
         ...state,
-        update: { type: "stream", device: action.payload.id, modality: action.payload?.modality || 'device' },
         dataStream: {
           ...state.dataStream,
           [action.payload.id]: {

@@ -22,17 +22,7 @@ export const selectDevices = createSelector(
 // Add an outside click alerter
 // In the top bar add a recording indicator that has a hover action (to indicate which devices you are using)
 
-export function DevicesManager({
-  setShowDevices,
-  saveObject,
-  recording,
-  setRecording,
-  camStream,
-  setCamStream,
-  videoRef,
-  canvasRef,
-  processingVideoRef,
-}) {
+export function DevicesManager({ setShowDevices, recording, setRecording }) {
   const [currentDevice, setCurrentDevice] = useState();
 
   const rightPanelRef = useRef(null);
@@ -51,11 +41,7 @@ export function DevicesManager({
   return (
     <div className="h-100 overflow-scroll disable-scrollbar devices-overlay">
       <div className="record-button" ref={recordButtonRef}>
-        <RecordComponent
-          saveObject={saveObject}
-          recording={recording}
-          setRecording={setRecording}
-        />
+        <RecordComponent recording={recording} setRecording={setRecording} />
       </div>
       <div className="sources-top">
         <div className="d-flex justify-content-end mb-n2">
@@ -80,10 +66,6 @@ export function DevicesManager({
             <LeftInfoPane
               currentDevice={currentDevice}
               leftPaneInfoRef={leftPaneInfoRef}
-              camStream={camStream}
-              setCamStream={setCamStream}
-              videoRef={videoRef}
-              canvasRef={canvasRef}
             />
           </div>
         </div>
@@ -91,30 +73,18 @@ export function DevicesManager({
           className="sources-pane-right disable-scrollbar me-3"
           ref={rightPanelRef}
         >
-          <RightPane
-            setCurrentDevice={setCurrentDevice}
-            setCamStream={setCamStream}
-            videoRef={videoRef}
-            canvasRef={canvasRef}
-            processingVideoRef={processingVideoRef}
-          />
+          <RightPane setCurrentDevice={setCurrentDevice} />
         </div>
       </div>
     </div>
   );
 }
 
-function RightPane({ setCurrentDevice, setCamStream, videoRef, canvasRef, processingVideoRef }) {
+function RightPane({ setCurrentDevice }) {
   return (
     <div>
       <FileUploadButton setCurrentDevice={setCurrentDevice} />
-      <GenericDeviceButtonsList 
-        setCurrentDevice={setCurrentDevice} 
-        setCamStream={setCamStream}
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        processingVideoRef={processingVideoRef}
-      />
+      <GenericDeviceButtonsList setCurrentDevice={setCurrentDevice} />
       <LSLDeviceButton setCurrentDevice={setCurrentDevice} />
     </div>
   );

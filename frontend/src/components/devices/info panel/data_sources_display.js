@@ -1,12 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 
 import Overlay from "react-bootstrap/Overlay";
 import Tooltip from "react-bootstrap/Tooltip";
-import { useSelector } from "react-redux";
-import devicesRaw from "../../../metadata/devices.json";
-import { selectDevices } from "../main";
+import { findDeviceByName } from "../../../devices/definitions";
 
-function PopupItem({ item }) {
+function PopupItem({ item, source }) {
   const [show, setShow] = useState(false);
   const target = useRef(null);
 
@@ -37,7 +35,7 @@ function PopupItem({ item }) {
               {...props}
             >
               <p>{item.description}</p>
-              <small>Source: {item.source}</small>
+              <small>Source: {source}</small>
               <br />
               <small>Type: {item.type}</small>
             </Tooltip>
@@ -49,16 +47,7 @@ function PopupItem({ item }) {
 }
 
 function DataCards({ source, groupData }) {
-  const dataArray = [];
-
-  const datatoAppend = devicesRaw
-    .find((x) => x.device === source)
-    .data.map((obj) => {
-      obj["source"] = source;
-      return obj;
-    });
-
-  dataArray.push(...datatoAppend);
+  const dataArray = findDeviceByName(source)?.data ?? [];
 
   // Group data by type if it's defined
   if (groupData) {
@@ -73,7 +62,7 @@ function DataCards({ source, groupData }) {
           <h6 className="g-0 mb-2">{group}</h6>
           <div className="row row-cols-auto mb-3 ms-1">
             {groupedData[group].map((item) => {
-              return <PopupItem item={item} key={item.name} />;
+              return <PopupItem item={item} source={source} key={item.name} />;
             })}
           </div>
         </div>
@@ -86,7 +75,7 @@ function DataCards({ source, groupData }) {
         <div className="row row-cols-auto mb-3 justify-content-start">
           {dataArray.length !== 0 ? (
             dataArray.map((item) => {
-              return <PopupItem item={item} key={item.name} />;
+              return <PopupItem item={item} source={source} key={item.name} />;
             })
           ) : (
             <small>No available data from devices</small>
@@ -95,26 +84,6 @@ function DataCards({ source, groupData }) {
       </div>
     );
   }
-}
-
-export default function AvailableDataInformation() {
-  const dataStream = useSelector(selectDevices); // Gets active devices
-
-  const source = devicesRaw.reduce((acc, data) => {
-    const foundItems = dataStream.filter((value) =>
-      data.heading.includes(value)
-    );
-    if (foundItems.length > 0) {
-      acc.push(data.heading);
-    }
-    return acc; // Always return the accumulator
-  }, []);
-
-  // Generate updatable DataCards as new devices become active
-  const [dataCard, updateDataCard] = useState(<DataCards source={source} />);
-  useEffect(() => updateDataCard(<DataCards source={source} />), [source]);
-
-  return <div>{dataCard}</div>;
 }
 
 export function ModalDataInformation({ source, groupData }) {
