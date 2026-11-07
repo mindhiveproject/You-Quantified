@@ -1617,6 +1617,20 @@ $side-nav-outline: 1px solid $black;
   }
 }
 
+// Top-layer popover anchored to its .mapping-btn (anchor set inline).
+// Resets the UA popover styles (centered, bordered, padded).
+.mapping-popover {
+  width: 300px;
+  inset: auto;
+  margin: 0.25rem 0;
+  padding: 0;
+  border: none;
+  background-color: $black;
+  color: $white;
+  position-area: bottom span-right;
+  position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+}
+
 .value-box {
   display: flex;
   flex-direction: column;

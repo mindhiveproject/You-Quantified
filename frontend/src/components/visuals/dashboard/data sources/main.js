@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useSelector } from "react-redux";
+import { UserContext } from "../../../../App";
 import { deviceRuntime, useIsRecording } from "../../../../devices/runtime";
 import { Modal } from "../../../modal";
 import { EditModalManager } from "../edit";
@@ -13,6 +14,8 @@ export default function DataSourcesWindow({ visMetadata, linkedSources, isEditab
   const { sources, link, unlink } = linkedSources;
   const [modal, setModal] = useState(null);
   const closeModal = () => setModal(null);
+  const { currentUser } = useContext(UserContext);
+  const isAdminEdit = currentUser?.isAdmin && visMetadata?.author?.id !== currentUser.id;
 
   return (
     <div className="d-flex flex-column h-100 overflow-clip">
@@ -44,6 +47,15 @@ export default function DataSourcesWindow({ visMetadata, linkedSources, isEditab
             <span className="material-symbols-outlined">edit</span>
             Create a copy
           </button>
+        </div>
+      )}
+
+      {isAdminEdit && (
+        <div className="notice-bar">
+          <p className="m-0">
+            You're using an admin account. Changes you make to this visual will be
+            saved this way for every user.
+          </p>
         </div>
       )}
 

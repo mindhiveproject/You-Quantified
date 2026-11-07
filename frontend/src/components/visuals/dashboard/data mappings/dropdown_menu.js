@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useId } from "react";
 import { useSelector, shallowEqual } from "react-redux";
-import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
 
 export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   const [showModal, setShowModal] = useState(false);
@@ -12,7 +11,9 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
       ? { Device: "Mapping", Metric: "Manual" }
       : { Device: mapping[0], Metric: mapping[1] };
 
-  const modalRef = useRef(null);
+  const popoverRef = useRef(null);
+  const popoverId = useId();
+  const anchorName = `--mapping-${popoverId.replace(/:/g, "")}`;
   const [currentKeys, setCurrentKeys] = useState({});
 
   const hasUserSelected = useSelector(
@@ -26,11 +27,18 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
 
   const dataStream = useSelector((state) => state.dataStream);
 
-  useOutsideAlerter(modalRef, setShowModal);
+  // React 18 doesn't wire onToggle for popovers, so listen directly. The
+  // modal only mounts while open, which resets the search and autofocuses it.
+  useEffect(() => {
+    const popover = popoverRef.current;
+    const onToggle = (e) => setShowModal(e.newState === "open");
+    popover.addEventListener("toggle", onToggle);
+    return () => popover.removeEventListener("toggle", onToggle);
+  }, []);
 
   function selectNewSource(sourceName) {
     changeSource(sourceName, parameter.name, true);
-    setShowModal(false);
+    popoverRef.current.hidePopover();
   }
 
   // Cleanup: reset mapping to Manual on unmount / parameter change
@@ -81,28 +89,35 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
     }
   }
 
+  // The menu is a native popover: it renders in the top layer, so the
+  // panel's scroll container can't clip it, and the browser handles toggling
+  // and light dismiss. CSS anchor positioning places it under the button.
   return (
-    <div className="position-relative">
+    <div>
       <button
         type="button"
         className="mapping-btn"
-        onClick={() => setShowModal((prev) => !prev)}
+        popovertarget={popoverId}
+        style={{ anchorName }}
       >
         <small>{display.Device}</small>
         <span>{isManual ? "Not mapped" : display.Metric}</span>
       </button>
-      {showModal && (
-        <div
-          className="bg-black position-absolute w-300px z-3 popup-bottom"
-          ref={modalRef}
-        >
+      <div
+        id={popoverId}
+        popover="auto"
+        ref={popoverRef}
+        className="mapping-popover"
+        style={{ positionAnchor: anchorName }}
+      >
+        {showModal && (
           <MappingModal
             display={display}
             updatedClaves={currentKeys}
             selectNewSource={selectNewSource}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
