@@ -46,15 +46,28 @@ export async function createReceiver(receiverType, { videoElement } = {}) {
       return new yq.VoiceEmotionReceiver({ emitAffect: true });
     case "lsl":
       return new yq.LSLReceiver();
+    // The geometry options feed the preview overlay (see runtime.attachOverlay).
+    // They add streams a device's graph must not record, which is why those
+    // graphs name their streams instead of taking everything.
     case "face_landmark":
-      return new yq.FaceLandmarkReceiver(videoElement, { maxFps: 15 });
+      return new yq.FaceLandmarkReceiver(videoElement, {
+        maxFps: 15,
+        emitLandmarks: true,
+        emitFaceBox: true,
+      });
     case "face_landmark_pair":
       return new yq.FaceLandmarkReceiver(videoElement, {
         maxFps: 15,
         numFaces: 2,
+        emitLandmarks: true,
+        emitFaceBox: true,
       });
     case "face_emotion":
-      return new yq.FaceEmotionReceiver(videoElement, { maxFps: 15 });
+      return new yq.FaceEmotionReceiver(videoElement, {
+        maxFps: 15,
+        emitFaceBox: true,
+        emitLandmarks: true,
+      });
     case "pose":
       return new yq.PoseReceiver(videoElement, { maxFps: 15 });
     case "rppg":

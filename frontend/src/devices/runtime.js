@@ -206,6 +206,35 @@ class DeviceRuntime {
     if (instance.usesCamera) await this.releaseCamera();
   }
 
+  /* ------------------------------ overlay ----------------------------- */
+
+  // Draws a connected device's face geometry on `canvas`, which should cover
+  // `video` exactly. Returns a function that stops drawing. The overlay reads
+  // the receiver's streams directly, outside the pipeline, so nothing is
+  // recorded or sent to the store for it, and it costs nothing while detached.
+  async attachOverlay(id, canvas, video) {
+    const instance = this.instances.get(id);
+    if (instance?.kind !== "device" || !instance.definition.overlay) {
+      return () => {};
+    }
+    const { FaceOverlay } = await import("yq-data");
+    const overlay = new FaceOverlay(canvas, {
+      video,
+      layers: instance.definition.overlay,
+    });
+    const detach = overlay.attach(instance.receiver);
+    overlay.start();
+    return () => {
+      detach();
+      overlay.destroy();
+    };
+  }
+
+  hasOverlay(id) {
+    const instance = this.instances.get(id);
+    return instance?.kind === "device" && Boolean(instance.definition.overlay);
+  }
+
   /* ----------------------------- recordings --------------------------- */
 
   // Loads a recording (a File, Blob, or URL) as a replayable source. Recordings

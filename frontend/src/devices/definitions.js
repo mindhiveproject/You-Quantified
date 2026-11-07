@@ -154,10 +154,17 @@ export const devices = [
     description:
       "This device uses machine learning models to analyze a live video feed and generate scores representing facial expressions and movements. To ensure proper functionality, keep the window active in the background during operation.",
     receiver: "face_landmark",
+    // Drawn over the camera preview. Passed to yq-data's FaceOverlay as `layers`.
+    overlay: { box: false, landmarks: false, connections: "mesh" },
     graph: {
-      nodes: [{ id: "face", receiver: DEVICE }],
+      // Named rather than "everything": the receiver also publishes the face
+      // mesh and box for the overlay, which would be 1,400+ channels to record.
+      nodes: [
+        { id: "blendshapes", receiver: DEVICE, stream: "blendshapes" },
+        { id: "head_pose", receiver: DEVICE, stream: "head_pose" },
+      ],
       edges: [],
-      record: { nodes: ["face"] },
+      record: { nodes: ["blendshapes", "head_pose"] },
     },
     data: [
       {
@@ -206,6 +213,7 @@ export const devices = [
     description:
       "This device tracks the faces of two people in the same camera view and measures the synchrony between their facial expressions. Values closer to one indicate greater similarity between the two faces, while lower values reflect reduced synchrony.",
     receiver: "face_landmark_pair",
+    overlay: { box: false, landmarks: false, connections: "contours" },
     graph: {
       nodes: [
         { id: "first", receiver: DEVICE, stream: "blendshapes_face_1" },
@@ -345,6 +353,8 @@ export const devices = [
     description:
       "This device uses a pre-trained deep learning model to estimate the probability of different emotions (e.g., happy, sad, angry) from a live video feed. The model processes facial expressions to predict emotional states.",
     receiver: "face_emotion",
+    // The box and the leading emotion above it, as on the old platform.
+    overlay: { box: true, label: true, landmarks: false, connections: "contours" },
     graph: {
       nodes: [{ id: "expressions", receiver: DEVICE, stream: "expressions" }],
       edges: [],
