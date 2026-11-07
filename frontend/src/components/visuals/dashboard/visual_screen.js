@@ -78,7 +78,7 @@ export function VisualScreen({
           visInfo={visMetadata}
           custom={isEditable}
           changeParameters={setters.changeParameters}
-          showDashboard={showDashboard}
+          hidden={currentScreen.left !== "dashboard"}
         />
       </SplitPaneLeft>
       <Divider />

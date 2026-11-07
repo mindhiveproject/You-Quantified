@@ -72,30 +72,28 @@ export function DataManualSlider({ parameter }) {
   );
   return (
     <div className="d-flex">
-      <div className="input-group me-1">
-        <form className="form-floating" autoComplete="off">
-          <input
-            type="number"
-            className="form-control w-75px no-spin"
-            id="valorManualInput"
-            value={valor || 0}
-            onChange={handleFormChange}
-            min={0}
-            max={1}
-          />
-          <label htmlFor="valorManualInput">Value</label>
-        </form>
-      </div>
-      <div className="align-self-center">
-        <OverlayTrigger
-          trigger="click"
-          placement="bottom"
-          rootClose={true}
-          overlay={sliderToolTip}
-        >
-          <button className={"btn btn-outline-dark pt-3 pb-3"}>Slider</button>
-        </OverlayTrigger>
-      </div>
+      <label className="value-box">
+        <small>Value</small>
+        <input
+          type="number"
+          className="no-spin"
+          value={valor || 0}
+          onChange={handleFormChange}
+          min={0}
+          max={1}
+          step={0.01}
+        />
+      </label>
+      <OverlayTrigger
+        trigger="click"
+        placement="bottom"
+        rootClose={true}
+        overlay={sliderToolTip}
+      >
+        <button className="btn btn-dark btn-60 square" title="Slider">
+          <span className="material-symbols-outlined">discover_tune</span>
+        </button>
+      </OverlayTrigger>
     </div>
   );
 }
@@ -274,28 +272,20 @@ export function DataAutoSlider({ dataMappings, parameter }) {
 
   return (
     <div className="d-flex">
-      <div className="input-group me-1">
-        <form className="form-floating" autoComplete="off">
-          <input
-            type="text"
-            className="form-control w-75px"
-            id="valueAutoInput"
-            value={Math.round(source * 1000) / 1000}
-            disabled
-          ></input>
-          <label htmlFor="valueAutoInput">Value</label>
-        </form>
-      </div>
-      <div className="align-self-center">
-        <OverlayTrigger
-          trigger="click"
-          placement="right"
-          rootClose={true}
-          overlay={rangeToolTip}
-        >
-          <button className={"btn btn-outline-dark pt-3 pb-3"}>Range</button>
-        </OverlayTrigger>
-      </div>
+      <label className="value-box readonly">
+        <small>Value</small>
+        <input type="text" value={Math.round(source * 1000) / 1000} readOnly />
+      </label>
+      <OverlayTrigger
+        trigger="click"
+        placement="right"
+        rootClose={true}
+        overlay={rangeToolTip}
+      >
+        <button className="btn btn-dark btn-60 square" title="Range">
+          <span className="material-symbols-outlined">discover_tune</span>
+        </button>
+      </OverlayTrigger>
     </div>
   );
 }

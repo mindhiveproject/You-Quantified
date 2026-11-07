@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="EQ Inactive">
+<mask id="mask0_0_155" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+<rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_155)">
+<path id="graphic_eq" d="M7.375 13.6538V10.3463H8.875V13.6538H7.375ZM11.25 13.6538V10.3462H12.75V13.6538H11.25ZM3.5 13.6538V10.3463H5V13.6538H3.5ZM15.125 13.6538V10.3462H16.625V13.6538H15.125ZM19 13.6538V10.3463H20.5V13.6538H19Z" fill="#1A1A1A"/>
+</g>
+</g>
+</svg>

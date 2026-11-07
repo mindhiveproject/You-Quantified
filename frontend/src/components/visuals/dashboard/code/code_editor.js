@@ -140,8 +140,8 @@ export default function CodePane({
 
   return (
     <div className="h-100 d-flex flex-column">
-      <div className="menu-bar-code d-flex justify-content-between">
-        <h6 className="ms-2 p-2 pt-3 align-self-center">script.js</h6>
+      <div className="menu-bar-code d-flex justify-content-between align-items-center">
+        <h6 className="m-0 ps-4 align-self-center">script.js</h6>
         <div className="d-flex align-self-center position-relative">
           <button
             className="btn btn-link small-bar-button-dark"

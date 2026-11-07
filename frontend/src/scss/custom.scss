@@ -254,6 +254,17 @@ div.w-10px {
   overflow-y: auto;
 }
 
+// Stays at the top of the popup while its contents scroll. It reaches up
+// over the popup's padding so nothing shows above it.
+.modal-header-sticky {
+  position: sticky;
+  top: -2rem;
+  z-index: 1;
+  margin: -2rem -2rem 1rem;
+  padding: 2rem 2rem 0.75rem;
+  background: white;
+}
+
 $popover-bg: rgba(255, 255, 255);
 $popover-header-bg: rgba(255, 255, 255);
 $popover-border-color: $gray-200;
@@ -272,6 +283,14 @@ $popover-border-color: $gray-200;
 
 .edit-background {
   @include blur-background(120px, calc(100vh - 120px));
+}
+
+// The shared Modal's backdrop: half the whiteness and blur, so the page
+// behind it still reads as being underneath.
+.edit-background.modal-backdrop-light {
+  background-color: rgba(255, 255, 255, 0.475);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 .blur-background-navbar {
@@ -426,18 +445,6 @@ $popover-border-color: $gray-200;
     user-select: none;
     white-space: nowrap;
   }
-}
-
-.btn-docs-vis {
-  height: 40px;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  width: fit-content;
-  align-items: center;
-  text-align: center;
-  align-self: flex-end;
-  margin-top: 1rem;
-  margin-right: 1rem;
 }
 
 .p5-container-lessons {
@@ -874,88 +881,6 @@ canvas {
   margin-right: -1px !important;
 }
 
-.vis-bar .btn-custom {
-  height: 61px;
-  width: 60px;
-  border: none;
-  background: none;
-  border: #1a1a1a solid 1px;
-  text-align: center;
-  align-items: center;
-  margin: -1px;
-}
-
-.vis-bar .btn-custom.edit {
-  height: 50px;
-  width: 50px;
-  margin: 5px;
-  margin-left: 5px !important;
-  margin-right: 5px !important;
-}
-
-.vis-bar .btn-custom.docs {
-  background-color: white;
-  margin-left: -1px;
-}
-
-.vis-bar .btn-custom.docs:hover {
-  background-color: $accent;
-}
-
-.vis-bar .btn-custom.secondary {
-  background-color: white;
-  margin-left: 0px;
-}
-
-.vis-bar .btn-custom.secondary:hover {
-  background-color: $secondary;
-  color: #1a1a1a;
-}
-
-.vis-bar .btn-custom.primary {
-  background-color: white;
-  margin-left: 0px;
-}
-
-.vis-bar .btn-custom.primary:hover {
-  background-color: $primary;
-  color: $black;
-}
-
-.vis-bar .btn-custom.primary.active {
-  background-color: $primary;
-  color: $white;
-}
-
-.vis-bar .btn-custom.primary.active:hover {
-  background-color: $primary;
-  color: $black;
-}
-
-.vis-bar .btn-custom.code,
-.vis-bar .btn-custom.data {
-  background-color: white;
-  color: #1a1a1a;
-  font-weight: bold;
-}
-
-.vis-bar .btn-custom.code:hover,
-.vis-bar .btn-custom.data:hover {
-  background-color: #1a1a1a;
-  color: white;
-}
-
-.vis-bar .btn-custom.code.active,
-.vis-bar .btn-custom.data.active {
-  background-color: #1a1a1a;
-  color: white;
-}
-
-.vis-bar .btn-custom.code.active:hover,
-.vis-bar .btn-custom.data.active:hover {
-  color: $primary;
-}
-
 .ProseMirror p.is-editor-empty:first-child::before,
 .ProseMirror h1.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
@@ -1180,8 +1105,9 @@ input.vis-name-input::placeholder {
 }
 
 .split-pane-row {
-  width: 100vw;
-  height: calc(100% - 60px);
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   display: flex;
   flex-direction: row;
 }
@@ -1282,19 +1208,21 @@ input.vis-name-input::placeholder {
   border: none;
 }
 
+// The code tab's bar: the same height and buttons as the other tabs' action
+// bars, but dark to sit on top of the editor.
 .menu-bar-code {
+  flex-shrink: 0;
   background-color: #1a1a1a;
-  border: solid 1px #1a1a1a;
   color: #f8f9fa;
-  height: 40px;
+  height: 48px;
 }
 
 .small-bar-button-dark {
   background: none;
   border: none;
   color: #f8f9fa !important;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   text-decoration: none;
   display: flex !important;
   justify-content: center !important;
@@ -1357,51 +1285,494 @@ input.vis-name-input::placeholder {
   border-color: $primary !important;
 }
 
-// Menu bar for the docs and the data sources
-.docs,
-.sources {
-  .menu-bar {
-    background-color: #f8f9fa;
-    border: solid 1px #1a1a1a;
-    margin-top: -1px;
-    height: 40px;
-  }
+/* ------------------------------ editor ------------------------------ */
 
-  .publish-button {
-    position: absolute;
-    z-index: 2;
-    top: 160px;
-  }
+// Buttons come in three heights: 60px in bars and cards, 48px for actions and
+// 40px for tags. Disabled ones go off-white with lighter text instead of
+// fading out. `.square` makes an icon-only button as wide as it is tall.
+.btn.btn-60,
+.btn.btn-48 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  white-space: nowrap;
+  --bs-btn-disabled-bg: #{$gray-100};
+  --bs-btn-disabled-color: #{$gray-500};
+  --bs-btn-disabled-border-color: #{$gray-500};
+  --bs-btn-disabled-opacity: 1;
+}
 
-  .menu-bar button {
-    background: none;
-    border: none;
-    width: 40px;
-  }
-
-  .menu-bar button.is-active {
-    background: none;
-    border: none;
-    color: $primary;
-  }
-
-  .menu-bar button:hover {
-    background: #dbdbdb;
-    border: none;
-  }
-
-  .menu-bar .vertical-line {
-    border-left: #d3d3d3 solid 1.25px;
-    height: 38px;
+.btn.btn-60 {
+  height: 60px;
+  &.square {
+    width: 60px;
+    padding: 0;
   }
 }
 
-.sources .menu-bar button {
-  width: auto;
+.btn.btn-48 {
+  height: 48px;
+  &.square {
+    width: 48px;
+    padding: 0;
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding: 0 16px 0 12px;
+  border: 1px solid $black;
+  background-color: $white;
+  color: $black;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+button.tag:hover {
+  background-color: $gray-200;
+}
+
+button.tag.active {
+  background-color: $black;
+  color: $white;
+  padding-right: 8px;
+}
+
+// A 40px round button holding only an icon, like a modal's close button.
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background: none;
+  color: $black;
+  &:hover {
+    background-color: $gray-200;
+  }
+}
+
+// Icons from the Figma file that Material Symbols doesn't have. Drawn as masks
+// so they take the text color, like the symbols do.
+.svg-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.icon-eq-inactive {
+  mask-image: url("../assets/icons/eq_inactive.svg");
+}
+
+.icon-link {
+  mask-image: url("../assets/icons/link.svg");
+}
+
+.icon-unlink {
+  mask-image: url("../assets/icons/unlink.svg");
+}
+
+.vis-bar .vis-title {
+  margin: 0;
+  padding: 0 24px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.editor-main {
+  display: flex;
+  height: calc(100% - 60px);
+}
+
+// Whether the side navigation draws a line around each button. Try
+// `1px solid $black` or `1px solid $gray-500`.
+$side-nav-outline: 1px solid $black;
+
+// The left pane's tabs, stacked. Hovering one widens it over the pane to show
+// its name.
+.side-nav {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 60px;
+  border-right: 1px solid $black;
+  background-color: $white;
+
+  .btn {
+    height: 60px;
+    min-width: 60px;
+    border: $side-nav-outline;
+    background-color: $white;
+    color: $black;
+  }
+
+  // Overlap the lines above and between the buttons so none draw twice.
+  .btn {
+    margin-top: -1px;
+  }
+
+  .input-btn-layout {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  // Bootstrap's own .btn.active sets a white border, and it loads after this
+  // file. Repeating the outline here keeps it black when a tab is selected.
+  .btn:hover,
+  .btn.active {
+    background-color: $black;
+    color: $white;
+    border: $side-nav-outline;
+  }
+
+  .btn.primary:hover,
+  .btn.primary.active {
+    background-color: $primary;
+    color: $white;
+  }
+}
+
+// The bar of actions over the data mappings and the data sources.
+.action-bar {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  background-color: $gray-100;
+  border-bottom: 1px solid $gray-500;
+
+  // Overlap the bar above and its own bottom line so the borders align.
+  .btn {
+    margin-block: -1px;
+  }
+
+  .btn + .btn {
+    margin-left: -1px;
+  }
+}
+
+// The docs' formatting tools, on the left of its action bar. The ones that
+// don't fit move into a row under the "more" button.
+.tool-bar {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0 0.75rem;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 48px;
+  // Overlap the bar's lines like the action bar's buttons do, so both are as
+  // tall as each other.
+  margin-block: -1px;
+}
+
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: $black;
+
+  &:hover {
+    background-color: $gray-200;
+  }
+
+  &.is-active {
+    color: $primary;
+  }
+
+  &:disabled {
+    color: $gray-500;
+    background: none;
+  }
+}
+
+.tool-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 24px;
+  background-color: $gray-500;
+}
+
+.tool-overflow {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 100%;
+  background-color: $gray-100;
+  border: 1px solid $gray-500;
+  border-top: none;
+}
+
+// A line of text under the action bar, with one action on the right.
+.notice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-shrink: 0;
+  padding: 16px 24px;
+  background-color: $gray-100;
+  // border-bottom: 1px solid $gray-500;
+  color: $gray-700;
+}
+
+.pane-title {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+// A parameter, tinted by where its value comes from: a streaming device, a
+// device that isn't sending anything, or nothing at all.
+.mapping-card {
+  --status-color: #{$black};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 10px 10px 16px;
+  background-color: $gray-100;
+  border: 1px solid $gray-500;
+  color: var(--status-color);
+
+  &.streaming {
+    --status-color: #{$primary};
+    border-color: $primary;
+  }
+
+  &.disconnected {
+    --status-color: #{$danger};
+    border-color: $danger;
+  }
+
+  small {
+    display: block;
+    font-size: 14px;
+  }
+
+  .name {
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  button.name:hover {
+    text-decoration: underline;
+  }
+}
+
+.mapping-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 60px;
+  max-width: 220px;
+  margin-right: -1px;
+  padding: 0 24px;
+  border: 1px solid var(--status-color);
+  background: none;
+  color: var(--status-color);
+  text-align: start;
+
+  small,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    line-height: 20px;
+  }
+
+  &:hover {
+    background-color: var(--status-color);
+    color: $white;
+  }
+}
+
+.value-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 80px;
+  height: 60px;
+  margin-right: -1px;
+  padding: 0 16px;
+  border: 1px solid $black;
+  color: $black;
+
+  small {
+    color: $gray-500;
+  }
+
+  input {
+    width: 100%;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: none;
+    color: inherit;
+    line-height: 20px;
+  }
+
+  &.readonly {
+    background-color: $gray-200;
+    small {
+      color: $gray-600;
+    }
+  }
+}
+
+.source-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: $gray-100;
+  border: 1px solid $gray-500;
+
+  .title {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .title + p {
+    line-height: 20px;
+  }
+}
+
+// Plain text with its icon, purple while the source is streaming.
+.stream-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: $black;
+
+  &.streaming {
+    color: $primary;
+  }
+}
+
+// A device or a catalog entry: its name over a line about it, with its actions
+// to the right and anything else underneath.
+.device-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px 12px 12px;
+  border: 1px solid $gray-500;
+
+  // The catalog in the link modal gets a black outline.
+  &.catalog {
+    border-color: $black;
+  }
+
+  &.muted {
+    background-color: $gray-200;
+  }
+
+  // Spans, not paragraphs, so Bootstrap's paragraph margin and line height
+  // don't push the two lines apart: 4px between them, as in the design.
+  .title {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: normal;
+  }
+
+  .subtitle {
+    display: block;
+    margin-top: 4px;
+    line-height: normal;
+  }
+}
+
+// A heading that folds the list under it: an h4 around the toggle button.
+.section-heading {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: $black;
+  text-align: start;
+
+  .section-title {
+    font-weight: 600;
+  }
+
+  .subtitle {
+    display: block;
+    font-size: $font-size-base;
+    font-weight: 400;
+    color: $gray-500;
+  }
+
+  &.large .section-title {
+    color: $gray-800;
+  }
+
+  .material-symbols-outlined {
+    transition: transform 0.15s;
+  }
+
+  &.closed .material-symbols-outlined {
+    transform: rotate(90deg);
+  }
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.modal-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 [type="color"] {
@@ -1627,14 +1998,6 @@ input.vis-name-input::placeholder {
 
 // General variables
 
-.btn.btn-mapping {
-  --bs-btn-color: #7749f8;
-  --bs-btn-border-color: #7749f8;
-  --bs-btn-hover-color: white;
-  --bs-btn-hover-bg: #7749f8;
-  --bs-btn-active-color: white;
-  --bs-btn-active-bg: #7749f8;
-}
 
 $btn-link-color: black;
 $list-group-active-color: #1a1a1a;

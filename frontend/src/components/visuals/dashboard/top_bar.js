@@ -1,5 +1,4 @@
 import { useState, useContext } from "react";
-import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../../../App";
 import { Modal } from "../../modal";
 import { EditModalManager } from "./edit";
@@ -8,8 +7,6 @@ import { ShareMenu } from "./share";
 export function VisTopBar({
   visMetadata,
   sources,
-  currentScreen,
-  setCurrentScreen,
   popupVisuals,
   setPopupVisuals,
   fullScreenHandle,
@@ -22,77 +19,12 @@ export function VisTopBar({
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const [showShare, setShowShare] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
   const [currentPrivacy, setCurrentPrivacy] = useState(visMetadata?.privacy);
-
-  const viewParam = searchParams.get("dashboard");
-
-  const isDocsVisible = visMetadata?.docsVisible || isEditable;
-
-  function changeScreen(input) {
-    let newScreen = input;
-    if (input === currentScreen.left) {
-      newScreen = "none";
-    }
-    setCurrentScreen({
-      ...currentScreen,
-      left: newScreen,
-    });
-  }
 
   return (
     <div className="vis-bar">
-      <div className="d-flex align-items-center">
-        {(viewParam === "true" || viewParam === null) && (
-          <div className="d-flex align-items-center">
-            <button
-              className={`btn-custom primary ${
-                currentScreen.left == "dashboard" ? "active" : ""
-              }`}
-              onClick={() => changeScreen("dashboard")}
-            >
-              <span className="material-symbols-outlined inline-icon">
-                tune
-              </span>
-            </button>
-            <button
-              className={`btn-custom code ${
-                currentScreen.left == "code" ? "active" : ""
-              }`}
-              onClick={() => changeScreen("code")}
-            >
-              <b>
-                <span className="material-symbols-outlined inline-icon">
-                  code
-                </span>
-              </b>
-            </button>
-            {isDocsVisible && (
-              <button
-                className={`btn-custom code ${
-                  currentScreen.left == "docs" ? "active" : ""
-                }`}
-                onClick={() => changeScreen("docs")}
-              >
-                <span className="material-symbols-outlined inline-icon">
-                  docs
-                </span>
-              </button>
-            )}
-            {/* Set apart: the inputs, rather than the visual itself. */}
-            <button
-              className={`btn-custom data ms-3 ${
-                currentScreen.left == "data" ? "active" : ""
-              }`}
-              onClick={() => changeScreen("data")}
-              title="Data sources"
-            >
-              <span className="material-symbols-outlined inline-icon">
-                graphic_eq
-              </span>
-            </button>
-          </div>
-        )}
+      <h1 className="vis-title text-truncate">{visMetadata?.title}</h1>
+      <div className="d-flex align-items-center gap-1 pe-1">
         {showEdit && (
           <Modal onClose={() => setShowEdit(false)}>
             <EditModalManager
@@ -105,26 +37,9 @@ export function VisTopBar({
             />
           </Modal>
         )}
-        <div className="m-0 ms-3 text-start">
-          <h1 className="small fw-normal m-0">Editor</h1>
-          <h2 className="h5 align-self-center m-0 text-truncate">
-            {visMetadata?.title}
-          </h2>
-        </div>
-      </div>
-      <div className="d-flex justify-content-end align-items-center">
         {/*isEditable && (
           <ShowUploadState mutationData={mutationData} isDirty={isDirty} />
         )*/}
-        <button
-          className="btn btn-link"
-          onClick={() => setIsStopped(!isStopped)}
-          title={isStopped ? "Run visual" : "Stop visual"}
-        >
-          <span className="material-symbols-outlined inline-icon">
-            {isStopped ? "play_arrow" : "stop"}
-          </span>
-        </button>
         <button
           className="btn btn-link"
           onClick={() => setPopupVisuals(!popupVisuals)}
@@ -142,27 +57,19 @@ export function VisTopBar({
         )}
         {currentPrivacy !== "private" && (
           <button
-            className="btn btn-outline-dark me-1 overflow-x-hidden text-nowrap"
+            className="btn btn-outline-dark btn-48 ps-3 pe-4"
             onClick={() => setShowShare(true)}
           >
-            <div>
-              <span className="material-symbols-outlined inline-icon me-2 ms-n1">
-                ios_share
-              </span>
-              <span>Share</span>
-            </div>
+            <span className="material-symbols-outlined">ios_share</span>
+            Share
           </button>
         )}
         <button
-          className="btn btn-outline-dark btn-secondary me-1 overflow-x-hidden ps-3 text-nowrap" // Change styling to make smaller
+          className="btn btn-outline-dark btn-secondary btn-48 ps-3 pe-4"
           onClick={() => setShowEdit(!showEdit)}
         >
-          <div>
-            <span className="material-symbols-outlined inline-icon me-2 ms-n1">
-              edit
-            </span>
-            <span>Edit</span>
-          </div>
+          <span className="material-symbols-outlined">edit</span>
+          Edit
         </button>
         {showShare && (
           <Modal onClose={() => setShowShare(false)}>
@@ -198,14 +105,14 @@ function PrivacyDropdown({
   }
 
   return (
-    <div className="dropdown me-1">
+    <div className="dropdown">
       <button
-        className="btn btn-outline-dark ps-3 overflow-x-hidden text-nowrap"
+        className="btn btn-outline-dark btn-48 ps-3 pe-4"
         data-bs-toggle="dropdown"
       >
         {currentPrivacy === "public" && (
           <div>
-            <span className="material-symbols-outlined inline-icon me-2 ms-n1">
+            <span className="material-symbols-outlined inline-icon me-2">
               public
             </span>
             <span>Public</span>

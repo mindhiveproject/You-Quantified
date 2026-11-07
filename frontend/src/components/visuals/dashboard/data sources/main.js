@@ -7,54 +7,58 @@ import { SourceCard } from "./source_card";
 import { LinkSourceModal } from "./link_modal";
 import { RecordingList, ReplayModal } from "./recordings";
 
-// The Data Sources tab: the devices linked into this project, ready to connect.
-// Laid out like the docs, with a bar of actions over the content.
+// The Data Sources tab: the devices linked into this project, ready to connect,
+// under a bar of actions.
 export default function DataSourcesWindow({ visMetadata, linkedSources, isEditable }) {
   const { sources, link, unlink } = linkedSources;
   const [modal, setModal] = useState(null);
   const closeModal = () => setModal(null);
 
   return (
-    <div className="d-flex flex-column h-100 overflow-clip sources">
-      <div className="menu-bar d-flex justify-content-between">
-        <div className="d-flex">
-          <button onClick={() => setModal("link")}>
-            <span className="material-symbols-outlined inline-icon">add_link</span>
-            Link a data source
-          </button>
-          <div className="vertical-line" />
-          <button onClick={() => setModal("replay")}>
-            <span className="material-symbols-outlined inline-icon">replay</span>
-            Replay a recording
-          </button>
-        </div>
+    <div className="d-flex flex-column h-100 overflow-clip">
+      <div className="action-bar">
         <RecordButton />
+        <button className="btn btn-outline-dark btn-48" onClick={() => setModal("replay")}>
+          <span className="material-symbols-outlined">upload</span>
+          Upload
+        </button>
+        <button
+          className="btn btn-primary border-dark btn-48"
+          onClick={() => setModal("link")}
+        >
+          <span className="svg-icon icon-link" />
+          Link new
+        </button>
       </div>
 
-      <div className="scrollable-editor px-4 pb-4">
-        <h5 className="mt-4">Data Sources</h5>
-        <p>Connect the devices this visual reads from.</p>
-        {!isEditable && (
-          <div className="alert alert-light border-dark rounded-0 d-flex justify-content-between align-items-center">
-            <span>
-              Changes you make here are only for this session. Create a copy to
-              save them.
-            </span>
-            <button
-              className="btn btn-secondary btn-outline-dark text-nowrap ms-3"
-              onClick={() => setModal("copy")}
-            >
-              Create a copy
-            </button>
-          </div>
-        )}
+      {!isEditable && (
+        <div className="notice-bar">
+          <p className="m-0">
+            Changes you make will not be saved when you come back. Copy the visual
+            to save changes.
+          </p>
+          <button
+            className="btn btn-secondary border-dark btn-48 text-nowrap"
+            onClick={() => setModal("copy")}
+          >
+            <span className="material-symbols-outlined">edit</span>
+            Create a copy
+          </button>
+        </div>
+      )}
+
+      <div className="overflow-auto p-4 d-flex flex-column gap-4">
+        <div>
+          <h2 className="pane-title">Linked Data Sources</h2>
+          <p className="m-0">Stream data from other devices to link them to parameters.</p>
+        </div>
         {sources.length === 0 && (
-          <p className="text-body-tertiary">
+          <p className="text-body-tertiary m-0">
             No data sources are linked yet. Link one to connect a device.
           </p>
         )}
         {sources.map((source) => (
-          <SourceCard key={source.id} source={source} onRemove={() => unlink(source)} />
+          <SourceCard key={source.id} source={source} />
         ))}
         <RecordingList />
       </div>
@@ -106,10 +110,10 @@ function RecordButton() {
     <button
       onClick={toggle}
       disabled={!recording && !hasData}
-      className={recording ? "text-danger" : ""}
+      className={`btn btn-outline-dark btn-48 ${recording ? "text-danger" : ""}`}
     >
-      <span className="material-symbols-outlined inline-icon">
-        {recording ? "stop_circle" : "radio_button_checked"}
+      <span className="material-symbols-outlined">
+        {recording ? "stop_circle" : "album"}
       </span>
       {recording ? "Stop recording" : "Record"}
     </button>

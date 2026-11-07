@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useSelector, shallowEqual } from "react-redux";
 import { useOutsideAlerter } from "../../../../utility/outsideClickDetection";
-import clsx from "clsx";
 
 export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
   const [showModal, setShowModal] = useState(false);
   const savedKeys = useRef({});
   const mapping = dataMappings[parameter.name];
+  const isManual = mapping === "Manual";
   const display =
-    mapping === "Manual"
+    isManual
       ? { Device: "Mapping", Metric: "Manual" }
       : { Device: mapping[0], Metric: mapping[1] };
 
@@ -85,17 +85,11 @@ export function ParameterDropDown({ parameter, dataMappings, changeSource }) {
     <div className="position-relative">
       <button
         type="button"
-        className={clsx(
-          "pt-1 pb-2 text-start",
-          "btn btn-mapping ms-2 rounded-0",
-          display.Metric != "Manual" && "active",
-        )}
+        className="mapping-btn"
         onClick={() => setShowModal((prev) => !prev)}
       >
-        <span className="d-block m-0 p-0 opacity-75 lh-sm mt-1 mb-1">
-          {display.Device}
-        </span>
-        <p className="m-0 mt-n1 p-0">{display.Metric}</p>
+        <small>{display.Device}</small>
+        <span>{isManual ? "Not mapped" : display.Metric}</span>
       </button>
       {showModal && (
         <div

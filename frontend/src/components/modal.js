@@ -14,7 +14,7 @@ export function Modal({ onClose, children }) {
   }, [onClose]);
 
   return (
-    <div className="edit-background">
+    <div className="edit-background modal-backdrop-light">
       <div className="edit-popup" ref={ref} role="dialog" aria-modal="true">
         {children}
       </div>
@@ -25,11 +25,11 @@ export function Modal({ onClose, children }) {
 // The title row every modal starts with, with its close button.
 export function ModalHeader({ title, onClose }) {
   return (
-    <div className="d-flex justify-content-between">
-      <button className="devices-close-btn h4 text-end" onClick={onClose} title="Close">
-        <i className="bi bi-x"></i>
+    <div className="modal-header-sticky d-flex justify-content-between align-items-center gap-3 mb-3">
+      <h2 className="modal-title">{title}</h2>
+      <button className="btn-icon" onClick={onClose} title="Close">
+        <span className="material-symbols-outlined">close</span>
       </button>
-      <h3 className="mb-3">{title}</h3>
     </div>
   );
 }

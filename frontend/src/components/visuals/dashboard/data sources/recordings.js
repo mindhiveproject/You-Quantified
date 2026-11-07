@@ -36,7 +36,7 @@ export function RecordingList() {
   if (ids.length === 0) return null;
 
   return (
-    <div className="card rounded-0 border-dark mb-3">
+    <div className="card rounded-0 border-dark">
       <div className="card-body">
         <small>Pre-recorded streams</small>
         <h5 className="card-title m-0">Recordings</h5>
@@ -181,10 +181,10 @@ export function ReplayModal({ onClose }) {
           Drop your file to upload
         </div>
       )}
-      <ModalHeader title="Replay a recording" onClose={onClose} />
+      <ModalHeader title="Upload a recording to play it back" onClose={onClose} />
       <p>
         Use sample data, drag & drop, or browse for a .zip recording made with
-        this app. Files stay on your computer.
+        this app.
       </p>
       <div className="d-flex justify-content-between">
         <select

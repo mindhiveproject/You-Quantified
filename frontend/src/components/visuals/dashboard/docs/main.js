@@ -8,7 +8,13 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Extension } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import javascript from "highlight.js/lib/languages/javascript";
 import { createLowlight } from "lowlight";
 import { sanitizeURL } from "../../../../utility/sanitize_urls";
@@ -50,127 +56,176 @@ const TabHandler = Extension.create({
 // In case I want to add support for more languages:
 // https://tiptap.dev/docs/examples/advanced/syntax-highlighting
 
+const TOOL_SIZE = 48;
+const DIVIDER_SIZE = 1;
+
+// The formatting tools, in groups separated by a divider.
+const toolGroups = (editor, setIsAddingLink) => {
+  const chain = () => editor.chain().focus();
+  const can = (command) => editor.can().chain().focus()[command]().run();
+
+  return [
+    [
+      { icon: "undo", label: "Undo", run: () => chain().undo().run(), disabled: !can("undo") },
+      { icon: "redo", label: "Redo", run: () => chain().redo().run(), disabled: !can("redo") },
+    ],
+    [
+      {
+        icon: "format_h1",
+        label: "Heading 1",
+        run: () => chain().toggleHeading({ level: 3 }).run(),
+        active: editor.isActive("heading", { level: 3 }),
+      },
+      {
+        icon: "format_h2",
+        label: "Heading 2",
+        run: () => chain().toggleHeading({ level: 4 }).run(),
+        active: editor.isActive("heading", { level: 4 }),
+      },
+      {
+        icon: "format_paragraph",
+        label: "Paragraph",
+        run: () => chain().setParagraph().run(),
+        active: editor.isActive("paragraph"),
+      },
+    ],
+    [
+      {
+        icon: "format_bold",
+        label: "Bold",
+        run: () => chain().toggleBold().run(),
+        disabled: !can("toggleBold"),
+        active: editor.isActive("bold"),
+      },
+      {
+        icon: "format_italic",
+        label: "Italic",
+        run: () => chain().toggleItalic().run(),
+        disabled: !can("toggleItalic"),
+        active: editor.isActive("italic"),
+      },
+      {
+        icon: "format_underlined",
+        label: "Underline",
+        run: () => chain().toggleUnderline().run(),
+        active: editor.isActive("underline"),
+      },
+      editor.isActive("link")
+        ? { icon: "link_off", label: "Remove link", run: () => chain().unsetLink().run() }
+        : { icon: "link", label: "Add link", run: () => setIsAddingLink(true) },
+      {
+        icon: "code",
+        label: "Code",
+        run: () => chain().toggleCode().run(),
+        disabled: !can("toggleCode"),
+        active: editor.isActive("code"),
+      },
+    ],
+    [
+      {
+        icon: "data_object",
+        label: "Code block",
+        run: () => chain().toggleCodeBlock().run(),
+        active: editor.isActive("codeBlock"),
+      },
+      {
+        icon: "format_list_bulleted",
+        label: "Bulleted list",
+        run: () => chain().toggleBulletList().run(),
+        active: editor.isActive("bulletList"),
+      },
+      {
+        icon: "format_list_numbered",
+        label: "Numbered list",
+        run: () => chain().toggleOrderedList().run(),
+        active: editor.isActive("orderedList"),
+      },
+      {
+        icon: "format_quote",
+        label: "Quote",
+        run: () => chain().toggleBlockquote().run(),
+        active: editor.isActive("blockquote"),
+      },
+    ],
+  ];
+};
+
+// The formatting tools that fit in the bar. The rest go in a row under a
+// "more" button, like Google Docs does.
 const MenuBar = ({ editor, setIsAddingLink }) => {
-  if (!editor) {
-    return null;
+  const barRef = useRef(null);
+  const moreRef = useRef(null);
+  const [width, setWidth] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+  useOutsideAlerter(moreRef, setShowMore);
+
+  useLayoutEffect(() => {
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(entry.contentRect.width),
+    );
+    observer.observe(barRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const tools = editor
+    ? toolGroups(editor, setIsAddingLink).flatMap((group, g) =>
+        group.map((tool, i) => ({ ...tool, divider: g > 0 && i === 0 })),
+      )
+    : [];
+  const cost = (tool) => TOOL_SIZE + (tool.divider ? DIVIDER_SIZE : 0);
+
+  // Leave room for the "more" button when not everything fits.
+  const total = tools.reduce((sum, tool) => sum + cost(tool), 0);
+  const budget = total > width ? width - TOOL_SIZE : width;
+  let used = 0;
+  let visibleCount = 0;
+  for (const tool of tools) {
+    used += cost(tool);
+    if (used > budget) break;
+    visibleCount++;
   }
+  const hidden = tools.slice(visibleCount);
+
+  const renderTool = (tool, onRun) => (
+    <React.Fragment key={tool.icon}>
+      {tool.divider && <div className="tool-divider" />}
+      <button
+        className={`tool-btn ${tool.active ? "is-active" : ""}`}
+        title={tool.label}
+        disabled={tool.disabled}
+        onClick={() => {
+          tool.run();
+          onRun?.();
+        }}
+      >
+        <span className="material-symbols-outlined">{tool.icon}</span>
+      </button>
+    </React.Fragment>
+  );
 
   return (
-    <div className="menu-bar d-flex">
-      <button
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().chain().focus().undo().run()}
-      >
-        <span className="material-symbols-outlined inline-icon">undo</span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().chain().focus().redo().run()}
-      >
-        <span className="material-symbols-outlined inline-icon">redo</span>
-      </button>
-      <div className="vertical-line" />
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={editor.isActive("heading", { level: 3 }) ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">format_h1</span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-        className={editor.isActive("heading", { level: 4 }) ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">format_h2</span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setParagraph().run()}
-        className={editor.isActive("paragraph") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_paragraph
-        </span>
-      </button>
-      <div className="vertical-line" />
-      <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={editor.isActive("bold") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_bold
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={editor.isActive("italic") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_italic
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={editor.isActive("underline") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_underlined
-        </span>
-      </button>
-      {!editor.isActive("link") ? (
-        <button
-          onClick={() => setIsAddingLink(true)}
-          className={editor.isActive("link") ? "is-active" : ""}
-        >
-          <span className="material-symbols-outlined inline-icon">link</span>
-        </button>
-      ) : (
-        <button onClick={() => editor.chain().focus().unsetLink().run()}>
-          <span className="material-symbols-outlined inline-icon">
-            link_off
-          </span>
-        </button>
+    <div className="tool-bar" ref={barRef}>
+      {tools.slice(0, visibleCount).map((tool) => renderTool(tool))}
+      {hidden.length > 0 && (
+        <div ref={moreRef}>
+          <button
+            className={`tool-btn ${showMore ? "is-active" : ""}`}
+            title="More"
+            onClick={() => setShowMore(!showMore)}
+          >
+            <span className="material-symbols-outlined">more_vert</span>
+          </button>
+          {showMore && (
+            <div className="tool-overflow">
+              {hidden.map((tool, i) =>
+                renderTool({ ...tool, divider: tool.divider && i > 0 }, () =>
+                  setShowMore(false),
+                ),
+              )}
+            </div>
+          )}
+        </div>
       )}
-      <button
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        disabled={!editor.can().chain().focus().toggleCode().run()}
-        className={editor.isActive("code") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">code</span>
-      </button>
-      <div className="vertical-line" />
-      <button
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={editor.isActive("codeBlock") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          data_object
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive("bulletList") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_list_bulleted
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive("orderedList") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_list_numbered
-        </span>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={editor.isActive("blockquote") ? "is-active" : ""}
-      >
-        <span className="material-symbols-outlined inline-icon">
-          format_quote
-        </span>
-      </button>
     </div>
   );
 };
@@ -284,22 +339,18 @@ export default function DocsWindow({
   return (
     <div className="d-flex flex-column h-100 overflow-clip">
       {isEditable && (
-        <div className="d-flex flex-column docs">
+        <div className="action-bar">
           <MenuBar editor={editor} setIsAddingLink={setIsAddingLink} />
           <button
-            className={`btn ${
-              _isDocsVisible
-                ? "btn-light btn-outline-primary publish-button"
-                : "btn-light btn-outline-dark publish-button"
-            }  btn-docs-vis`}
+            className={`btn btn-48 ${
+              _isDocsVisible ? "btn-outline-primary" : "btn-outline-dark"
+            }`}
             onClick={() => setIsDocsVisible(!_isDocsVisible)}
           >
-            <div className="d-flex align-items-center">
-              <span className="material-symbols-outlined inline-icon ms-n1 me-1">
-                {_isDocsVisible ? "visibility" : "visibility_off"}
-              </span>
-              {_isDocsVisible ? "Visible" : "Hidden"}
-            </div>
+            <span className="material-symbols-outlined">
+              {_isDocsVisible ? "visibility" : "visibility_off"}
+            </span>
+            {_isDocsVisible ? "Visible" : "Hidden"}
           </button>
         </div>
       )}

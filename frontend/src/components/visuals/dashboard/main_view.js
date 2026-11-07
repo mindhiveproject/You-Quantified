@@ -8,6 +8,7 @@ import React, {
 import { useFullScreenHandle } from "react-full-screen";
 import { VisTopBar } from "./top_bar";
 import { VisualScreen } from "./visual_screen";
+import { SideNav } from "./side_nav";
 import { UserContext } from "../../../App";
 import { useDispatch } from "react-redux";
 import { useMutation } from "@apollo/client/react";
@@ -204,8 +205,6 @@ export default function MainView({ visID, queryData }) {
         sources={linkedSources.sources}
         isEditable={isEditable}
         isOwner={isOwner}
-        currentScreen={currentScreen}
-        setCurrentScreen={setCurrentScreen}
         popupVisuals={popupVisuals}
         setPopupVisuals={setPopupVisuals}
         fullScreenHandle={fullScreenHandle}
@@ -214,17 +213,24 @@ export default function MainView({ visID, queryData }) {
         isStopped={isStopped}
         setIsStopped={setIsStopped}
       />
-      <VisualScreen
-        isEditable={isEditable}
-        visMetadata={visMetadata}
-        code={code}
-        isStopped={isStopped}
-        popupVisuals={popupVisuals}
-        currentScreen={currentScreen}
-        fullScreenHandle={fullScreenHandle}
-        setters={setters}
-        linkedSources={linkedSources}
-      />
+      <div className="editor-main">
+        <SideNav
+          currentScreen={currentScreen}
+          setCurrentScreen={setCurrentScreen}
+          isDocsVisible={visMetadata?.docsVisible || isEditable}
+        />
+        <VisualScreen
+          isEditable={isEditable}
+          visMetadata={visMetadata}
+          code={code}
+          isStopped={isStopped}
+          popupVisuals={popupVisuals}
+          currentScreen={currentScreen}
+          fullScreenHandle={fullScreenHandle}
+          setters={setters}
+          linkedSources={linkedSources}
+        />
+      </div>
     </div>
   );
 }

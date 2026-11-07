@@ -7,6 +7,7 @@ const SplitPane = ({ children, ...props }) => {
     const isDragging = useRef(false);
     const yDividerPos = useRef(null);
     const xDividerPos = useRef(null);
+    const ref = useRef(null);
 
     const onMouseHoldDown = (e) => {
         isDragging.current = true;
@@ -31,7 +32,8 @@ const SplitPane = ({ children, ...props }) => {
         }
 
         setClientHeight(clientHeight + e.clientY - yDividerPos.current);
-        setClientWidth(e.clientX);
+        // Measured from the pane's own edge, which a side bar can push in.
+        setClientWidth(e.clientX - ref.current.getBoundingClientRect().left);
         
         yDividerPos.current = e.clientY;
         xDividerPos.current = e.clientX;
@@ -51,7 +53,7 @@ const SplitPane = ({ children, ...props }) => {
     });
 
     return (
-        <div {...props}>
+        <div {...props} ref={ref}>
             <SplitPaneContext.Provider
                 value={{
                     clientHeight,

@@ -29,6 +29,12 @@ function ParameterManager({ parameter, dataMappings }) {
   );
 }
 
+const STATUS_TEXT = {
+  streaming: "Streaming",
+  disconnected: "Not connected",
+  unmapped: "Not mapped",
+};
+
 function DataCard({
   visParameter,
   dataMappings,
@@ -42,6 +48,13 @@ function DataCard({
   const dispatch = useDispatch();
 
   const [showEditOverlay, setShowEditOverlay] = useState(false);
+
+  const mapping = dataMappings[visParameter.name];
+  const isMapped = mapping !== "Manual";
+  const isStreaming = useSelector(
+    (state) => isMapped && state.dataStream?.[mapping[0]]?.[mapping[1]] !== undefined,
+  );
+  const status = !isMapped ? "unmapped" : isStreaming ? "streaming" : "disconnected";
 
   function changeSource(sourceName, paramName, userSelected = false) {
     dispatch({
@@ -72,9 +85,15 @@ function DataCard({
   );
 
   return (
-    <div className="list-group-item" key={visParameter.name}>
-      <div className="d-flex align-items-center justify-content-between">
-        <div className="d-flex align-items-center">
+    <div className={`mapping-card ${status}`}>
+      <div className="d-flex align-items-center gap-2 text-truncate">
+        {isStreaming ? (
+          <span className="material-symbols-outlined">graphic_eq</span>
+        ) : (
+          <span className="svg-icon icon-eq-inactive" />
+        )}
+        <div className="text-truncate">
+          <small>{STATUS_TEXT[status]}</small>
           {custom ? (
             <OverlayTrigger
               trigger="click"
@@ -84,30 +103,22 @@ function DataCard({
               show={showEditOverlay}
               onToggle={(nextShow) => setShowEditOverlay(nextShow)}
             >
-              <button className="btn btn-outline-dark m-0 ps-2">
-                <span className="material-symbols-outlined inline-icon me-1">
-                  edit
-                </span>
-                <span>{visParameter.name}</span>
+              <button className="name" title="Edit parameter">
+                {visParameter.name}
               </button>
             </OverlayTrigger>
-          ):(
-            <span>{visParameter.name}</span>
+          ) : (
+            <span className="name">{visParameter.name}</span>
           )}
         </div>
-        <div className="d-flex align-items-center me-n2">
-          <div className="me-1">
-            <ParameterDropDown
-              changeSource={changeSource}
-              parameter={visParameter}
-              dataMappings={dataMappings}
-            />
-          </div>
-          <ParameterManager
-            parameter={visParameter}
-            dataMappings={dataMappings}
-          />
-        </div>
+      </div>
+      <div className="d-flex flex-shrink-0">
+        <ParameterDropDown
+          changeSource={changeSource}
+          parameter={visParameter}
+          dataMappings={dataMappings}
+        />
+        <ParameterManager parameter={visParameter} dataMappings={dataMappings} />
       </div>
     </div>
   );
@@ -204,28 +215,9 @@ function EditParameterModal({
 }
 
 export default function DataManagement({ changeParameters, visInfo, custom }) {
-  // Contains the entire accordion with all vis properties based on the current visInfo
-
-  const [newParamName, setNewParamName] = useState("");
-  const [valid, setValid] = useState(true);
-  const [show, setShow] = useState(false);
-
-  const overlayRef = useRef(null);
+  // Contains every parameter's card, based on the current visInfo
 
   const dataMappings = useSelector(selectDataMappings);
-
-
-  const dataCards = visInfo?.parameters?.map((parameter) => (
-    <DataCard
-      visParameter={parameter}
-      key={parameter.name}
-      dataMappings={dataMappings}
-      deleteParameter={deleteParameter}
-      visInfo={visInfo}
-      custom={custom}
-      updateParameter={updateParameter}
-    />
-  ));
 
   function deleteParameter(paramName) {
     // Retrieve data from local storage and assign it to a new object
@@ -250,6 +242,32 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
     changeParameters(newMeta.parameters);
   }
 
+  if (Object.keys(dataMappings).length === 0) return <div>Loading...</div>;
+
+  return (
+    <div className="d-flex flex-column gap-2 mb-5">
+      {visInfo?.parameters?.map((parameter) => (
+        <DataCard
+          visParameter={parameter}
+          key={parameter.name}
+          dataMappings={dataMappings}
+          deleteParameter={deleteParameter}
+          visInfo={visInfo}
+          custom={custom}
+          updateParameter={updateParameter}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function NewParameterButton({ visInfo, changeParameters }) {
+  const [newParamName, setNewParamName] = useState("");
+  const [valid, setValid] = useState(true);
+  const [show, setShow] = useState(false);
+
+  const overlayRef = useRef(null);
+
   function newParameter() {
     const isParamValid = checkNameValidity(visInfo, newParamName);
 
@@ -264,8 +282,6 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
   }
 
   useOutsideAlerter(overlayRef, setShow);
-
-  if (Object.keys(dataMappings).length === 0) return <div>Loading...</div>;
 
   const newParamToolTip = (
     <Popover id="popover-basic" className="rounded-0">
@@ -308,29 +324,22 @@ export default function DataManagement({ changeParameters, visInfo, custom }) {
   );
 
   return (
-    <div className="mb-5">
-      <div className="list-group rounded-0">{dataCards}</div>
-      {custom ? (
-        <div className="d-flex justify-content-center text-center">
-          <OverlayTrigger
-            trigger="click"
-            placement="top"
-            rootClose
-            overlay={newParamToolTip}
-            show={show}
-          >
-            <button
-              className="btn btn-link"
-              type="button"
-              aria-expanded="false"
-              onClick={() => setShow(!show)}
-            >
-              <i className="bi bi-plus-circle h5"></i>
-            </button>
-          </OverlayTrigger>
-        </div>
-      ) : null}
-    </div>
+    <OverlayTrigger
+      trigger="click"
+      placement="bottom"
+      rootClose
+      overlay={newParamToolTip}
+      show={show}
+    >
+      <button
+        className="btn btn-outline-dark btn-48"
+        type="button"
+        onClick={() => setShow(!show)}
+      >
+        <span className="material-symbols-outlined">add</span>
+        Add a new parameter
+      </button>
+    </OverlayTrigger>
   );
 }
 
