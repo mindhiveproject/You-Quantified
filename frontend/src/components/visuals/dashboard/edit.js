@@ -9,9 +9,11 @@ import {
   DELETE_VISUAL,
   NEW_VISUAL,
 } from "../../../queries/visuals";
+import { LINK_DATA_SOURCES } from "../../../queries/dataSources";
 
 export function EditModalManager({
   visMetadata,
+  sources,
   setShowEdit,
   changeVisMetadata,
   isEditable,
@@ -19,10 +21,12 @@ export function EditModalManager({
 }) {
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const [copyID, setCopyID] = useState();
 
-  const [createNewVisual, { data: copyData, error }] = useMutation(NEW_VISUAL, {
+  const [createNewVisual] = useMutation(NEW_VISUAL, {
     refetchQueries: [VISUAL_CARDS, "VisualCards"],
   });
+  const [linkSources] = useMutation(LINK_DATA_SOURCES);
 
   async function createVisualCopy() {
     const response = await fetch(visMetadata?.code?.url);
@@ -51,14 +55,31 @@ export function EditModalManager({
       newData[docs] === visMetadata?.docs;
     }
 
-    await createNewVisual({
+    const { data } = await createNewVisual({
       variables: { data: newData },
     });
+    const id = data.createVisual.id;
+
+    // The copy keeps the data sources linked here, including any a viewer
+    // linked for this session only.
+    if (sources.length > 0) {
+      await linkSources({
+        variables: {
+          data: sources.map((source, order) => ({
+            visual: { connect: { id } },
+            block: { connect: { id: source.block.id } },
+            label: source.label,
+            order,
+          })),
+        },
+      });
+    }
+    setCopyID(id);
   }
 
-  if (copyData) {
+  if (copyID) {
     setTimeout(() => {
-      navigate(`/visuals/${copyData?.createVisual?.id}`);
+      navigate(`/visuals/${copyID}`);
     }, 500);
     return <p>Redirecting you to the copy...</p>;
   }

@@ -198,12 +198,6 @@ div.w-10px {
     z-index: 102;
 }*/
 
-.record-button {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-}
-
 .record-indicator {
   width: 19px;
   margin-left: 1px;
@@ -256,6 +250,8 @@ div.w-10px {
   padding: 2rem;
   text-align: left;
   z-index: 102;
+  max-height: calc(100% - 2rem);
+  overflow-y: auto;
 }
 
 $popover-bg: rgba(255, 255, 255);
@@ -843,74 +839,6 @@ canvas {
   height: 3.75rem;
 }
 
-.styled-navbar .data-btn {
-  outline: 1px solid #1a1a1a !important;
-  border-radius: 0;
-  border: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  justify-items: center;
-  margin-left: 1px;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-}
-
-.styled-navbar .data-btn-link {
-  background-color: white;
-  border-radius: 0;
-  border: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  justify-items: center;
-  margin-left: 1px;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-  text-decoration: none;
-}
-
-.styled-navbar .data-btn.active:active {
-  background: #7849f8dd;
-  color: #ffffff;
-  box-shadow: inset 0px -8px 0px 0px #7749f8;
-}
-
-.styled-navbar .data-btn.active {
-  background: #7849f8dd;
-  box-shadow: inset 0px -8px 0px 0px #7749f8;
-  font-weight: 600;
-}
-
-.styled-navbar .data-btn:hover {
-  background: #7749f8;
-  color: #ffffff;
-}
-
-.styled-navbar .data-btn:hover:active {
-  background: #7849f8dd;
-  color: #ffffff;
-}
-
-.styled-navbar .data-btn-smaller {
-  margin-left: 1rem;
-  margin-right: 1rem;
-  color: #1a1a1a;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  text-decoration: none;
-  transition: all 0.5s;
-}
-
-.styled-navbar .data-btn-smaller:hover {
-  background-color: #7749f8;
-  color: #ffffff;
-}
-
 .styled-navbar .nav-link {
   color: #1a1a1a;
   margin-right: 2rem;
@@ -1004,23 +932,27 @@ canvas {
   color: $black;
 }
 
-.vis-bar .btn-custom.code {
+.vis-bar .btn-custom.code,
+.vis-bar .btn-custom.data {
   background-color: white;
   color: #1a1a1a;
   font-weight: bold;
 }
 
-.vis-bar .btn-custom.code:hover {
+.vis-bar .btn-custom.code:hover,
+.vis-bar .btn-custom.data:hover {
   background-color: #1a1a1a;
   color: white;
 }
 
-.vis-bar .btn-custom.code.active {
+.vis-bar .btn-custom.code.active,
+.vis-bar .btn-custom.data.active {
   background-color: #1a1a1a;
   color: white;
 }
 
-.vis-bar .btn-custom.code.active:hover {
+.vis-bar .btn-custom.code.active:hover,
+.vis-bar .btn-custom.data.active:hover {
   color: $primary;
 }
 
@@ -1155,19 +1087,6 @@ canvas {
   text-align: center;
 }
 
-.devices-overlay {
-  background-color: rgba(255, 255, 255, 0.9);
-  /* White with 70% opacity */
-  -webkit-backdrop-filter: blur(25px);
-  backdrop-filter: blur(25px);
-  height: 100vh;
-  width: 100vw;
-  position: absolute;
-  top: 0;
-  z-index: 150;
-  right: 0;
-}
-
 .ai-overlay {
   background-color: $black;
   height: 100vh;
@@ -1181,82 +1100,8 @@ canvas {
   overscroll-behavior-x: none !important;
 }
 
-.btn-connect {
-  display: flex;
-  align-content: center;
-  color: white;
-
-  --border-angle: 0turn; // For animation.
-  --main-bg: conic-gradient(
-    from var(--border-angle),
-    rgb(255, 255, 255),
-    rgb(255, 255, 255) 5%,
-    rgb(255, 255, 255) 60%,
-    rgb(255, 255, 255) 95%
-  );
-
-  border: solid 5px transparent;
-  border-width: 1px !important;
-  border-radius: 2px;
-  --gradient-border: conic-gradient(
-    from var(--border-angle),
-    transparent 5%,
-    #7749f8,
-    #7749f8 95%
-  );
-
-  background:
-        // padding-box clip this background in to the overall element except the border.
-    var(--main-bg) padding-box,
-    // border-box extends this background to the border space
-    var(--gradient-border) border-box,
-    // Duplicate main background to fill in behind the gradient border. You can remove this if you want the border to extend "outside" the box background.
-    var(--main-bg) border-box;
-
-  background-position: center center;
-
-  animation: bg-spin 3s linear infinite;
-
-  @keyframes bg-spin {
-    to {
-      --border-angle: 1turn;
-    }
-  }
-}
-
 .mt-n01 {
   margin-top: -1px;
-}
-
-.sources-pane-right {
-  flex-grow: 1;
-  overflow-y: scroll;
-  width: 75%;
-  height: calc(100vh - 10rem);
-}
-
-.sources-pane-left {
-  overflow-y: scroll;
-  flex-grow: 1;
-  height: calc(100vh - 10rem) !important;
-}
-
-.pe-4-5 {
-  padding-right: 2.2rem;
-}
-
-.sources-top {
-  height: 10rem;
-}
-
-.black-hover:hover {
-  border-color: #7749f8 !important;
-}
-
-@property --border-angle {
-  syntax: "<angle>";
-  inherits: true;
-  initial-value: 0turn;
 }
 
 .height-40px {
@@ -1512,8 +1357,9 @@ input.vis-name-input::placeholder {
   border-color: $primary !important;
 }
 
-// Menu bar for the docs
-.docs {
+// Menu bar for the docs and the data sources
+.docs,
+.sources {
   .menu-bar {
     background-color: #f8f9fa;
     border: solid 1px #1a1a1a;
@@ -1548,6 +1394,14 @@ input.vis-name-input::placeholder {
     border-left: #d3d3d3 solid 1.25px;
     height: 38px;
   }
+}
+
+.sources .menu-bar button {
+  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.75rem;
 }
 
 [type="color"] {

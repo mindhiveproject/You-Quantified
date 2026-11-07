@@ -1,30 +1,51 @@
 import { useSyncExternalStore } from "react";
-import { findDevice, DEVICE_SOURCE_KEY } from "./definitions";
-import { createReceiver, connectReceiver, needsCamera } from "./receivers";
+import { filter } from "rxjs";
+import store from "../store/store";
+import {
+  createReceiver,
+  connectReceiver,
+  needsCamera,
+  overlayLayers,
+} from "./receivers";
 import { StoreBridge } from "./bridge";
+import { findOutput } from "./outputs";
 import { prepareRecording } from "./recordings";
 
-// Owns every live device for the lifetime of the page.
+// Owns every live device for the lifetime of a project.
 //
 // This is a singleton rather than a hook (contrast MindHive's useSourceRuntime)
-// because devices must outlive the UI that connected them: the Data overlay
-// mounts and unmounts as it is opened and closed, and a visual on another route
-// keeps reading the stream. React only ever sees the Redux store, which the
-// StoreBridge feeds, plus the camera preview stream below.
+// because devices must outlive the UI that connected them: the Data Sources tab
+// mounts and unmounts as the author moves between tabs, and the visual keeps
+// reading the stream. React sees the Redux store, which the StoreBridge feeds,
+// plus the input statuses and camera stream below.
 //
-// Three kinds of instance live here, keyed by the id they use in the store:
-//   device - a yq-data receiver feeding a Pipeline (see definitions.js)
+// Three kinds of instance live here:
+//   source - a linked data source: its block's Pipeline, with one receiver
+//            attached per connected input. Keyed by the linked source's id.
 //   replay - a FileReplayReceiver playing back an uploaded recording
 //   marker - a MarkerReceiver a running visual sends its events to
 class DeviceRuntime {
   constructor() {
     this.instances = new Map();
     this.pendingMarkers = new Map();
+    // `${sourceId}/${inputId}` -> { state, device?, error? }, where `state` is
+    // one of "awaiting", "connected", "lost" or "failed". Replaced rather than
+    // mutated, so React can read it with useSyncExternalStore.
+    this.inputStatus = {};
     this.camera = null;
     this.cameraOpening = null;
     this.cameraUsers = 0;
     this.recorder = null;
     this.listeners = new Set();
+  }
+
+  subscribe = (listener) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  notify() {
+    this.listeners.forEach((listener) => listener());
   }
 
   /* ------------------------------ camera ------------------------------ */
@@ -81,158 +102,175 @@ class DeviceRuntime {
     }
   }
 
-  subscribe = (listener) => {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  };
-
-  notify() {
-    this.listeners.forEach((listener) => listener());
-  }
-
   getCameraStream = () => this.camera?.receiver.videoStream ?? null;
 
-  /* ------------------------------ devices ----------------------------- */
+  /* ------------------------------ sources ----------------------------- */
 
+  // Store entries are keyed by name, which is what the mapping dropdown shows.
+  // A second copy of the same source gets a number.
   uniqueId(wanted) {
+    const taken = store.getState().deviceMeta;
     let id = wanted;
-    for (let n = 2; this.instances.has(id); n += 1) id = `${wanted} ${n}`;
+    for (let n = 2; id in taken; n += 1) id = `${wanted} ${n}`;
     return id;
   }
 
-  // Connects one of the devices in definitions.js. Rejects if it can't.
-  async connect(definitionId) {
-    const definition = findDevice(definitionId);
-    if (!definition) throw new Error(`Unknown device "${definitionId}"`);
+  setStatus(sourceId, inputId, status) {
+    this.inputStatus = { ...this.inputStatus, [`${sourceId}/${inputId}`]: status };
+    this.notify();
+  }
 
-    const yq = await import("yq-data");
+  // Connects one input of a linked source (`{ id, label, block }`). Failures
+  // end up in the input's status rather than being thrown.
+  async connect(source, inputId) {
+    const input = source.block.inputs.find(({ id }) => id === inputId);
+    this.setStatus(source.id, inputId, { state: "awaiting" });
+
     let usesCamera = false;
     let receiver;
-    let pipeline;
-    const subscriptions = [];
-
     try {
-      const videoElement = needsCamera(definition.receiver)
+      const videoElement = needsCamera(input.receiver)
         ? await this.acquireCamera()
         : undefined;
       usesCamera = videoElement !== undefined;
-
-      receiver = await createReceiver(definition.receiver, { videoElement });
-      await connectReceiver(definition.receiver, receiver, definition);
-
-      // Headsets name themselves ("Muse-1A2B") and may be worn in pairs; the
-      // rest are one per page and use the name on their card.
-      const id = this.uniqueId(
-        definition.connections === "multiple" && receiver.deviceID
-          ? String(receiver.deviceID)
-          : definition.name,
-      );
-
-      const bridge = new StoreBridge({
-        deviceName: definition.name,
-        keyFor: definition.perStream
-          ? (packet) => packet.streamID.split(":")[0]
-          : () => id,
-      });
-      // A relay's own entry carries no data (its streams get theirs), but
-      // gives the UI something to show and disconnect before any arrive.
-      bridge.ensure(id);
-
-      pipeline = new yq.Pipeline(definition.graph, {
-        onError: (error, nodeId) =>
-          console.error(`${definition.name}: "${nodeId}" failed`, error),
-      });
-      pipeline.attachReceiver(DEVICE_SOURCE_KEY, receiver);
-      pipeline.start();
-      pipeline
-        .issues()
-        .filter((issue) => issue.severity === "error")
-        .forEach((issue) => console.warn(`${definition.name}:`, issue.reason));
-
-      for (const output of pipeline.recordTargets().values()) {
-        subscriptions.push(output.subscribe((packet) => bridge.handle(packet)));
-      }
-      subscriptions.push(
-        receiver.isConnected$.subscribe((connected) =>
-          bridge.setMeta("connected", connected),
-        ),
-      );
-
-      const instance = {
-        kind: "device",
-        id,
-        definition,
-        receiver,
-        pipeline,
-        bridge,
-        subscriptions,
-        usesCamera,
-        recordSources: () => [...pipeline.recordTargets().values()],
-      };
-      this.instances.set(id, instance);
-      this.recordInstance(instance);
-      return id;
+      receiver = await createReceiver(input.receiver, { videoElement });
+      await connectReceiver(input.receiver, receiver);
     } catch (error) {
-      subscriptions.forEach((s) => s.unsubscribe());
-      pipeline?.destroy();
+      console.error(`Could not connect ${input.label}`, error);
       try {
         await receiver?.disconnect();
       } catch {
         // Never got as far as connecting.
       }
       if (usesCamera) await this.releaseCamera();
-      throw error;
+      this.setStatus(source.id, inputId, {
+        state: "failed",
+        error: error?.message || "Could not connect",
+      });
+      return;
+    }
+
+    const yq = await import("yq-data");
+    const instance = this.instances.get(source.id) ?? this.openSource(yq, source);
+    // Keyed by the input's own id: a block's graph names its source nodes after
+    // its inputs, so two headsets of the same kind get separate slots.
+    instance.pipeline.attachReceiver(input.id, receiver);
+
+    const device = receiver.deviceID
+      ? `${receiver.deviceName} ${receiver.deviceID}`
+      : receiver.deviceName;
+    const entry = { type: input.receiver, receiver, usesCamera };
+    instance.inputs.set(input.id, entry);
+    // Reports straight away, then follows the device: a headset can drop on
+    // its own, and some come back by themselves.
+    entry.subscription = receiver.isConnected$.subscribe((connected) =>
+      this.setStatus(source.id, inputId, {
+        state: connected ? "connected" : "lost",
+        device,
+      }),
+    );
+  }
+
+  // Builds the source's pipeline, the first time one of its inputs connects.
+  openSource(yq, source) {
+    const { block } = source;
+    const id = this.uniqueId(source.label || block.title);
+    const bridge = new StoreBridge({ deviceName: block.title, keyFor: () => id });
+    bridge.ensure(id);
+
+    const pipeline = new yq.Pipeline(block.graph, {
+      onError: (error, nodeId) =>
+        console.error(`${block.title}: "${nodeId}" failed`, error),
+    });
+    pipeline.start();
+
+    // Only the outputs the block declares. A camera node also carries the face
+    // geometry the preview draws, which nobody maps to or records.
+    const streams = [...pipeline.recordTargets()].map(([nodeId, output]) =>
+      output.pipe(filter((packet) => findOutput(block.outputs, nodeId, packet))),
+    );
+
+    const instance = {
+      kind: "source",
+      id: source.id,
+      pipeline,
+      bridge,
+      inputs: new Map(),
+      subscriptions: streams.map((stream) =>
+        stream.subscribe((packet) => bridge.handle(packet)),
+      ),
+      recordSources: () => streams,
+    };
+    this.instances.set(source.id, instance);
+    this.recordInstance(instance);
+    return instance;
+  }
+
+  // Disconnects one input. The last one closes the whole source.
+  async disconnect(sourceId, inputId) {
+    const instance = this.instances.get(sourceId);
+    if (instance.inputs.size === 1) return this.closeSource(sourceId);
+
+    const input = instance.inputs.get(inputId);
+    instance.inputs.delete(inputId);
+    instance.pipeline.detachReceiver(inputId);
+    await this.closeInput(sourceId, inputId, input);
+  }
+
+  async closeInput(sourceId, inputId, input) {
+    input.subscription.unsubscribe();
+    this.setStatus(sourceId, inputId, undefined);
+    try {
+      await input.receiver.stopStream?.();
+      await input.receiver.disconnect();
+    } catch (error) {
+      console.warn(`Error while disconnecting ${inputId}`, error);
+    }
+    if (input.usesCamera) await this.releaseCamera();
+  }
+
+  // Tears a source down and removes it from the store. Also how a source is
+  // unlinked, which may happen before anything was connected.
+  async closeSource(sourceId) {
+    const instance = this.instances.get(sourceId);
+    if (!instance) return;
+    this.instances.delete(sourceId);
+
+    instance.subscriptions.forEach((s) => s.unsubscribe());
+    instance.pipeline.destroy();
+    instance.bridge.remove();
+    for (const [inputId, input] of instance.inputs) {
+      await this.closeInput(sourceId, inputId, input);
     }
   }
 
-  // Tears down an instance and removes it from the store. `id` may also be one
-  // of the store entries an instance owns (an LSL relay has one per stream).
-  async disconnect(id) {
-    const instance =
-      this.instances.get(id) ??
-      [...this.instances.values()].find((i) => i.bridge.keys.includes(id));
-    if (!instance) return;
-    this.instances.delete(instance.id);
-
-    instance.subscriptions.forEach((s) => s.unsubscribe());
-    instance.pipeline?.destroy();
-    instance.bridge.remove();
-    try {
-      await instance.receiver.stopStream?.();
-      await instance.receiver.disconnect();
-    } catch (error) {
-      console.warn(`Error while disconnecting ${id}`, error);
+  // Leaving a project closes everything it connected. Event markers belong to
+  // the running visual, which closes them itself.
+  closeProject() {
+    for (const instance of this.instances.values()) {
+      if (instance.kind === "source") this.closeSource(instance.id);
+      if (instance.kind === "replay") this.closeRecording(instance.id);
     }
-    if (instance.usesCamera) await this.releaseCamera();
   }
 
   /* ------------------------------ overlay ----------------------------- */
 
-  // Draws a connected device's face geometry on `canvas`, which should cover
-  // `video` exactly. Returns a function that stops drawing. The overlay reads
-  // the receiver's streams directly, outside the pipeline, so nothing is
-  // recorded or sent to the store for it, and it costs nothing while detached.
-  async attachOverlay(id, canvas, video) {
-    const instance = this.instances.get(id);
-    if (instance?.kind !== "device" || !instance.definition.overlay) {
-      return () => {};
-    }
+  // Draws a connected camera input's face geometry on `canvas`, which should
+  // cover `video` exactly. Returns a function that stops drawing. The overlay
+  // reads the receiver's streams directly, outside the pipeline.
+  async attachOverlay(sourceId, inputId, canvas, video) {
+    const { type, receiver } = this.instances.get(sourceId).inputs.get(inputId);
+    const layers = overlayLayers(type);
+    if (!layers) return () => {};
+
     const { FaceOverlay } = await import("yq-data");
-    const overlay = new FaceOverlay(canvas, {
-      video,
-      layers: instance.definition.overlay,
-    });
-    const detach = overlay.attach(instance.receiver);
+    const overlay = new FaceOverlay(canvas, { video, layers });
+    const detach = overlay.attach(receiver);
     overlay.start();
     return () => {
       detach();
       overlay.destroy();
     };
-  }
-
-  hasOverlay(id) {
-    const instance = this.instances.get(id);
-    return instance?.kind === "device" && Boolean(instance.definition.overlay);
   }
 
   /* ----------------------------- recordings --------------------------- */
@@ -282,6 +320,18 @@ class DeviceRuntime {
     };
   }
 
+  async closeRecording(id) {
+    const instance = this.instances.get(id);
+    this.instances.delete(id);
+    instance.subscriptions.forEach((s) => s.unsubscribe());
+    instance.bridge.remove();
+    try {
+      await instance.receiver.disconnect();
+    } catch (error) {
+      console.warn(`Error while closing ${id}`, error);
+    }
+  }
+
   /* ------------------------------ recording --------------------------- */
 
   get isRecording() {
@@ -293,9 +343,10 @@ class DeviceRuntime {
     this.recorder = new yq.Recorder();
     this.instances.forEach((instance) => this.recordInstance(instance));
     this.recorder.start();
+    this.notify();
   }
 
-  // Adds an instance's outputs to a recording in progress; a device connected
+  // Adds an instance's outputs to a recording in progress; a source connected
   // mid-recording is picked up here too.
   recordInstance(instance) {
     if (!this.recorder || instance.kind === "replay") return;
@@ -306,6 +357,7 @@ class DeviceRuntime {
   async stopRecording() {
     const recorder = this.recorder;
     this.recorder = null;
+    this.notify();
     if (!recorder) return;
     recorder.stop();
     await recorder.download();
@@ -372,7 +424,19 @@ class DeviceRuntime {
 
 export const deviceRuntime = new DeviceRuntime();
 
-// The camera's MediaStream while any camera device is connected, else null.
+// The camera's MediaStream while any camera input is connected, else null.
 export function useCameraStream() {
   return useSyncExternalStore(deviceRuntime.subscribe, deviceRuntime.getCameraStream);
+}
+
+// One input's connection status, or undefined while it is disconnected.
+export function useInputStatus(sourceId, inputId) {
+  return useSyncExternalStore(
+    deviceRuntime.subscribe,
+    () => deviceRuntime.inputStatus[`${sourceId}/${inputId}`],
+  );
+}
+
+export function useIsRecording() {
+  return useSyncExternalStore(deviceRuntime.subscribe, () => deviceRuntime.isRecording);
 }

@@ -33,7 +33,8 @@ export function QueryMainView() {
   return (
     <HocuspocusProviderWebsocketComponent url={collabEndpoint}>
       <HocuspocusRoom name={`visual:${visID}`}>
-        <MainView visID={visID} queryData={data?.visuals[0]} />
+        {/* Keyed so another visual starts fresh, session links included. */}
+        <MainView key={visID} visID={visID} queryData={data?.visuals[0]} />
       </HocuspocusRoom>
     </HocuspocusProviderWebsocketComponent>
   );

@@ -1,4 +1,4 @@
-// Maps a device definition's `receiver` key to a live yq-data receiver.
+// Maps a data source block input's `receiver` key to a live yq-data receiver.
 // yq-data touches Web Bluetooth, AudioWorklet and getUserMedia, so it is only
 // ever imported dynamically from here.
 
@@ -14,6 +14,19 @@ const CAMERA_RECEIVERS = new Set([
 
 export function needsCamera(receiverType) {
   return CAMERA_RECEIVERS.has(receiverType);
+}
+
+// What yq-data's FaceOverlay draws over the camera preview for each receiver.
+// The geometry it reads is only emitted because createReceiver asks for it.
+const OVERLAY_LAYERS = {
+  face_landmark: { box: false, landmarks: false, connections: "mesh" },
+  face_landmark_pair: { box: false, landmarks: false, connections: "contours" },
+  face_emotion: { box: true, label: true, landmarks: false, connections: "contours" },
+  pose: { box: false, label: false, landmarks: true, connections: "contours" },
+};
+
+export function overlayLayers(receiverType) {
+  return OVERLAY_LAYERS[receiverType];
 }
 
 // Cortex client credentials identify this app to EMOTIV, not the wearer.
@@ -37,6 +50,9 @@ export async function createReceiver(receiverType, { videoElement } = {}) {
   const yq = await import("yq-data");
   switch (receiverType) {
     case "muse":
+      if (!navigator.bluetooth) {
+        throw new Error("This browser can't use Bluetooth. Try Chrome or Edge.");
+      }
       return new yq.MuseReceiver();
     case "emotiv":
       return new yq.EMOTIVReceiver(emotivCredentials());
@@ -44,11 +60,8 @@ export async function createReceiver(receiverType, { videoElement } = {}) {
       return new yq.MicrophoneReceiver();
     case "voice_emotion":
       return new yq.VoiceEmotionReceiver({ emitAffect: true });
-    case "lsl":
-      return new yq.LSLReceiver();
-    // The geometry options feed the preview overlay (see runtime.attachOverlay).
-    // They add streams a device's graph must not record, which is why those
-    // graphs name their streams instead of taking everything.
+    // The geometry options feed the preview overlay. The runtime only passes on
+    // the streams a block declares, so they are never mapped or recorded.
     case "face_landmark":
       return new yq.FaceLandmarkReceiver(videoElement, {
         maxFps: 15,
@@ -72,25 +85,19 @@ export async function createReceiver(receiverType, { videoElement } = {}) {
       return new yq.PoseReceiver(videoElement, { maxFps: 15 });
     case "rppg":
       return new yq.RPPGReceiver(videoElement);
-    case "marker":
-      return new yq.MarkerReceiver();
     default:
       throw new Error(`No receiver is registered for "${receiverType}".`);
   }
 }
 
-// Receivers disagree about what `connect` takes, so that lives here too.
-export async function connectReceiver(receiverType, receiver, definition) {
-  switch (receiverType) {
-    case "emotiv":
-      // Raw EEG and motion; band power is derived by the graph, as for Muse.
-      await receiver.connect(["eeg", "mot"]);
-      break;
-    case "lsl":
-      await receiver.connect(definition.options.url);
-      break;
-    default:
-      await receiver.connect();
+// Receivers disagree about what `connect` takes: EMOTIV must be told which
+// Cortex streams to subscribe to (raw EEG and motion; band power is derived by
+// the graph, as for Muse), the rest take nothing.
+export async function connectReceiver(receiverType, receiver) {
+  if (receiverType === "emotiv") {
+    await receiver.connect(["eeg", "mot"]);
+  } else {
+    await receiver.connect();
   }
   await receiver.startStream?.();
 }

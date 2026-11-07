@@ -25,6 +25,8 @@ import {
 import { extensions } from "./docs/main";
 import { getSchema } from "@tiptap/core";
 import { userColor } from "../../../utility/user_colors";
+import { deviceRuntime } from "../../../devices/runtime";
+import { useLinkedSources } from "./data sources/useLinkedSources";
 
 
 const SAVE_DEBOUNCE_MS = 5000;
@@ -49,6 +51,11 @@ export default function MainView({ visID, queryData }) {
   const isEditable =
     isOwner ||
     queryData?.collaborators?.some(({ id }) => id == currentUser?.id);
+
+  const linkedSources = useLinkedSources(visID, isEditable);
+
+  // The devices belong to this project: leaving it disconnects them.
+  useEffect(() => () => deviceRuntime.closeProject(), []);
 
   const [visMetadata, _setVisMetadata] = useState(queryData);
   const [code, setCode] = useState("");
@@ -194,6 +201,7 @@ export default function MainView({ visID, queryData }) {
     <div className="h-100">
       <VisTopBar
         visMetadata={visMetadata}
+        sources={linkedSources.sources}
         isEditable={isEditable}
         isOwner={isOwner}
         currentScreen={currentScreen}
@@ -215,6 +223,7 @@ export default function MainView({ visID, queryData }) {
         currentScreen={currentScreen}
         fullScreenHandle={fullScreenHandle}
         setters={setters}
+        linkedSources={linkedSources}
       />
     </div>
   );

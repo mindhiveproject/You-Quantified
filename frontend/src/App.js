@@ -2,7 +2,6 @@ import "./App.scss";
 import React, { useState, createContext, useEffect } from "react";
 import { QueryMainView } from "./components/visuals/dashboard/main";
 import { MainMenu } from "./components/visuals/menu/menu";
-import { DevicesManager } from "./components/devices/main";
 import { Routes, Route, NavLink } from "react-router-dom";
 import { isMobile } from "react-device-detect";
 import MobileUnavaiabilityScreen from "./components/mobile";
@@ -15,8 +14,10 @@ import { NewVisual } from "./components/visuals/menu/new";
 import { AINewVisual } from "./components/visuals/new-ai/main";
 import { User } from "./components/profile/main";
 import { MyUserName } from "./components/visuals/menu/username";
+import { useIsRecording } from "./devices/runtime";
 
-function NavBar({ setShowDevices, recording }) {
+function NavBar() {
+  const recording = useIsRecording();
   return (
     <nav className="navbar styled-navbar g-0 p-0 d-flex justify-content-between align-items-center">
       <NavLink className="navbar-brand m-0 ms-4 h5" to="/">
@@ -29,9 +30,6 @@ function NavBar({ setShowDevices, recording }) {
         <NavLink className="nav-link" to="/visuals">
           Projects
         </NavLink>
-        <button className="data-btn" onClick={() => setShowDevices(true)}>
-          Data
-        </button>
         {recording && <div className="record-indicator" />}
       </div>
     </nav>
@@ -39,20 +37,10 @@ function NavBar({ setShowDevices, recording }) {
 }
 
 function DesktopApp() {
-  const [showDevices, setShowDevices] = useState(false);
-  const [recording, setRecording] = useState(false);
-
   return (
     <div className="h-100 d-flex flex-column">
-      <NavBar setShowDevices={setShowDevices} recording={recording} />
+      <NavBar />
       <div className="hv-100">
-        {showDevices && (
-          <DevicesManager
-            setShowDevices={setShowDevices}
-            recording={recording}
-            setRecording={setRecording}
-          />
-        )}
         <Routes>
           <Route path="/visuals" element={<MainMenu />} />
           <Route path="/visuals-new" element={<NewVisual />} />

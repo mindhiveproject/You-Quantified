@@ -4,6 +4,7 @@ import CodePane from "./code/code_editor";
 import DataManagementWindow from "./data mappings/main";
 import { VisualsWindow } from "./p5window/p5window";
 import DocsWindow from "./docs/main";
+import DataSourcesWindow from "./data sources/main";
 import SplitPane, {
   SplitPaneLeft,
   SplitPaneRight,
@@ -22,6 +23,7 @@ export function VisualScreen({
   isDirty,
   isDirtyRef,
   awarenessUser,
+  linkedSources,
 }) {
   const [errors, setErrors] = useState([]);
   const visName = visMetadata?.title;
@@ -63,6 +65,13 @@ export function VisualScreen({
             isDirtyRef={isDirtyRef}
             setIsDirty={setters.setIsDirty}
             awarenessUser={awarenessUser}
+          />
+        )}
+        {currentScreen.left === "data" && (
+          <DataSourcesWindow
+            visMetadata={visMetadata}
+            linkedSources={linkedSources}
+            isEditable={isEditable}
           />
         )}
         <DataManagementWindow

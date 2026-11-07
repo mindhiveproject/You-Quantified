@@ -1,12 +1,13 @@
-import { useState, useRef, useContext, useEffect } from "react";
-import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
+import { useState, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UserContext } from "../../../App";
+import { Modal } from "../../modal";
 import { EditModalManager } from "./edit";
 import { ShareMenu } from "./share";
 
 export function VisTopBar({
   visMetadata,
+  sources,
   currentScreen,
   setCurrentScreen,
   popupVisuals,
@@ -20,16 +21,11 @@ export function VisTopBar({
   setIsStopped,
 }) {
   const [showEdit, setShowEdit] = useState(false);
-  const editPopupRef = useRef(null);
-  const sharePopupRef = useRef(null);
   const [showShare, setShowShare] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPrivacy, setCurrentPrivacy] = useState(visMetadata?.privacy);
 
   const viewParam = searchParams.get("dashboard");
-
-  useOutsideAlerter(editPopupRef, setShowEdit);
-  useOutsideAlerter(sharePopupRef, setShowShare);
 
   const isDocsVisible = visMetadata?.docsVisible || isEditable;
 
@@ -83,20 +79,31 @@ export function VisTopBar({
                 </span>
               </button>
             )}
+            {/* Set apart: the inputs, rather than the visual itself. */}
+            <button
+              className={`btn-custom data ms-3 ${
+                currentScreen.left == "data" ? "active" : ""
+              }`}
+              onClick={() => changeScreen("data")}
+              title="Data sources"
+            >
+              <span className="material-symbols-outlined inline-icon">
+                graphic_eq
+              </span>
+            </button>
           </div>
         )}
         {showEdit && (
-          <div className="edit-background">
-            <div className="edit-popup" ref={editPopupRef}>
-              <EditModalManager
-                visMetadata={visMetadata}
-                setShowEdit={setShowEdit}
-                changeVisMetadata={changeVisMetadata}
-                isEditable={isEditable}
-                isOwner={isOwner}
-              />
-            </div>
-          </div>
+          <Modal onClose={() => setShowEdit(false)}>
+            <EditModalManager
+              visMetadata={visMetadata}
+              sources={sources}
+              setShowEdit={setShowEdit}
+              changeVisMetadata={changeVisMetadata}
+              isEditable={isEditable}
+              isOwner={isOwner}
+            />
+          </Modal>
         )}
         <div className="m-0 ms-3 text-start">
           <h1 className="small fw-normal m-0">Editor</h1>
@@ -158,17 +165,15 @@ export function VisTopBar({
           </div>
         </button>
         {showShare && (
-          <div className="edit-background">
-            <div className="edit-popup" ref={sharePopupRef}>
-              <ShareMenu
-                visMetadata={visMetadata}
-                visURL={window.location.href}
-                setShowShare={setShowShare}
-                changeVisMetadata={changeVisMetadata}
-                isOwner={isOwner}
-              />
-            </div>
-          </div>
+          <Modal onClose={() => setShowShare(false)}>
+            <ShareMenu
+              visMetadata={visMetadata}
+              visURL={window.location.href}
+              setShowShare={setShowShare}
+              changeVisMetadata={changeVisMetadata}
+              isOwner={isOwner}
+            />
+          </Modal>
         )}
       </div>
     </div>
