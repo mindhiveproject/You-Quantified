@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import { VISUAL_CARDS } from "../../../../../queries/visuals";
 import { DisplayVisResult } from "../references";
 import { motion } from "motion/react";
+import { withoutNewBackendVisuals } from "../../../../../utility/newBackendVisuals";
 
 
 
@@ -28,7 +29,7 @@ function IntroSuggestions({ additionalReferences, addReference, removeReference 
     return <div>Loading featured visuals...</div>;
   }
 
-  const renderVisuals = allFeaturedVisuals?.visuals.map((visMeta) => {
+  const renderVisuals = withoutNewBackendVisuals(allFeaturedVisuals?.visuals)?.map((visMeta) => {
     const hasBeenAdded = additionalReferences.find(
       (object) => object?.id === visMeta?.id
     );

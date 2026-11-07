@@ -4,6 +4,7 @@ import p5logo from "../../../assets/p5logo.png";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { ShareMenu } from "../dashboard/share";
 import { useOutsideAlerter } from "../../../utility/outsideClickDetection";
+import { withoutNewBackendVisuals } from "../../../utility/newBackendVisuals";
 import {
   LIKE_VISUAL,
   UNLIKE_VISUAL,
@@ -274,7 +275,7 @@ export function VisualizationCards({
     );
 
   const sortedArray = sortVisuals(
-    visualsData.visuals,
+    withoutNewBackendVisuals(visualsData.visuals),
     currentSort.type,
     currentSort.isDescending
   );
