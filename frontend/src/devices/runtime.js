@@ -163,11 +163,24 @@ class DeviceRuntime {
     instance.inputs.set(input.id, entry);
     // Reports straight away, then follows the device: a headset can drop on
     // its own, and some come back by themselves.
-    entry.subscription = receiver.isConnected$.subscribe((connected) =>
+    entry.subscription = receiver.isConnected$.subscribe((connected) => {
       this.setStatus(source.id, inputId, {
         state: connected ? "connected" : "lost",
         device,
-      }),
+      });
+      this.syncConnected(source.id);
+    });
+  }
+
+  // Tells the mapping cards whether the source is still live: it is only when
+  // every input it holds is connected, like the source card's "Streaming".
+  syncConnected(sourceId) {
+    const { inputs, bridge } = this.instances.get(sourceId);
+    bridge.setMeta(
+      "connected",
+      [...inputs.keys()].every(
+        (id) => this.inputStatus[`${sourceId}/${id}`]?.state === "connected",
+      ),
     );
   }
 
@@ -215,6 +228,7 @@ class DeviceRuntime {
     instance.inputs.delete(inputId);
     instance.pipeline.detachReceiver(inputId);
     await this.closeInput(sourceId, inputId, input);
+    this.syncConnected(sourceId);
   }
 
   async closeInput(sourceId, inputId, input) {

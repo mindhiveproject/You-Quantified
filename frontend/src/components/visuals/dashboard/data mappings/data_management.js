@@ -51,8 +51,13 @@ function DataCard({
 
   const mapping = dataMappings[visParameter.name];
   const isMapped = mapping !== "Manual";
+  // A device that dropped keeps its last values in the stream, so its
+  // connection has to be checked too.
   const isStreaming = useSelector(
-    (state) => isMapped && state.dataStream?.[mapping[0]]?.[mapping[1]] !== undefined,
+    (state) =>
+      isMapped &&
+      state.deviceMeta[mapping[0]]?.connected &&
+      state.dataStream?.[mapping[0]]?.[mapping[1]] !== undefined,
   );
   const status = !isMapped ? "unmapped" : isStreaming ? "streaming" : "disconnected";
 

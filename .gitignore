@@ -39,3 +39,6 @@ keystone/*.vscode
 keystone/dist
 keystone/__generated__
 keystone/public
+
+# Internal notes and docs
+notes/
